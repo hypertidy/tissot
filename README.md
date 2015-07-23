@@ -2,13 +2,26 @@
 The Tissot Indicatrix
 =====================
 
+NOTE: this package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful.
+
+TODO
+----
+
+-   sort out the interface for inputting data, projections
+-   semi-automate the scaling for the plot
+
+Installation
+============
+
 Can be installed with
 
 ``` r
 devtools::install_github("mdsumner/tissot")
 ```
 
+
 Minimal example
+===============
 
 ``` r
 library(tissot)
