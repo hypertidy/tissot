@@ -9,4 +9,4 @@ License: GPL-3
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 LazyData: true
-Suggests: rgdal
+Suggests: maptools, rgdal
