@@ -103,8 +103,20 @@ tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137
               to.degrees(zapsmall(c(angle_deformation=omega, convergence=conv, intersection_angle=theta.p))),
               axes=axes, derivatives=g))
 }
+
+#' Indicatrix
+#'
+#' Indicatrix
+#'
+#' Reprocesses the output of \code{tissot} into convenient geometrical data.
+#' @param x object from \code{tissot}
+#'
+#' @param scale scaling
+#' @param ... arguments passed to internal function
+#'
+#' @export
+#'
 indicatrix <- function(x, scale=1, ...) {
-  # Reprocesses the output of "tissot" into convenient geometrical data.
   o <- x$projected
   base <- ellipse(o, matrix(c(1,0,0,1), 2), scale=scale, ...)             # A reference circle
   outline <- ellipse(o, x$axes, scale=scale, ...)
