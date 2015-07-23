@@ -2,6 +2,8 @@
 The Tissot Indicatrix
 =====================
 
+NOTE: this package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful. 
+
 Can be installed with
 
 ``` r
