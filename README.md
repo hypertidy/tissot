@@ -7,6 +7,7 @@ NOTE: this package is in early development and will change a lot, this is just a
 TODO
 ----
 
+-   colours need really serious attention for general distribution
 -   sort out the interface for inputting data, projections
 -   semi-automate the scaling for the plot
 
