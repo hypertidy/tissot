@@ -25,6 +25,7 @@ Can be installed with
 devtools::install_github("mdsumner/tissot")
 ```
 
+
 Minimal example
 ===============
 

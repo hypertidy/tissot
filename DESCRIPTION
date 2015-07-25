@@ -1,7 +1,7 @@
 Package: tissot
 Type: Package
 Title: The Tissot Indicatrix
-Version: 0.0-1.9000
+Version: 0.0-2
 Authors@R: c(person("Michael D.","Sumner", role = c("aut", "cre"), email = "mdsumner@gmail.com"),
      person("Bill", "Huber", role  = "aut", email = "whuber@quantdec.com"))
 Description: Create and plot the Tissot Indicatrix.
@@ -9,4 +9,4 @@ License: GPL-3
 LazyData: TRUE
 Depends: R (>= 3.1.0)
 LazyData: true
-Suggests: maptools, rgdal
+Suggests: maptools,  rgdal
