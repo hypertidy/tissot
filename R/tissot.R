@@ -39,6 +39,7 @@
 #' lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
 #' lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
 #' lines(i$outline, asp=1, lwd=2)
+#' @importFrom stats numericDeriv
 tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137, f.inv=298.257223563, ...) {
 
   to.degrees <- function(x) x * 180 / pi
