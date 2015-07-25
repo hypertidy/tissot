@@ -2,6 +2,10 @@
 The Tissot Indicatrix
 =====================
 
+The Tissot Indicatrix is used to characterize local distortions within map projections.
+
+<https://en.wikipedia.org/wiki/Tissot%27s_indicatrix>
+
 NOTE: this package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful.
 
 TODO
@@ -9,6 +13,8 @@ TODO
 
 -   sort out the interface for inputting data, projections
 -   semi-automate the scaling for the plot
+-   provide control and better defaults for colours
+-   check terminology (and spelling) is consistent
 
 Installation
 ============
