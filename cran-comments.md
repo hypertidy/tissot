@@ -5,7 +5,8 @@ This is a first time submission.
 ## Test environments
 
 * Win builder dev
-* Windows R version 3.2.1 Patched (2015-06-29 r68604)
+* Windows release
+* Ubuntu release
 
 ## R CMD check results
 
