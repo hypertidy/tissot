@@ -17,28 +17,28 @@
 #' @param ... passed to internal function
 #' @return list with stuff as per below
 #' @export
-# @examples
-# library(rgdal)
-# prj <- function(z, proj.in, proj.out) {
-#   z.pt <- SpatialPoints(coords=matrix(z, ncol=2), proj4string=proj.in)
-#   w.pt <- spTransform(z.pt, CRS=proj.out)
-#   w.pt@coords[1, ]
-# }
-# # Longitude, latitude, and reprojection function
-# # NAD 27 in
-# # World Robinson projection out
-# r <- tissot(130, 54, prj,
-#             proj.in=CRS("+init=epsg:4267"),
-#             proj.out=CRS("+init=esri:54030"))
-#
-# i <- indicatrix(r, scale=10^4, n=71)
-# plot(i$outline, type="n", asp=1, xlab="Easting", ylab="Northing")
-# polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
-# lines(i$d.lambda, lwd=2, col="Gray", lty=2)
-# lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
-# lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
-# lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
-# lines(i$outline, asp=1, lwd=2)
+#' @examples
+#' library(rgdal)
+#' prj <- function(z, proj.in, proj.out) {
+#'   z.pt <- SpatialPoints(coords = matrix(z, ncol = 2), proj4string = proj.in)
+#'   w.pt <- spTransform(z.pt, CRS = proj.out)
+#'   coordinates(w.pt)[1,]
+#' }
+#' # Longitude, latitude, and reprojection function
+#' # NAD 27 in
+#' # World Robinson projection out
+#' r <- tissot(130, 54, prj,
+#'             proj.in=CRS("+init=epsg:4267"),
+#'             proj.out=CRS("+init=esri:54030"))
+#'
+#' i <- indicatrix(r, scale=10^4, n=71)
+#' plot(i$outline, type="n", asp=1, xlab="Easting", ylab="Northing")
+#' polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
+#' lines(i$d.lambda, lwd=2, col="Gray", lty=2)
+#' lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
+#' lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
+#' lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
+#' lines(i$outline, asp=1, lwd=2)
 tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137, f.inv=298.257223563, ...) {
 
   to.degrees <- function(x) x * 180 / pi
@@ -112,14 +112,14 @@ tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137
 #' @param x object from \code{tissot}
 #'
 #' @param scale scaling
-#' @param ... arguments passed to internal function
+#' @param ... arguments \code{n}, \code{from} and \code{to} passed to \code{ti_ellipse} function
 #'
 #' @export
 #'
 indicatrix <- function(x, scale=1, ...) {
   o <- x$projected
-  base <- ellipse(o, matrix(c(1,0,0,1), 2), scale=scale, ...)             # A reference circle
-  outline <- ellipse(o, x$axes, scale=scale, ...)
+  base <- ti_ellipse(o, matrix(c(1,0,0,1), 2), scale=scale, ...)             # A reference circle
+  outline <- ti_ellipse(o, x$axes, scale=scale, ...)
   axis.major <- rbind(o + scale * x$axes[1, ], o - scale * x$axes[1, ])
   axis.minor <- rbind(o + scale * x$axes[2, ], o - scale * x$axes[2, ])
   d.lambda <- rbind(o + scale * x$derivatives[, "lambda"], o - scale * x$derivatives[, "lambda"])
@@ -128,7 +128,19 @@ indicatrix <- function(x, scale=1, ...) {
               axis.major=axis.major, axis.minor=axis.minor,
               d.lambda=d.lambda, d.phi=d.phi))
 }
-ellipse <- function(center, axes, scale=1, n=36, from=0, to=2*pi) {
+
+#' Ellipse
+#'
+#' @param center center
+#' @param axes axes
+#' @param scale scale
+#' @param n n
+#' @param from from
+#' @param to to
+#'
+#' @return matrix
+#' @export
+ti_ellipse <- function(center, axes, scale=1, n=36, from=0, to=2*pi) {
   # Vector representation of an ellipse at "center" with axes in the *rows* of "axes".
   # Returns an "n" by 2 array of points, one per row.
   theta <- seq(from=from, to=to, length.out=n)

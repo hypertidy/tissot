@@ -11,7 +11,7 @@ indicatrix(x, scale = 1, ...)
 
 \item{scale}{scaling}
 
-\item{...}{arguments passed to internal function}
+\item{...}{arguments \code{n}, \code{from} and \code{to} passed to \code{ti_ellipse} function}
 }
 \description{
 Indicatrix
