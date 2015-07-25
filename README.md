@@ -7,7 +7,6 @@ NOTE: this package is in early development and will change a lot, this is just a
 TODO
 ----
 
--   colours need really serious attention for general distribution
 -   sort out the interface for inputting data, projections
 -   semi-automate the scaling for the plot
 
@@ -19,7 +18,6 @@ Can be installed with
 ``` r
 devtools::install_github("mdsumner/tissot")
 ```
-
 
 Minimal example
 ===============
@@ -38,7 +36,6 @@ library(tissot)
  r <- tissot(130, 54, prj,
              proj.in=CRS("+init=epsg:4267"),
              proj.out=CRS("+init=esri:54030"))
-#> Note: no visible binding for global variable '.Data'
 
  i <- indicatrix(r, scale=10^4, n=71)
  plot(i$outline, type="n", asp=1, xlab="Easting", ylab="Northing")
@@ -63,7 +60,6 @@ Polar example
  library(tissot)
 library(rgdal)
 library(maptools)
-#> Checking rgeos availability: TRUE
 data(wrld_simpl)
 prj <- function(z, proj.in, proj.out) {
   z.pt <- SpatialPoints(coords=matrix(z, ncol=2), proj4string=proj.in)
@@ -72,7 +68,7 @@ prj <- function(z, proj.in, proj.out) {
 }
 library(raster)
 
-buildandplot <- function(data, title = "") {
+buildandplot <- function(data, title = "", scale = 5e5) {
   ## grid of points
   gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = TRUE)
   grll <- spTransform(gr, CRS(projection(wrld_simpl)))
@@ -81,7 +77,7 @@ buildandplot <- function(data, title = "") {
                                                proj.in = CRS(projection(wrld_simpl)), proj.out = projection(data))
 plot(data, main = title)
 for (j in seq_along(tis)) {
-  i <- indicatrix(tis[[j]], scale = 5e5, n = 71)
+  i <- indicatrix(tis[[j]], scale = scale, n = 71)
   polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
   lines(i$d.lambda, lwd=2, col="Gray", lty=2)
   lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
@@ -93,12 +89,14 @@ for (j in seq_along(tis)) {
 invisible(NULL)
 }
 ## choose a projection
-ptarget1 <- "+proj=stere +lat_ts-71 +lat_0=-90 +ellps=WGS84"
+ptarget1 <- "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +ellps=WGS84"
 w1 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget1))
-#> Note: no visible binding for global variable 'plotOrder'
 
-ptarget2 <- "+proj=laea +lat_0=-90 +ellps=WGS84"
+ptarget2 <- "+proj=laea +lon_0=147 +lat_0=-90 +ellps=WGS84"
 w2 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget2))
+
+ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
+w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
 
 buildandplot(w1, "Polar Stereographic")
 ```
@@ -110,3 +108,9 @@ buildandplot(w2, "Lambert Azimuthal Equal Area")
 ```
 
 ![](readmefigs/README-unnamed-chunk-4-2.png)
+
+``` r
+buildandplot(w3, "Oblique Mercator")
+```
+
+![](readmefigs/README-unnamed-chunk-4-3.png)
