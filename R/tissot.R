@@ -97,12 +97,13 @@ tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137
   axes <- zapsmall(diag(m$d) %*% apply(m$v, 1, function(x) x / norm(x)))
   dimnames(axes) <- list(c("major", "minor"), NULL)
 
-  return(list(location=c(lambda, phi), projected=z,
+  list(location=c(lambda, phi), projected=z,
               meridian_radius=radius.meridian, meridian_length=length.meridian,
               normal_radius=radius.normal, normal_length=length.normal,
               scale.meridian=h, scale.parallel=k, scale.area=g.det, max.scale=a, min.scale=b,
               to.degrees(zapsmall(c(angle_deformation=omega, convergence=conv, intersection_angle=theta.p))),
-              axes=axes, derivatives=g))
+              axes=axes, derivatives=g)
+
 }
 
 #' Indicatrix
@@ -125,11 +126,31 @@ indicatrix <- function(x, scale=1, ...) {
   axis.minor <- rbind(o + scale * x$axes[2, ], o - scale * x$axes[2, ])
   d.lambda <- rbind(o + scale * x$derivatives[, "lambda"], o - scale * x$derivatives[, "lambda"])
   d.phi <- rbind(o + scale * x$derivatives[, "phi"], o - scale * x$derivatives[, "phi"])
-  return(list(center=x$projected, base=base, outline=outline,
+  i <- list(center=x$projected, base=base, outline=outline,
               axis.major=axis.major, axis.minor=axis.minor,
-              d.lambda=d.lambda, d.phi=d.phi))
+              d.lambda=d.lambda, d.phi=d.phi)
+  class(i) <- c("indicatrix", "list")
+  i
 }
 
+#' @rdname indicatrix
+#' @export
+plot.indicatrix <- function(x, asp=1, xlab="Easting", ylab="Northing", add = FALSE, ...,
+                            col.base = rgb(0, 0, 0, .1),
+                            col.lambda = grey(0.75),
+                            col.phi =  "#45A271", ## #5CBD92", #rgb(.25, .7, .25),
+                            col.major = "#A782C3", ##"#7DB0DD", #rgb(.25, .25, .7),
+                            col.minor = "#C87A8A", ##"#C7A76C", #rgb(.7, .25, .25),
+                            col.outline = "black") {
+  if (!add) plot(x$outline, type="n", asp = asp, xlab = xlab, ylab = ylab, ...)
+  polygon(x$base, col= col.base, border="Gray")
+  lines(x$d.lambda, lwd=2, col= col.lambda, lty=2)
+  lines(x$d.phi, lwd=2, col= col.phi, lty=2)
+  lines(x$axis.major, lwd=2, col= col.major)
+  lines(x$axis.minor, lwd=2, col = col.minor)
+  lines(x$outline, asp=1, lwd=1, col = col.outline)
+
+}
 #' Ellipse
 #'
 #' @param center center

@@ -25,7 +25,6 @@ Can be installed with
 devtools::install_github("mdsumner/tissot")
 ```
 
-
 Minimal example
 ===============
 
@@ -67,6 +66,7 @@ Polar example
  library(tissot)
 library(rgdal)
 library(maptools)
+#> Checking rgeos availability: TRUE
 data(wrld_simpl)
 prj <- function(z, proj.in, proj.out) {
   z.pt <- SpatialPoints(coords=matrix(z, ncol=2), proj4string=proj.in)
@@ -75,23 +75,17 @@ prj <- function(z, proj.in, proj.out) {
 }
 library(raster)
 
-buildandplot <- function(data, title = "", scale = 5e5) {
+buildandplot <- function(data, title = "", scale = 5e5, nr = 7, nc = 7) {
   ## grid of points
-  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = TRUE)
-  grll <- spTransform(gr, CRS(projection(wrld_simpl)))
+  gr <- rasterToPoints(raster(data, nrow = nr, ncol = nc), spatial = TRUE)
+  grll <- spTransform(gr, CRS("+proj=longlat +ellps=WGS84"))
   tis <- vector("list", length(gr))
   for (i in seq_along(tis)) tis[[i]] <- tissot(coordinates(grll)[i, 1], coordinates(grll)[i, 2], prj,  
                                                proj.in = CRS(projection(wrld_simpl)), proj.out = projection(data))
 plot(data, main = title)
 for (j in seq_along(tis)) {
-  i <- indicatrix(tis[[j]], scale = scale, n = 71)
-  polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
-  lines(i$d.lambda, lwd=2, col="Gray", lty=2)
-  lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
-  lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
-  lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
-  lines(i$outline, asp=1, lwd=1)
-  
+  indi <- indicatrix(tis[[j]], scale = scale, n = 71)
+  plot(indi, add = TRUE)
 }
 invisible(NULL)
 }
