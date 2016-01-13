@@ -1,4 +1,9 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+[![Travis-CI Build Status](https://travis-ci.org/mdsumner/tissot.svg?branch=master)](https://travis-ci.org/mdsumner/tissot)
+[![](http://www.r-pkg.org/badges/version/tissot)](http://www.r-pkg.org/pkg/tissot)
+[![](http://cranlogs.r-pkg.org/badges/tissot)](http://www.r-pkg.org/pkg/tissot)
+
 The Tissot Indicatrix
 =====================
 
