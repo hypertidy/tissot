@@ -133,6 +133,20 @@ indicatrix <- function(x, scale=1, ...) {
   i
 }
 
+
+#'
+#' @param asp aspect ratio
+#' @param xlab x-axis labels
+#' @param ylab y-axis labels
+#' @param add add to existing plot
+#' @param ... reserved
+#' @param col.base colour of base
+#' @param col.lambda colour of lambda
+#' @param col.phi colour of phi
+#' @param col.major major axis colour
+#' @param col.minor minor axis colour
+#' @param col.outline outline colour
+#'
 #' @rdname indicatrix
 #' @export
 plot.indicatrix <- function(x, asp=1, xlab="Easting", ylab="Northing", add = FALSE, ...,

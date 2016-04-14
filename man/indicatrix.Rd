@@ -18,6 +18,28 @@ indicatrix(x, scale = 1, ...)
 \item{scale}{scaling}
 
 \item{...}{arguments \code{n}, \code{from} and \code{to} passed to \code{ti_ellipse} function}
+
+\item{asp}{aspect ratio}
+
+\item{xlab}{x-axis labels}
+
+\item{ylab}{y-axis labels}
+
+\item{add}{add to existing plot}
+
+\item{col.base}{colour of base}
+
+\item{col.lambda}{colour of lambda}
+
+\item{col.phi}{colour of phi}
+
+\item{col.major}{major axis colour}
+
+\item{col.minor}{minor axis colour}
+
+\item{col.outline}{outline colour}
+
+\item{...}{reserved}
 }
 \description{
 Indicatrix
