@@ -6,7 +6,10 @@ Authors@R: c(person("Michael D.","Sumner", role = c("aut", "cre"), email = "mdsu
      person("Bill", "Huber", role  = "aut", email = "whuber@quantdec.com"))
 Description: Create and plot the Tissot Indicatrix.
 License: GPL-3
-LazyData: TRUE
-Depends: R (>= 3.1.0)
 LazyData: true
-Suggests: maptools,  rgdal
+Depends:
+    R (>= 3.1.0)
+Suggests:
+    maptools,
+    rgdal
+RoxygenNote: 5.0.1
