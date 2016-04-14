@@ -139,7 +139,6 @@ indicatrix <- function(x, scale=1, ...) {
 #' @param xlab x-axis labels
 #' @param ylab y-axis labels
 #' @param add add to existing plot
-#' @param ... reserved
 #' @param col.base colour of base
 #' @param col.lambda colour of lambda
 #' @param col.phi colour of phi

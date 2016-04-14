@@ -38,8 +38,6 @@ indicatrix(x, scale = 1, ...)
 \item{col.minor}{minor axis colour}
 
 \item{col.outline}{outline colour}
-
-\item{...}{reserved}
 }
 \description{
 Indicatrix
