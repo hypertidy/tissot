@@ -2,7 +2,7 @@
 % Please edit documentation in R/tissot.R
 \name{tissot}
 \alias{tissot}
-\title{The Tissot Indicatrix}
+\title{Tissot}
 \usage{
 tissot(lambda, phi, prj = function(z) z + 0, asDegrees = TRUE,
   A = 6378137, f.inv = 298.257223563, ...)

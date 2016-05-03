@@ -1,4 +1,4 @@
-#' The Tissot Indicatrix
+#' Tissot
 #'
 #' Create the Tissot Indicatrix.
 #'
