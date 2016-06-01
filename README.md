@@ -65,7 +65,7 @@ Polar example
 =============
 
 ``` r
- library(tissot)
+library(tissot)
 library(rgdal)
 library(maptools)
 #> Checking rgeos availability: TRUE
@@ -77,14 +77,14 @@ prj <- function(z, proj.in, proj.out) {
 }
 library(raster)
 
-buildandplot <- function(data, title = "", scale = 5e5) {
+buildandplot <- function(data, scale = 5e5, ...) {
   ## grid of points
   gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = TRUE)
   grll <- spTransform(gr, CRS(projection(wrld_simpl)))
   tis <- vector("list", length(gr))
   for (i in seq_along(tis)) tis[[i]] <- tissot(coordinates(grll)[i, 1], coordinates(grll)[i, 2], prj,  
                                                proj.in = CRS(projection(wrld_simpl)), proj.out = projection(data))
-plot(data, main = title)
+plot(data,  ...)
 for (j in seq_along(tis)) {
   i <- indicatrix(tis[[j]], scale = scale, n = 71)
   polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
@@ -108,19 +108,19 @@ ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
 w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
 
 
-buildandplot(w1, "Polar Stereographic")
+buildandplot(w1, main = "Polar Stereographic")
 ```
 
 ![](readmefigs/README-unnamed-chunk-4-1.png)
 
 ``` r
-buildandplot(w2, "Lambert Azimuthal Equal Area")
+buildandplot(w2, main = "Lambert Azimuthal Equal Area")
 ```
 
 ![](readmefigs/README-unnamed-chunk-4-2.png)
 
 ``` r
-buildandplot(w3, "Oblique Mercator")
+buildandplot(w3, main = "Oblique Mercator")
 ```
 
 ![](readmefigs/README-unnamed-chunk-4-3.png)
@@ -132,7 +132,38 @@ Non-polar
 library(raster)
 ptarget4 <- "+proj=merc +ellps=WGS84"
 w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
-buildandplot(w4, "Mercator")
+buildandplot(w4, main = "Mercator")
 ```
 
 ![](readmefigs/README-unnamed-chunk-5-1.png)
+
+``` r
+
+ptarget5 <- "+proj=lcc +ellps=WGS84 +lon_0=134 +lat_0=-30 +lat_1=-50 +lat_2=-20"
+w5 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 180, -65, -10), "SpatialPolygons")), ptarget5)
+buildandplot(w5, main = "Lambert Conformal Conic", scale = 3.5e5)
+```
+
+![](readmefigs/README-unnamed-chunk-5-2.png)
+
+``` r
+
+
+ptarget6 <- "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "
+
+w6 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 160, -65, -10), "SpatialPolygons")), ptarget6)
+buildandplot(w6, main = "UTM South Zone 50 ", col = "grey", scale = 2.5e5)
+```
+
+![](readmefigs/README-unnamed-chunk-5-3.png)
+
+``` r
+
+
+
+buildandplot(wrld_simpl, main = "Longitude / Latitude")
+degAxis(1)
+degAxis(2)
+```
+
+![](readmefigs/README-unnamed-chunk-5-4.png)
