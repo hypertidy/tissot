@@ -1,9 +1,6 @@
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 [![Travis-CI Build Status](https://travis-ci.org/mdsumner/tissot.svg?branch=master)](https://travis-ci.org/mdsumner/tissot)
-[![](http://www.r-pkg.org/badges/version/tissot)](http://www.r-pkg.org/pkg/tissot)
-[![](http://cranlogs.r-pkg.org/badges/tissot)](http://www.r-pkg.org/pkg/tissot)
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 The Tissot Indicatrix
 =====================
 
@@ -80,17 +77,23 @@ prj <- function(z, proj.in, proj.out) {
 }
 library(raster)
 
-buildandplot <- function(data, title = "", scale = 5e5, nr = 7, nc = 7) {
+buildandplot <- function(data, title = "", scale = 5e5) {
   ## grid of points
-  gr <- rasterToPoints(raster(data, nrow = nr, ncol = nc), spatial = TRUE)
-  grll <- spTransform(gr, CRS("+proj=longlat +ellps=WGS84"))
+  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = TRUE)
+  grll <- spTransform(gr, CRS(projection(wrld_simpl)))
   tis <- vector("list", length(gr))
   for (i in seq_along(tis)) tis[[i]] <- tissot(coordinates(grll)[i, 1], coordinates(grll)[i, 2], prj,  
                                                proj.in = CRS(projection(wrld_simpl)), proj.out = projection(data))
 plot(data, main = title)
 for (j in seq_along(tis)) {
-  indi <- indicatrix(tis[[j]], scale = scale, n = 71)
-  plot(indi, add = TRUE)
+  i <- indicatrix(tis[[j]], scale = scale, n = 71)
+  polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
+  lines(i$d.lambda, lwd=2, col="Gray", lty=2)
+  lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
+  lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
+  lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
+  lines(i$outline, asp=1, lwd=1)
+  
 }
 invisible(NULL)
 }
@@ -103,6 +106,7 @@ w2 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptar
 
 ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
 w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
+
 
 buildandplot(w1, "Polar Stereographic")
 ```
@@ -120,3 +124,15 @@ buildandplot(w3, "Oblique Mercator")
 ```
 
 ![](readmefigs/README-unnamed-chunk-4-3.png)
+
+Non-polar
+=========
+
+``` r
+library(raster)
+ptarget4 <- "+proj=merc +ellps=WGS84"
+w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
+buildandplot(w4, "Mercator")
+```
+
+![](readmefigs/README-unnamed-chunk-5-1.png)

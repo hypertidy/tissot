@@ -12,7 +12,9 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "readmefigs/README-"
+  fig.path = "readmefigs/README-", 
+        fig.height = 8, 
+       fig.width = 8
 )
 ```
 
@@ -117,9 +119,20 @@ w2 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptar
 ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
 w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
 
+
 buildandplot(w1, "Polar Stereographic")
 buildandplot(w2, "Lambert Azimuthal Equal Area")
 buildandplot(w3, "Oblique Mercator")
 
+
+```
+
+# Non-polar
+
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+ptarget4 <- "+proj=merc +ellps=WGS84"
+w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
+buildandplot(w4, "Mercator")
 
 ```
