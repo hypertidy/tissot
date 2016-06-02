@@ -167,3 +167,34 @@ degAxis(2)
 ```
 
 ![](readmefigs/README-unnamed-chunk-5-4.png)
+
+SOM
+---
+
+``` r
+ex <- extent(c(20891678,  40158321, -13438415,  10618277))
+target7 <- "+proj=lsat +lsat=5 +path=188"
+library(spbabel)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:raster':
+#> 
+#>     intersect, select, union
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+tab <- sptable(spTransform(disaggregate(wrld_simpl), target7)) %>% filter(x_ >= xmin(ex), x_ <= xmax(ex), y_ >= ymin(ex), y_ <= ymax(ex))
+## egregiously naive crop here, but good enough for the task
+w7 <- sp(tab  %>% group_by(branch_)  %>% summarize(n = n())  %>% filter(n > 2) %>% inner_join(tab), crs = target7)
+#> Joining by: "branch_"
+library(graticule)
+g <- graticule(seq(-180, 165, by = 15), seq(-85, -20, by = 5), proj = target7, xlim = c(-180, 180), ylim = c(-85, -5))
+buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 2.5e5)
+plot(g, add = TRUE, lty = 2)
+```
+
+![](readmefigs/README-unnamed-chunk-6-1.png)
