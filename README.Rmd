@@ -164,6 +164,6 @@ tab <- sptable(spTransform(disaggregate(wrld_simpl), target7)) %>% filter(x_ >= 
 w7 <- sp(tab  %>% group_by(branch_)  %>% summarize(n = n())  %>% filter(n > 2) %>% inner_join(tab), crs = target7)
 library(graticule)
 g <- graticule(seq(-180, 165, by = 15), seq(-85, -20, by = 5), proj = target7, xlim = c(-180, 180), ylim = c(-85, -5))
-buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 2.5e5)
+buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 5e5)
 plot(g, add = TRUE, lty = 2)
 ```
