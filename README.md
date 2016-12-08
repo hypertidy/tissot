@@ -8,7 +8,7 @@ The Tissot Indicatrix is used to characterize local distortions within map proje
 
 <https://en.wikipedia.org/wiki/Tissot%27s_indicatrix>
 
-NOTE: this package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful.
+NOTE: I am not the primary author of this great code only the package creator, please see the DESCRIPTION for details.  This package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful.
 
 TODO
 ----
