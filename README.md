@@ -61,6 +61,12 @@ Derived from
 
 <http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection>
 
+
+Also see
+
+https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
+
+
 Polar example
 =============
 
