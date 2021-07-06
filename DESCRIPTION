@@ -13,6 +13,6 @@ Suggests:
     maptools, rgeos,
     libproj
 RoxygenNote: 7.1.1
-Remotes: hypertidy/PROJ, paleolimbot/libproj
+Remotes: hypertidy/PROJ
 URL: https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues
