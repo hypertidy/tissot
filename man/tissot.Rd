@@ -28,7 +28,9 @@ tissot(
 
 \item{...}{passed to internal function}
 
-\item{prj}{projection in PROJ.4}
+\item{proj.in}{projection of input}
+
+\item{proj.out}{projection of context}
 }
 \value{
 list with stuff as per below

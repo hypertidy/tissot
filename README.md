@@ -1,6 +1,3 @@
-[![Travis-CI Build
-Status](https://travis-ci.org/mdsumner/tissot.svg?branch=master)](https://travis-ci.org/mdsumner/tissot)
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
     ## Warning in rgeos::gBuffer(wrld_simpl, width = 0, byid = T): Spatial object is
@@ -30,7 +27,7 @@ and needs quite a bit more to be useful.
 Can be installed with
 
 ``` r
-devtools::install_github("mdsumner/tissot")
+remotes::install_github("hypertidy/tissot")
 ```
 
 # Minimal example

@@ -15,11 +15,12 @@ prj <- function(z, proj.in, proj.out) {
 #' All input and output angles are in degrees.
 #' @param lambda longitude
 #' @param phi latitude
-#' @param prj projection in PROJ.4
 #' @param asDegrees logical, work in degrees or radians
 #' @param A ellipsoidal semi-major axis (meters)
 #' @param f.inv the inverse flattening
 #' @param ... passed to internal function
+#' @param proj.in projection of input
+#' @param proj.out projection of context
 #' @return list with stuff as per below
 #' @export
 #' @examples
@@ -127,6 +128,9 @@ indicatrix <- function(x, scale=1, ...) {
 }
 
 
+#' Methods for indicatrix
+#'
+#' plot indicatrix
 #'
 #' @param asp aspect ratio
 #' @param xlab x-axis labels
@@ -175,17 +179,15 @@ ti_ellipse <- function(center, axes, scale=1, n=36, from=0, to=2*pi) {
   t((scale * t(axes))  %*% rbind(cos(theta), sin(theta)) + center)
 }
 
-#' @name plot
-#' @export
-plot.indicatrix <- function(x, y, ...) {
-  add <- list(...)$add
-  if (is.null(add) || !add) {
-    plot(x$outline, type="n", asp=1, xlab="x", ylab="y")
-  }
-  polygon(x$base, col=rgb(0, 0, 0, .025), border="Gray")
-  lines(x$d.lambda, lwd=2, col="Gray", lty=2)
-  lines(x$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
-  lines(x$axis.major, lwd=2, col=rgb(.25, .25, .7))
-  lines(x$axis.minor, lwd=2, col=rgb(.7, .25, .25))
-  lines(x$outline, asp=1, lwd=2)
-}
+# plot.indicatrix <- function(x, y, ...) {
+#   add <- list(...)$add
+#   if (is.null(add) || !add) {
+#     plot(x$outline, type="n", asp=1, xlab="x", ylab="y")
+#   }
+#   polygon(x$base, col=rgb(0, 0, 0, .025), border="Gray")
+#   lines(x$d.lambda, lwd=2, col="Gray", lty=2)
+#   lines(x$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
+#   lines(x$axis.major, lwd=2, col=rgb(.25, .25, .7))
+#   lines(x$axis.minor, lwd=2, col=rgb(.7, .25, .25))
+#   lines(x$outline, asp=1, lwd=2)
+# }

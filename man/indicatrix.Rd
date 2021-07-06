@@ -7,7 +7,20 @@
 \usage{
 indicatrix(x, scale = 1, ...)
 
-\method{plot}{indicatrix}(x, y, ...)
+\method{plot}{indicatrix}(
+  x,
+  asp = 1,
+  xlab = "Easting",
+  ylab = "Northing",
+  add = FALSE,
+  ...,
+  col.base = rgb(0, 0, 0, 0.1),
+  col.lambda = grey(0.75),
+  col.phi = "#45A271",
+  col.major = "#A782C3",
+  col.minor = "#C87A8A",
+  col.outline = "black"
+)
 }
 \arguments{
 \item{x}{object from \code{tissot}}
@@ -38,6 +51,8 @@ indicatrix(x, scale = 1, ...)
 }
 \description{
 Indicatrix
+
+plot indicatrix
 }
 \details{
 Reprocesses the output of \code{tissot} into convenient geometrical data.
