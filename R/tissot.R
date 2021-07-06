@@ -1,3 +1,8 @@
+prj <- function(z, proj.in, proj.out) {
+  do.call(cbind, PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))[1, ]
+}
+
+
 #' Tissot
 #'
 #' Create the Tissot Indicatrix.
@@ -18,32 +23,18 @@
 #' @return list with stuff as per below
 #' @export
 #' @examples
-#' library(rgdal)
-#' prj <- function(z, proj.in, proj.out) {
-#'   z.pt <- SpatialPoints(coords = matrix(z, ncol = 2), proj4string = proj.in)
-#'   w.pt <- spTransform(z.pt, CRS = proj.out)
-#'   coordinates(w.pt)[1,]
-#' }
-#' # Longitude, latitude, and reprojection function
 #' # NAD 27 in
 #' # World Robinson projection out
-#' r <- tissot(130, 54, prj,
-#'             proj.in=CRS("+init=epsg:4267"),
-#'             proj.out=CRS("+init=esri:54030"))
+#' r <- tissot(130, 54,
+#'             proj.in= "EPSG:4267",  ## "NAD27" doesn't work
+#'             proj.out= "ESRI:54030")
 #'
 #' i <- indicatrix(r, scale=10^4, n=71)
-#' plot(i$outline, type="n", asp=1, xlab="Easting", ylab="Northing")
-#' polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
-#' lines(i$d.lambda, lwd=2, col="Gray", lty=2)
-#' lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
-#' lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
-#' lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
-#' lines(i$outline, asp=1, lwd=2)
+#' plot(i)
 #' @importFrom grDevices grey rgb
 #' @importFrom graphics lines plot polygon
 #' @importFrom stats numericDeriv
-tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137, f.inv=298.257223563, ...) {
-
+tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
   to.degrees <- function(x) x * 180 / pi
   to.radians <- function(x) x * pi / 180
   clamp <- function(x) min(max(x, -1), 1)                             # Avoids invalid args to asin
@@ -72,7 +63,7 @@ tissot <- function(lambda, phi, prj=function(z) z+0, asDegrees=TRUE, A = 6378137
   # The projection and its first derivatives, normalized to unit lengths.
   #
   x <- c(lambda, phi)
-  d <- numericDeriv(quote(prj(x, ...)), theta="x")
+  d <- numericDeriv(quote(prj(x, proj.in = proj.in, proj.out = proj.out)), theta="x")
   z <- d[1:2]                                                         # Projected coordinates
   names(z) <- c("x", "y")
   g <- attr(d, "gradient")                                            # First derivative (matrix)
@@ -182,4 +173,19 @@ ti_ellipse <- function(center, axes, scale=1, n=36, from=0, to=2*pi) {
   # Returns an "n" by 2 array of points, one per row.
   theta <- seq(from=from, to=to, length.out=n)
   t((scale * t(axes))  %*% rbind(cos(theta), sin(theta)) + center)
+}
+
+#' @name plot
+#' @export
+plot.indicatrix <- function(x, y, ...) {
+  add <- list(...)$add
+  if (is.null(add) || !add) {
+    plot(x$outline, type="n", asp=1, xlab="x", ylab="y")
+  }
+  polygon(x$base, col=rgb(0, 0, 0, .025), border="Gray")
+  lines(x$d.lambda, lwd=2, col="Gray", lty=2)
+  lines(x$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
+  lines(x$axis.major, lwd=2, col=rgb(.25, .25, .7))
+  lines(x$axis.minor, lwd=2, col=rgb(.7, .25, .25))
+  lines(x$outline, asp=1, lwd=2)
 }

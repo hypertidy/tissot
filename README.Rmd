@@ -2,6 +2,8 @@
 output:
   md_document:
     variant: markdown_github
+editor_options: 
+  chunk_output_type: console
 ---
 
 [![Travis-CI Build Status](https://travis-ci.org/mdsumner/tissot.svg?branch=master)](https://travis-ci.org/mdsumner/tissot)
@@ -16,6 +18,11 @@ knitr::opts_chunk$set(
         fig.height = 9, 
        fig.width = 9
 )
+data(wrld_simpl, package = "maptools")
+## something in sp is automating this now so do upfront hack for now
+wrld_simpl <- sp::SpatialPolygonsDataFrame(rgeos::gBuffer(wrld_simpl, width = 0, byid = T), wrld_simpl@data)
+
+
 ```
 
 # The Tissot Indicatrix
@@ -39,36 +46,17 @@ Can be installed with
 devtools::install_github("mdsumner/tissot")
 ```
 
-```{r,echo=FALSE,message=FALSE}
-library(rgdal)
-```
-
-
 # Minimal example
 
 ```{r}
 library(tissot)
- library(rgdal)
- prj <- function(z, proj.in, proj.out) {
-   z.pt <- SpatialPoints(coords=matrix(z, ncol=2), proj4string=proj.in)
-   w.pt <- spTransform(z.pt, CRS=proj.out)
-   w.pt@coords[1, ]
- }
- # Longitude, latitude, and reprojection function
- # NAD 27 in
- # World Robinson projection out
- r <- tissot(130, 54, prj,
-             proj.in=CRS("+init=epsg:4267"),
-             proj.out=CRS("+init=esri:54030"))
-
- i <- indicatrix(r, scale=10^4, n=71)
- plot(i$outline, type="n", asp=1, xlab="Easting", ylab="Northing")
- polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
- lines(i$d.lambda, lwd=2, col="Gray", lty=2)
- lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
- lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
- lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
- lines(i$outline, asp=1, lwd=2)
+# NAD 27 in
+# World Robinson projection out
+r <- tissot(130, 54,
+           proj.in= "EPSG:4267",  ## "NAD27" doesn't work
+           proj.out= "ESRI:54030")
+i <- indicatrix(r, scale=10^4, n=71)
+plot(i)
 ```
 
 Derived from 
@@ -82,38 +70,27 @@ https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-in
 
 # Polar example
 
-```{r}
+```{r, warning=FALSE}
 library(tissot)
-library(rgdal)
 library(maptools)
-data(wrld_simpl)
-prj <- function(z, proj.in, proj.out) {
-  z.pt <- SpatialPoints(coords=matrix(z, ncol=2), proj4string=proj.in)
-  w.pt <- spTransform(z.pt, CRS=proj.out)
-  w.pt@coords[1, ]
-}
 library(raster)
-
 buildandplot <- function(data, scale = 5e5, ...) {
   ## grid of points
-  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = TRUE)
-  grll <- spTransform(gr, CRS(projection(wrld_simpl)))
-  tis <- vector("list", length(gr))
-  for (i in seq_along(tis)) tis[[i]] <- tissot(coordinates(grll)[i, 1], coordinates(grll)[i, 2], prj,  
-                                               proj.in = CRS(projection(wrld_simpl)), proj.out = projection(data))
-plot(data,  ...)
-for (j in seq_along(tis)) {
-  i <- indicatrix(tis[[j]], scale = scale, n = 71)
-  polygon(i$base, col=rgb(0, 0, 0, .025), border="Gray")
-  lines(i$d.lambda, lwd=2, col="Gray", lty=2)
-  lines(i$d.phi, lwd=2, col=rgb(.25, .7, .25), lty=2)
-  lines(i$axis.major, lwd=2, col=rgb(.25, .25, .7))
-  lines(i$axis.minor, lwd=2, col=rgb(.7, .25, .25))
-  lines(i$outline, asp=1, lwd=1)
-  
+  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = FALSE)
+  ## relying on dev {PROJ} that links to unreleased {libproj}
+  grll <- do.call(cbind, PROJ::proj_trans(gr, "OGC:CRS84", source = projection(data) ))
+  sp::plot(data,  ...)
+  grll <- grll[!is.na(grll[,1]), ]
+  for (i in seq_len(nrow(grll))) {
+    tis <- tissot(grll[i, 1], grll[i, 2],  
+                                               proj.in = projection(wrld_simpl), proj.out = projection(data))
+   ind <- indicatrix(tis, scale = scale, n = 71)
+   plot(ind, add = TRUE)
+  }
+  invisible(NULL)
 }
-invisible(NULL)
-}
+
+
 ## choose a projection
 ptarget1 <- "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +ellps=WGS84"
 w1 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget1))
@@ -127,7 +104,9 @@ w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(pta
 
 buildandplot(w1, main = "Polar Stereographic")
 buildandplot(w2, main = "Lambert Azimuthal Equal Area")
+
 buildandplot(w3, main = "Oblique Mercator")
+
 
 
 ```
@@ -135,6 +114,16 @@ buildandplot(w3, main = "Oblique Mercator")
 # Non-polar
 
 ```{r, message=FALSE, warning=FALSE}
+
+
+## doesn't look right
+# ptarget8 <- "+proj=laea +lat_0=-90"
+# w8 <- spTransform(wrld_simpl, CRS(ptarget8))
+# buildandplot(w8)
+
+
+
+
 library(raster)
 ptarget4 <- "+proj=merc +ellps=WGS84"
 w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
@@ -160,7 +149,9 @@ degAxis(2)
 
 ## SOM
 
-```{r}
+```{r, eval = F}
+## changes in spatial break this old hack
+library(dplyr)
 ex <- extent(c(20891678,  40158321, -13438415,  10618277))
 target7 <- "+proj=lsat +lsat=5 +path=188"
 library(spbabel)
@@ -172,3 +163,8 @@ g <- graticule(seq(-180, 165, by = 15), seq(-85, -20, by = 5), proj = target7, x
 buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 5e5)
 plot(g, add = TRUE, lty = 2)
 ```
+
+
+## Code of Conduct
+  
+Please note that the tissot project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
