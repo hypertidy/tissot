@@ -8,7 +8,7 @@ Description: Create and plot the Tissot Indicatrix.
 License: GPL-3
 Depends:
     R (>= 4.0.0)
-Imports: PROJ
+Imports: PROJ (> 0.4.0)
 Suggests:
     maptools, rgeos,
     libproj
