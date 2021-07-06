@@ -14,5 +14,6 @@ Suggests:
     libproj
 RoxygenNote: 7.1.1
 Remotes: hypertidy/PROJ
+Additional_repositories: https://hypertidy.r-universe.dev
 URL: https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues
