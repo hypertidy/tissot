@@ -6,8 +6,8 @@
 \usage{
 tissot(
   lambda,
-  phi,
-  asDegrees = TRUE,
+  phi = NULL,
+  degrees = TRUE,
   A = 6378137,
   f.inv = 298.257223563,
   ...,
@@ -20,7 +20,7 @@ tissot(
 
 \item{phi}{latitude}
 
-\item{asDegrees}{logical, work in degrees or radians}
+\item{degrees}{logical, work in degrees or radians}
 
 \item{A}{ellipsoidal semi-major axis (meters)}
 
@@ -47,12 +47,18 @@ Source: Snyder pp 20-26 (WGS 84 defaults for the ellipsoidal parameters).
 All input and output angles are in degrees.
 }
 \examples{
-# NAD 27 in
-# World Robinson projection out
-r <- tissot(130, 54,
-            proj.in= "EPSG:4267",  ## "NAD27" doesn't work
-            proj.out= "ESRI:54030")
+x <- seq(-165, 165, by = 15)
+y <- seq(-82.5, 82.5, by = 15)
+xy <- expand.grid(x, y)
+r <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=robin")
 
-i <- indicatrix(r, scale=10^4, n=71)
-plot(i)
+i <- indicatrix0(r[1, ], scale=10^4, n=71)
+plot(i, add = FALSE)
+ii <- indicatrix(r, scale=3e5, n=71)
+plot(ii, add = FALSE)
+
+
+
 }

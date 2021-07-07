@@ -47,16 +47,18 @@ remotes::install_github("hypertidy/tissot")
 
 # Minimal example
 
-```{r}
+```{r minimal}
 library(tissot)
 # NAD 27 in
 # World Robinson projection out
 r <- tissot(130, 54,
-           proj.in= "EPSG:4267",  ## "NAD27" doesn't work
+           proj.in= "EPSG:4267",  
            proj.out= "ESRI:54030")
 i <- indicatrix(r, scale=10^4, n=71)
 plot(i)
+
 ```
+
 
 Derived from 
 
@@ -67,9 +69,133 @@ Also see
 https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
 
 
+Since an original port of whuber's code we have now made it much easier to create many indicatrixes and plot them in one step. Or we can still just grab one and plot it on its own. Note that the scale is quite different in these plots. 
+
+
+```{r bigger-example}
+x <- seq(-175, 175, by = 20)
+y <- seq(-82.5, 82.5, by = 15)
+xy <- expand.grid(x, y)
+r <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=robin")
+
+i <- indicatrix0(r[1, ], scale=10^4, n=71)
+plot(i, add = FALSE)
+
+ii <- indicatrix(r, scale=3e5, n=71)
+plot(ii, add = FALSE)
+```
+
+Mollweide. 
+
+```{r mollweide}
+m <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=moll")
+
+
+plot(indicatrix(m, scale=3e5, n=71), add = FALSE)
+```
+
+
+Eckhert I
+
+```{r eckhert}
+e <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=eck1")
+
+
+plot(indicatrix(e, scale=3e5, n=71), add = FALSE)
+```
+
+Sinusoidal
+
+```{r sinu}
+s <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=sinu")
+
+
+plot(indicatrix(s, scale=3e5, n=71), add = FALSE)
+```
+
+
+
 # Polar example
 
-```{r, warning=FALSE}
+
+```{r polar-stereo}
+p <- tissot(xy[xy[,2] < -40, ],
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84")
+
+plot(indicatrix(p, scale = 3e5))
+```
+
+```{r polar-laea}
+laea <- tissot(xy[xy[,2] < 20, ],
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=laea +lon_0=147 +lat_0=-90 +datum=WGS84")
+
+plot(indicatrix(laea, scale = 3e5))
+```
+
+
+Oblique Mercator
+
+You get the idea ... many projections need extra attention for real data. 
+
+
+```{r omerc}
+mp0 <- do.call(cbind, maps::map(plot = FALSE)[1:2])
+omerc <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
+mp <- tissot:::.prj(mp0, proj.out = omerc, proj.in = "OGC:CRS84")
+o <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= omerc)
+
+plot(indicatrix(o, scale = 3e5))
+lines(mp)
+
+```
+
+
+VicGrid
+
+```{r vicgrid}
+
+vgrid <- "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+mp <- tissot:::.prj(mp0, 
+                    proj.out = vgrid, proj.in = "OGC:CRS84")
+v <- tissot(as.matrix(expand.grid(seq(120, 165, by =5 ), 
+                                          seq(-45, -35, by = 5))),
+            proj.in= "OGC:CRS84",
+            proj.out= vgrid)
+
+plot(indicatrix(v, scale = 2e5))
+lines(mp)
+```
+
+UTM Zone 54 (Hobart)
+
+
+```{r utm54}
+
+utm <- "+proj=utm +zone=54 +south"
+mp <- tissot:::.prj(mp0, 
+                    proj.out = utm, proj.in = "OGC:CRS84")
+u <- tissot(as.matrix(expand.grid(seq(108, 162, by =6 ), 
+                                          seq(-65, 55, by = 15))),
+            proj.in= "OGC:CRS84",
+            proj.out= utm)
+
+plot(indicatrix(u, scale = 2e5))
+lines(mp)
+```
+
+```{r, warning=FALSE,eval=F,include=FALSE}
 library(tissot)
 library(maptools)
 library(raster)
@@ -112,7 +238,7 @@ buildandplot(w3, main = "Oblique Mercator")
 
 # Non-polar
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=F, eval=F}
 
 
 ## doesn't look right
