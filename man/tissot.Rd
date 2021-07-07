@@ -47,18 +47,21 @@ Source: Snyder pp 20-26 (WGS 84 defaults for the ellipsoidal parameters).
 All input and output angles are in degrees.
 }
 \examples{
-x <- seq(-165, 165, by = 15)
+x <- seq(-175, 175, by = 15)
 y <- seq(-82.5, 82.5, by = 15)
 xy <- expand.grid(x, y)
 r <- tissot(xy,
             proj.in= "OGC:CRS84",
             proj.out= "+proj=robin")
 
-i <- indicatrix0(r[1, ], scale=10^4, n=71)
-plot(i, add = FALSE)
-ii <- indicatrix(r, scale=3e5, n=71)
-plot(ii, add = FALSE)
-
+j <- which.min(abs(135 - r$lon) + abs(54 - r$lat))
+idx0 <- indicatrix0(r[j, ], scale=10^4, n=71)
+op <- par(mfrow =   c(2, 1))
+plot(idx0, add = FALSE)
+idx <- indicatrix(r, scale=3e5, n=71)
+plot(idx, add = FALSE)
+tissot_abline(r$lon[j], r$lat[j])
+par(op)
 
 
 }

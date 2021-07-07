@@ -1,4 +1,8 @@
-.prj <- function(z, proj.in, proj.out) {
+.prj <- function(z, proj.out, ..., proj.in = NULL) {
+  if (is.null(proj.in)) {
+    message("assuming WGS84 for unprojected angular coordinates")
+    proj.in <- "OGC:CRS84"
+  }
    do.call(cbind, PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))
 }
 .to.degrees <- function(x) x * 180 / pi
@@ -28,19 +32,22 @@
 #' @return list with stuff as per below
 #' @export
 #' @examples
-#' x <- seq(-165, 165, by = 15)
+#' x <- seq(-175, 175, by = 15)
 #' y <- seq(-82.5, 82.5, by = 15)
 #' xy <- expand.grid(x, y)
 #' r <- tissot(xy,
 #'             proj.in= "OGC:CRS84",
 #'             proj.out= "+proj=robin")
 #'
-#' i <- indicatrix0(r[1, ], scale=10^4, n=71)
-#' plot(i, add = FALSE)
+#' j <- which.min(abs(135 - r$lon) + abs(54 - r$lat))
+#' idx0 <- indicatrix0(r[j, ], scale=10^4, n=71)
+#' op <- par(mfrow =   c(2, 1))
+#' plot(idx0, add = FALSE)
 
-#' ii <- indicatrix(r, scale=3e5, n=71)
-#' plot(ii, add = FALSE)
-#'
+#' idx <- indicatrix(r, scale=3e5, n=71)
+#' plot(idx, add = FALSE)
+#' tissot_abline(r$lon[j], r$lat[j])
+#' par(op)
 #'
 #'
 #' @importFrom grDevices grey rgb
@@ -58,7 +65,14 @@ tissot <- function(lambda, phi = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257
  do.call(rbind, out)
 }
 #' @importFrom tibble tibble
-tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
+tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563, proj.out = NULL,
+                    ..., proj.in = NULL) {
+  if (is.null(proj.in)) {
+    proj.in <- "OGC:CRS84"
+  }
+  if (is.null(proj.out)) {
+    stop("'proj.out' must be specified")
+  }
   #
   # Precomputation.
   #
@@ -83,7 +97,7 @@ tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563
   # The projection and its first derivatives, normalized to unit lengths.
   #
   x <- c(lambda, phi)
-  d <- numericDeriv(quote(.prj(x, proj.in = proj.in, proj.out = proj.out)[1L, ]), theta="x")
+  d <- numericDeriv(quote(.prj(x, proj.out = proj.out, proj.in = proj.in)[1L, ]), theta="x")
   z <- d[1:2]                                                         # Projected coordinates
   names(z) <- c("x", "y")
   g <- attr(d, "gradient")                                            # First derivative (matrix)
@@ -126,7 +140,8 @@ tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563
                  axes_x_major = axes[1L,1L, drop = TRUE], axes_x_minor = axes[2L,1L, drop = TRUE],
                  axes_y_major = axes[1L,2L, drop = TRUE], axes_y_minor = axes[2L,2L, drop = TRUE],
                  lambda_dx = g[1L, 1L, drop = TRUE], lambda_dy = g[2L, 1L, drop = TRUE],
-                 phi_dx = g[1L, 2L, drop = TRUE], phi_dy = g[2L, 2L, drop = TRUE])
+                 phi_dx = g[1L, 2L, drop = TRUE], phi_dy = g[2L, 2L, drop = TRUE],
+                 proj.in = proj.in, proj.out = proj.out)
 
 }
 
@@ -152,17 +167,23 @@ indicatrix <- function(x, scale = 1, ...) {
 plot.indicatrixes <- function(x, asp=1, xlab="x", ylab="y", add = FALSE, ...,
  col.base = rgb(0, 0, 0, .1),
  col.lambda = grey(0.75),
- col.phi =  "#45A271", ## #5CBD92", #rgb(.25, .7, .25),
- col.major = "#A782C3", ##"#7DB0DD", #rgb(.25, .25, .7),
- col.minor = "#C87A8A", ##"#C7A76C", #rgb(.7, .25, .25),
+ #col.phi =  "#45A271", ## #5CBD92", #rgb(.25, .7, .25),  ## green
+ #col.major = "#A782C3", ##"#7DB0DD", #rgb(.25, .25, .7), ## purple
+ #col.minor = "#C87A8A", ##"#C7A76C", #rgb(.7, .25, .25), ## red
+ col.phi = "#1b9e77",  ## colorbrewer, qualitative, color friendly
+ col.major = "#7570b3",
+ col.minor = "#d95f02",
  col.outline = "black") {
  if (!add) {
    center <- do.call(rbind, lapply(x, function(a) a$center))
    major <- do.call(rbind, lapply(x, function(a) a$axis.major))
    minor <- do.call(rbind, lapply(x, function(a) a$axis.minor))
-   plot(center, type = "n", asp = asp, xlab = xlab, ylab = ylab,
-        xlim = range(c(major[,1L], minor[,1L])),
-        ylim = range(c(major[,2L], minor[,2L])))
+   props <- list(x = center, type = "n", asp = asp, xlab = xlab, ylab = ylab, ...)
+   if (is.null(props$xlim)) props$xlim <-range(c(major[,1L], minor[,1L]))
+   if (is.null(props$ylim)) props$ylim <- range(c(major[,2L], minor[,2L]))
+
+   do.call(plot, props)
+   options(tissot.last.plot.proj = x[[1]]$proj.out)
  }
   lapply(x, plot, add = TRUE,
          col.base = col.base,
@@ -192,7 +213,8 @@ indicatrix0 <- function(x, scale=1, ...) {
 
   i <- list(center=o, base = base, outline = outline,
               axis.major = axis.major, axis.minor = axis.minor,
-              d.lambda = d.lambda, d.phi = d.phi)
+              d.lambda = d.lambda, d.phi = d.phi,
+            proj.in = x$proj.in, proj.out = x$proj.out)
   class(i) <- c("indicatrix0", "list")
   i
 }

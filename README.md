@@ -36,11 +36,24 @@ library(tissot)
 r <- tissot(130, 54,
            proj.in= "EPSG:4267",  
            proj.out= "ESRI:54030")
-i <- indicatrix(r, scale=10^4, n=71)
-plot(i)
+i0 <- indicatrix(r, scale=10^4, n=71)
+plot(i0)
 ```
 
-![](readmefigs/README-minimal-1.png)
+![](man/readmefigs/README-minimal-1.png)
+
+``` r
+tissot_map(add = FALSE)
+#> Error detected, some values Inf (error code: -20)
+#> 
+#> ' tolerance condition error
+#> 
+#>  '
+i1 <- indicatrix(r, scale=10^6, n=71)
+plot(i1, add = T)
+```
+
+![](man/readmefigs/README-minimal-2.png)
 
 Since an original port of whuber’s code we have now made it much easier
 to create many indicatrixes and plot them in one step. Or we can still
@@ -48,25 +61,31 @@ just grab one and plot it on its own. Note that the scale is quite
 different in these plots.
 
 ``` r
-x <- seq(-175, 175, by = 20)
+x <- seq(-172.5, 172.5, by = 15)
 y <- seq(-82.5, 82.5, by = 15)
 xy <- expand.grid(x, y)
 r <- tissot(xy,
             proj.in= "OGC:CRS84",
             proj.out= "+proj=robin")
 
-i <- indicatrix0(r[1, ], scale=10^4, n=71)
+i <- indicatrix0(r[1, ], scale= 1e4, n=71)
 plot(i, add = FALSE)
 ```
 
-![](readmefigs/README-bigger-example-1.png)
+![](man/readmefigs/README-bigger-example-1.png)
 
 ``` r
-ii <- indicatrix(r, scale=3e5, n=71)
-plot(ii, add = FALSE)
+ii <- indicatrix(r, scale=4e5, n=71)
+tissot_map(add = FALSE)
+#> Error detected, some values Inf (error code: -20)
+#> 
+#> ' tolerance condition error
+#> 
+#>  '
+plot(ii, add = TRUE)
 ```
 
-![](readmefigs/README-bigger-example-2.png)
+![](man/readmefigs/README-bigger-example-2.png)
 
 Mollweide.
 
@@ -76,23 +95,51 @@ m <- tissot(xy,
             proj.out= "+proj=moll")
 
 
-plot(indicatrix(m, scale=3e5, n=71), add = FALSE)
+plot(indicatrix(m, scale=4e5, n=71), add = FALSE)
+tissot_map()
 ```
 
-![](readmefigs/README-mollweide-1.png)
+![](man/readmefigs/README-mollweide-1.png)
 
-Eckhert I
+Eckhert III
 
 ``` r
 e <- tissot(xy,
             proj.in= "OGC:CRS84",
-            proj.out= "+proj=eck1")
+            proj.out= "+proj=eck3")
 
 
-plot(indicatrix(e, scale=3e5, n=71), add = FALSE)
+plot(indicatrix(e, scale=4e5, n=71), add = FALSE)
 ```
 
-![](readmefigs/README-eckhert-1.png)
+![](man/readmefigs/README-eckhert-1.png)
+
+Equidistant
+
+``` r
+aeqd <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=aeqd")
+
+
+plot(indicatrix(aeqd, scale=4e5, n=71), add = FALSE)
+```
+
+![](man/readmefigs/README-aeqd-1.png)
+
+Cassini-Soldner (spherical because ellipsoidal seems broken)
+
+``` r
+xx <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=cass +R=6378137")
+
+
+plot(indicatrix(xx, scale=4e5, n=71), add = FALSE)
+points(tissot_map(col = "transparent"), pch = ".")
+```
+
+![](man/readmefigs/README-xx-1.png)
 
 Sinusoidal
 
@@ -103,9 +150,10 @@ s <- tissot(xy,
 
 
 plot(indicatrix(s, scale=3e5, n=71), add = FALSE)
+tissot_map()
 ```
 
-![](readmefigs/README-sinu-1.png)
+![](man/readmefigs/README-sinu-1.png)
 
 # Polar example
 
@@ -115,9 +163,10 @@ p <- tissot(xy[xy[,2] < -40, ],
             proj.out= "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84")
 
 plot(indicatrix(p, scale = 3e5))
+tissot_map()
 ```
 
-![](readmefigs/README-polar-stereo-1.png)
+![](man/readmefigs/README-polar-stereo-1.png)
 
 ``` r
 laea <- tissot(xy[xy[,2] < 20, ],
@@ -127,7 +176,7 @@ laea <- tissot(xy[xy[,2] < 20, ],
 plot(indicatrix(laea, scale = 3e5))
 ```
 
-![](readmefigs/README-polar-laea-1.png)
+![](man/readmefigs/README-polar-laea-1.png)
 
 Oblique Mercator
 
@@ -136,7 +185,7 @@ You get the idea … many projections need extra attention for real data.
 ``` r
 mp0 <- do.call(cbind, maps::map(plot = FALSE)[1:2])
 omerc <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
-mp <- tissot:::.prj(mp0, proj.out = omerc, proj.in = "OGC:CRS84")
+mp <- tissot:::.prj(mp0, omerc, proj.in = "OGC:CRS84")
 o <- tissot(xy,
             proj.in= "OGC:CRS84",
             proj.out= omerc)
@@ -145,14 +194,13 @@ plot(indicatrix(o, scale = 3e5))
 lines(mp)
 ```
 
-![](readmefigs/README-omerc-1.png)
+![](man/readmefigs/README-omerc-1.png)
 
 VicGrid
 
 ``` r
 vgrid <- "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-mp <- tissot:::.prj(mp0, 
-                    proj.out = vgrid, proj.in = "OGC:CRS84")
+mp <- tissot:::.prj(mp0, vgrid, proj.in = "OGC:CRS84")
 v <- tissot(as.matrix(expand.grid(seq(120, 165, by =5 ), 
                                           seq(-45, -35, by = 5))),
             proj.in= "OGC:CRS84",
@@ -162,14 +210,13 @@ plot(indicatrix(v, scale = 2e5))
 lines(mp)
 ```
 
-![](readmefigs/README-vicgrid-1.png)
+![](man/readmefigs/README-vicgrid-1.png)
 
 UTM Zone 54 (Hobart)
 
 ``` r
 utm <- "+proj=utm +zone=54 +south"
-mp <- tissot:::.prj(mp0, 
-                    proj.out = utm, proj.in = "OGC:CRS84")
+mp <- tissot:::.prj(mp0, utm, proj.in = "OGC:CRS84")
 u <- tissot(as.matrix(expand.grid(seq(108, 162, by =6 ), 
                                           seq(-65, 55, by = 15))),
             proj.in= "OGC:CRS84",
@@ -179,7 +226,7 @@ plot(indicatrix(u, scale = 2e5))
 lines(mp)
 ```
 
-![](readmefigs/README-utm54-1.png)
+![](man/readmefigs/README-utm54-1.png)
 
 ## Code of Conduct
 

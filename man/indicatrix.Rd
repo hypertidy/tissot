@@ -18,9 +18,9 @@ indicatrix(x, scale = 1, ...)
   ...,
   col.base = rgb(0, 0, 0, 0.1),
   col.lambda = grey(0.75),
-  col.phi = "#45A271",
-  col.major = "#A782C3",
-  col.minor = "#C87A8A",
+  col.phi = "#1b9e77",
+  col.major = "#7570b3",
+  col.minor = "#d95f02",
   col.outline = "black"
 )
 

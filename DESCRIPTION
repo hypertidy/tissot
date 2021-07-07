@@ -14,6 +14,8 @@ Imports:
 Suggests:
     libproj
 RoxygenNote: 7.1.1
+LazyData: true
+LazyDataCompression: xz
 Encoding: UTF-8
 Remotes: hypertidy/PROJ
 Additional_repositories: https://hypertidy.r-universe.dev

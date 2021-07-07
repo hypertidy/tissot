@@ -2,8 +2,9 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^README-.*\.png$
-^readmefigs/*
+^man/readmefigs/*
 ^cran-comments\.md$
 ^\.travis\.yml$
 ^CODE_OF_CONDUCT\.md$
 ^\.github$
+^data-raw$
