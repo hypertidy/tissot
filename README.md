@@ -6,22 +6,18 @@
 
 # The Tissot Indicatrix
 
-The Tissot Indicatrix is used to characterize local distortions within
-map projections.
+The [Tissot
+Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) is used
+to characterize local distortions within map projections.
 
-<https://en.wikipedia.org/wiki/Tissot%27s_indicatrix>
+I have derived the code in this package (with permission) from Bill
+Huber’s wonderful online answer here:
 
-NOTE: I am not the primary author of this great code only the package
-creator, please see the DESCRIPTION for details. This package is in
-early development and will change a lot, this is just a quick prototype
-and needs quite a bit more to be useful.
+<http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection>
 
-## TODO
+Also see
 
--   sort out the interface for inputting data, projections
--   semi-automate the scaling for the plot
--   provide control and better defaults for colours
--   check terminology (and spelling) is consistent
+<https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix>
 
 # Installation
 
@@ -45,14 +41,6 @@ plot(i)
 ```
 
 ![](readmefigs/README-minimal-1.png)
-
-Derived from
-
-<http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection>
-
-Also see
-
-<https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix>
 
 Since an original port of whuber’s code we have now made it much easier
 to create many indicatrixes and plot them in one step. Or we can still
@@ -192,25 +180,6 @@ lines(mp)
 ```
 
 ![](readmefigs/README-utm54-1.png)
-
-# Non-polar
-
-## SOM
-
-``` r
-## changes in spatial break this old hack
-library(dplyr)
-ex <- extent(c(20891678,  40158321, -13438415,  10618277))
-target7 <- "+proj=lsat +lsat=5 +path=188"
-library(spbabel)
-tab <- sptable(spTransform(disaggregate(wrld_simpl), target7)) %>% filter(x_ >= xmin(ex), x_ <= xmax(ex), y_ >= ymin(ex), y_ <= ymax(ex))
-## egregiously naive crop here, but good enough for the task
-w7 <- sp(tab  %>% group_by(branch_)  %>% summarize(n = n())  %>% filter(n > 2) %>% inner_join(tab), crs = target7)
-library(graticule)
-g <- graticule(seq(-180, 165, by = 15), seq(-85, -20, by = 5), proj = target7, xlim = c(-180, 180), ylim = c(-85, -5))
-buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 5e5)
-plot(g, add = TRUE, lty = 2)
-```
 
 ## Code of Conduct
 

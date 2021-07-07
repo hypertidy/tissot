@@ -27,19 +27,21 @@ knitr::opts_chunk$set(
 
 # The Tissot Indicatrix
 
-The Tissot Indicatrix is used to characterize local distortions within map projections. 
+The [Tissot Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) is used to characterize local distortions within map projections. 
 
-https://en.wikipedia.org/wiki/Tissot%27s_indicatrix
 
-NOTE: I am not the primary author of this great code only the package creator, please see the DESCRIPTION for details.  This package is in early development and will change a lot, this is just a quick prototype and needs quite a bit more to be useful.
+I have derived the code in this package (with permission) from Bill Huber's wonderful online answer here: 
 
-## TODO
- * sort out the interface for inputting data, projections
- * semi-automate the scaling for the plot
- * provide control and better defaults for colours 
- * check terminology (and spelling) is consistent
- 
+http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection
+
+Also see
+
+https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
+
+
+
 # Installation
+
 Can be installed with 
 
 ```R
@@ -59,15 +61,6 @@ i <- indicatrix(r, scale=10^4, n=71)
 plot(i)
 
 ```
-
-
-Derived from 
-
-http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection
-
-Also see
-
-https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
 
 
 Since an original port of whuber's code we have now made it much easier to create many indicatrixes and plot them in one step. Or we can still just grab one and plot it on its own. Note that the scale is quite different in these plots. 
@@ -237,7 +230,6 @@ buildandplot(w3, main = "Oblique Mercator")
 
 ```
 
-# Non-polar
 
 ```{r, message=FALSE, warning=FALSE, include=F, eval=F}
 
@@ -273,9 +265,8 @@ degAxis(2)
 
 ```
 
-## SOM
 
-```{r, eval = F}
+```{r, eval = F, include=F}
 ## changes in spatial break this old hack
 library(dplyr)
 ex <- extent(c(20891678,  40158321, -13438415,  10618277))
