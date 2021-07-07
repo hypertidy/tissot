@@ -1,6 +1,10 @@
-prj <- function(z, proj.in, proj.out) {
-  do.call(cbind, PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))[1, ]
+.prj <- function(z, proj.in, proj.out) {
+   do.call(cbind, PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))
 }
+.to.degrees <- function(x) x * 180 / pi
+.to.radians <- function(x) x * pi / 180
+.clamp <- function(x) min(max(x, -1), 1)                             # Avoids invalid args to asin
+.norm <- function(x) sqrt(sum(x*x))
 
 
 #' Tissot
@@ -26,20 +30,36 @@ prj <- function(z, proj.in, proj.out) {
 #' @examples
 #' # NAD 27 in
 #' # World Robinson projection out
-#' r <- tissot(130, 54,
+#'
+#' b <- -3
+#' x <- seq(-160, 160, by = 35)
+#' y <- seq(-65, 65, by = 25)
+#' xy <- expand.grid(x, y)
+#' r <- tissot(xy,
 #'             proj.in= "EPSG:4267",  ## "NAD27" doesn't work
 #'             proj.out= "ESRI:54030")
 #'
-#' i <- indicatrix(r, scale=10^4, n=71)
+#' i <- indicatrix0(r[1, ], scale=10^4, n=71)
 #' plot(i)
+#'
+#' ii <- indicatrix(r, scale=10^5, n=71)
+#' plot(ii)
+#'
 #' @importFrom grDevices grey rgb
 #' @importFrom graphics lines plot polygon
 #' @importFrom stats numericDeriv
-tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
-  to.degrees <- function(x) x * 180 / pi
-  to.radians <- function(x) x * pi / 180
-  clamp <- function(x) min(max(x, -1), 1)                             # Avoids invalid args to asin
-  norm <- function(x) sqrt(sum(x*x))
+tissot <- function(x, y = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
+ xy <- xy.coords(x, y)
+ lam <- xy[[1L]]
+ phi <- xy[[2L]]
+ out <- vector("list", length(lam))
+ for (i in seq_along(lam)) {
+   out[[i]] <- tissot0(lam[i], phi[i], degrees = degrees, A = A, f.inv = f.inv, proj.in = proj.in, proj.out = proj.out, ...)
+ }
+ do.call(rbind, out)
+}
+
+tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
   #
   # Precomputation.
   #
@@ -48,11 +68,11 @@ tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.25722356
   } else {
     e2 <- (2 - 1/f.inv) / f.inv                                       # Squared eccentricity
   }
-  if (asDegrees) phi.r <- to.radians(phi) else phi.r <- phi
+  if (degrees) phi.r <- .to.radians(phi) else phi.r <- phi
   cos.phi <- cos(phi.r)                                               # Convenience term
   e2.sinphi <- 1 - e2 * sin(phi.r)^2                                  # Convenience term
   e2.sinphi2 <- sqrt(e2.sinphi)                                       # Convenience term
-  if (asDegrees) units <- 180 / pi else units <- 1                    # Angle measurement units per radian
+  if (degrees) units <- 180 / pi else units <- 1                    # Angle measurement units per radian
   #
   # Lengths (the metric).
   #
@@ -64,7 +84,7 @@ tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.25722356
   # The projection and its first derivatives, normalized to unit lengths.
   #
   x <- c(lambda, phi)
-  d <- numericDeriv(quote(prj(x, proj.in = proj.in, proj.out = proj.out)), theta="x")
+  d <- numericDeriv(quote(.prj(x, proj.in = proj.in, proj.out = proj.out)[1L, ]), theta="x")
   z <- d[1:2]                                                         # Projected coordinates
   names(z) <- c("x", "y")
   g <- attr(d, "gradient")                                            # First derivative (matrix)
@@ -74,29 +94,40 @@ tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.25722356
   #
   # Computation.
   #
-  h <- norm(g[, "phi"])                                               # (4-27)
-  k <- norm(g[, "lambda"])                                            # (4-28)
+  h <- .norm(g[, "phi"])                                               # (4-27)
+  k <- .norm(g[, "lambda"])                                            # (4-28)
   a.p <- sqrt(max(0, h^2 + k^2 + 2 * g.det))                          # (4-12) (intermediate)
   b.p <- sqrt(max(0, h^2 + k^2 - 2 * g.det))                          # (4-13) (intermediate)
   a <- (a.p + b.p)/2                                                  # (4-12a)
   b <- (a.p - b.p)/2                                                  # (4-13a)
-  omega <- 2 * asin(clamp(b.p / a.p))                                 # (4-1a)
-  theta.p <- asin(clamp(g.det / (h * k)))                             # (4-14)
+  omega <- 2 * asin(.clamp(b.p / a.p))                                 # (4-1a)
+  theta.p <- asin(.clamp(g.det / (h * k)))                             # (4-14)
   conv <- (atan2(g["y", "phi"], g["x","phi"]) + pi / 2) %% (2 * pi) - pi # Middle of p. 21
   #
   # The indicatrix itself.
   # "svd" essentially redoes the preceding computation of "h", "k", and "theta.p".
   #
   m <- svd(g)
-  axes <- zapsmall(diag(m$d) %*% apply(m$v, 1, function(x) x / norm(x)))
+  axes <- zapsmall(diag(m$d) %*% apply(m$v, 1, function(x) x / .norm(x)))
   dimnames(axes) <- list(c("major", "minor"), NULL)
 
-  list(location=c(lambda, phi), projected=z,
-              meridian_radius=radius.meridian, meridian_length=length.meridian,
-              normal_radius=radius.normal, normal_length=length.normal,
-              scale.meridian=h, scale.parallel=k, scale.area=g.det, max.scale=a, min.scale=b,
-              to.degrees(zapsmall(c(angle_deformation=omega, convergence=conv, intersection_angle=theta.p))),
-              axes=axes, derivatives=g)
+  # list(location=c(lambda, phi), projected=z,
+  #             meridian_radius=radius.meridian, meridian_length=length.meridian,
+  #             normal_radius=radius.normal, normal_length=length.normal,
+  #             scale.meridian=h, scale.parallel=k, scale.area=g.det, max.scale=a, min.scale=b,
+  #             .to.degrees(zapsmall(c(angle_deformation=omega, convergence=conv, intersection_angle=theta.p))),
+  #             axes=axes, derivatives=g)
+
+  dfconint <- .to.degrees(zapsmall(c(omega, conv, theta.p)))
+  tibble::tibble(lon = lambda, lat = phi, x = z[1L], y = z[2L],
+                 meridian_radius=radius.meridian, meridian_length=length.meridian,
+                 normal_radius=radius.normal, normal_length=length.normal,
+                 scale.meridian=h, scale.parallel=k, scale.area=g.det, max.scale=a, min.scale=b,
+                 angle_deformation= dfconint[1L], convergence= dfconint[2L], intersection_angle= dfconint[3L],
+                 axes_x_major = axes[1L,1L, drop = TRUE], axes_x_minor = axes[2L,1L, drop = TRUE],
+                 axes_y_major = axes[1L,2L, drop = TRUE], axes_y_minor = axes[2L,2L, drop = TRUE],
+                 lambda_dx = g[1L, 1L, drop = TRUE], lambda_dy = g[2L, 1L, drop = TRUE],
+                 phi_dx = g[1L, 2L, drop = TRUE], phi_dy = g[2L, 2L, drop = TRUE])
 
 }
 
@@ -112,18 +143,55 @@ tissot <- function(lambda, phi,  asDegrees=TRUE, A = 6378137, f.inv=298.25722356
 #'
 #' @export
 #'
-indicatrix <- function(x, scale=1, ...) {
-  o <- x$projected
+indicatrix <- function(x, scale = 1, ...) {
+  structure(lapply(split(x, 1:nrow(x)), indicatrix0, scale = scale, ...),
+            class = c("indicatrixes", "list"))
+}
+
+#' @name indicatrix
+#' @export
+plot.indicatrixes <- function(x, asp=1, xlab="x", ylab="y", add = FALSE, ...,
+ col.base = rgb(0, 0, 0, .1),
+ col.lambda = grey(0.75),
+ col.phi =  "#45A271", ## #5CBD92", #rgb(.25, .7, .25),
+ col.major = "#A782C3", ##"#7DB0DD", #rgb(.25, .25, .7),
+ col.minor = "#C87A8A", ##"#C7A76C", #rgb(.7, .25, .25),
+ col.outline = "black") {
+ if (!add) {
+   center <- do.call(rbind, lapply(x, function(a) a$center))
+   major <- do.call(rbind, lapply(x, function(a) a$axis.major))
+   minor <- do.call(rbind, lapply(x, function(a) a$axis.minor))
+   plot(center, type = "n", asp = asp, xlab = xlab, ylab = ylab,
+        xlim = range(c(major[,1L], minor[,1L])),
+        ylim = range(c(major[,2L], minor[,2L])))
+ }
+  lapply(x, plot, add = TRUE,
+         col.base = col.base,
+         col.lambda = col.lambda,
+         col.phi = col.phi,
+         col.major = col.major,
+         col.minor = col.minor,
+         col.outline = col.outline
+         )
+  invisible(NULL)
+}
+indicatrix0 <- function(x, scale=1, ...) {
+  o <- unlist(x[c("x", "y")])
   base <- ti_ellipse(o, matrix(c(1,0,0,1), 2), scale=scale, ...)             # A reference circle
-  outline <- ti_ellipse(o, x$axes, scale=scale, ...)
-  axis.major <- rbind(o + scale * x$axes[1, ], o - scale * x$axes[1, ])
-  axis.minor <- rbind(o + scale * x$axes[2, ], o - scale * x$axes[2, ])
-  d.lambda <- rbind(o + scale * x$derivatives[, "lambda"], o - scale * x$derivatives[, "lambda"])
-  d.phi <- rbind(o + scale * x$derivatives[, "phi"], o - scale * x$derivatives[, "phi"])
-  i <- list(center=x$projected, base=base, outline=outline,
-              axis.major=axis.major, axis.minor=axis.minor,
-              d.lambda=d.lambda, d.phi=d.phi)
-  class(i) <- c("indicatrix", "list")
+  axes_major <- unlist(x[c("axes_x_major", "axes_y_major")])
+  axis.major <- rbind(o + scale * axes_major, o - scale * axes_major)
+  axes_minor <- unlist(x[c("axes_x_minor", "axes_y_minor")])
+  axis.minor <- rbind(o + scale * axes_minor, o - scale * axes_minor)
+  outline <- ti_ellipse(o, matrix(c(axes_major, axes_minor), 2L, byrow = TRUE), scale=scale, ...)
+  #dimnames(g) <- list(c("x", "y"), c("lambda", "phi"))
+  lambda_d <- unlist(x[c("lambda_dx", "lambda_dy")])
+  d.lambda <- rbind(o + scale * lambda_d, o - scale * lambda_d)
+  phi_d <- unlist(x[c("phi_dx", "phi_dy")])
+  d.phi <- rbind(o + scale * phi_d, o - scale * phi_d)
+  i <- list(center=unlist(x[c("x", "y")]), base = base, outline = outline,
+              axis.major = axis.major, axis.minor = axis.minor,
+              d.lambda = d.lambda, d.phi = d.phi)
+  class(i) <- c("indicatrix0", "list")
   i
 }
 
@@ -145,7 +213,7 @@ indicatrix <- function(x, scale=1, ...) {
 #'
 #' @rdname indicatrix
 #' @export
-plot.indicatrix <- function(x, asp=1, xlab="Easting", ylab="Northing", add = FALSE, ...,
+plot.indicatrix0 <- function(x, asp=1, xlab="Easting", ylab="Northing", add = FALSE, ...,
                             col.base = rgb(0, 0, 0, .1),
                             col.lambda = grey(0.75),
                             col.phi =  "#45A271", ## #5CBD92", #rgb(.25, .7, .25),
@@ -159,7 +227,7 @@ plot.indicatrix <- function(x, asp=1, xlab="Easting", ylab="Northing", add = FAL
   lines(x$axis.major, lwd=2, col= col.major)
   lines(x$axis.minor, lwd=2, col = col.minor)
   lines(x$outline, asp=1, lwd=1, col = col.outline)
-
+ invisible(NULL)
 }
 #' Ellipse
 #'

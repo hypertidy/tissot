@@ -5,9 +5,9 @@
 \title{Tissot}
 \usage{
 tissot(
-  lambda,
-  phi,
-  asDegrees = TRUE,
+  x,
+  y = NULL,
+  degrees = TRUE,
   A = 6378137,
   f.inv = 298.257223563,
   ...,
@@ -16,12 +16,6 @@ tissot(
 )
 }
 \arguments{
-\item{lambda}{longitude}
-
-\item{phi}{latitude}
-
-\item{asDegrees}{logical, work in degrees or radians}
-
 \item{A}{ellipsoidal semi-major axis (meters)}
 
 \item{f.inv}{the inverse flattening}
@@ -31,6 +25,12 @@ tissot(
 \item{proj.in}{projection of input}
 
 \item{proj.out}{projection of context}
+
+\item{lambda}{longitude}
+
+\item{phi}{latitude}
+
+\item{asDegrees}{logical, work in degrees or radians}
 }
 \value{
 list with stuff as per below
@@ -49,10 +49,17 @@ All input and output angles are in degrees.
 \examples{
 # NAD 27 in
 # World Robinson projection out
-r <- tissot(130, 54,
+b <- - 1
+b <- b - 1
+r <- tissot(c(-100, -50, -50, 0, 130, 150)[b],
+            c(-70, -70, -30, 0, 10, 60)[b],
             proj.in= "EPSG:4267",  ## "NAD27" doesn't work
             proj.out= "ESRI:54030")
 
-i <- indicatrix(r, scale=10^4, n=71)
+i <- indicatrix0(r[1, ], scale=10^4, n=71)
 plot(i)
+
+ii <- indicatrix(r, scale=10^6, n=71)
+plot(ii)
+
 }
