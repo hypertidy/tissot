@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">tissot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.9005</span>
       </span>
     </div>
 
@@ -97,88 +97,132 @@
 <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="fl">130</span>, <span class="fl">54</span>,
            proj.in<span class="op">=</span> <span class="st">"EPSG:4267"</span>,  
            proj.out<span class="op">=</span> <span class="st">"ESRI:54030"</span><span class="op">)</span>
-<span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span>, scale<span class="op">=</span><span class="fl">10</span><span class="op">^</span><span class="fl">4</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">i</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-minimal-1.png"></p>
-<p>Since an original port of whuber’s code we have now made it much easier to create many indicatrixes and plot them in one step. Or we can still just grab one and plot it on its own. Note that the scale is quite different in these plots.</p>
+<span class="va">i0</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span>, scale<span class="op">=</span><span class="fl">10</span><span class="op">^</span><span class="fl">4</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">i0</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-minimal-1.png"></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">175</span>, <span class="fl">175</span>, by <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span>add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="co">#&gt; Error detected, some values Inf (error code: -20)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ' tolerance condition error</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  '</span>
+<span class="va">i1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span>, scale<span class="op">=</span><span class="fl">10</span><span class="op">^</span><span class="fl">6</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">i1</span>, add <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_abline</a></span><span class="op">(</span><span class="fl">130</span>, <span class="fl">54</span><span class="op">)</span>
+<span class="co">#&gt; assuming WGS84 for unprojected angular coordinates</span></code></pre></div>
+<p><img src="man/readmefigs/README-minimal-2.png"></p>
+<p>Since an original port of whuber’s code we have now made it much easier to create many indicatrixes and plot them in one step. Or we can still just grab one and plot it on its own. Note that the scale is quite different in these plots.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">172.5</span>, <span class="fl">172.5</span>, by <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>
 <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">82.5</span>, <span class="fl">82.5</span>, by <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>
 <span class="va">xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>
 <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="st">"+proj=robin"</span><span class="op">)</span>
 
-<span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix0</a></span><span class="op">(</span><span class="va">r</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, scale<span class="op">=</span><span class="fl">10</span><span class="op">^</span><span class="fl">4</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
+<span class="va">j</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html">which.min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fl">135</span> <span class="op">-</span> <span class="va">r</span><span class="op">$</span><span class="va">lon</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fl">54</span> <span class="op">-</span> <span class="va">r</span><span class="op">$</span><span class="va">lat</span><span class="op">)</span><span class="op">)</span>
+<span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix0</a></span><span class="op">(</span><span class="va">r</span><span class="op">[</span><span class="va">j</span>, <span class="op">]</span>, scale<span class="op">=</span> <span class="fl">1e4</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">i</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-bigger-example-1.png"></p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ii</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span>, scale<span class="op">=</span><span class="fl">3e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ii</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-bigger-example-2.png"></p>
-<p>Mollweide.</p>
+<p><img src="man/readmefigs/README-bigger-example-1.png"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ii</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span>, scale<span class="op">=</span><span class="fl">4e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span>add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="co">#&gt; Error detected, some values Inf (error code: -20)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ' tolerance condition error</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  '</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ii</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_abline</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span>
+<span class="co">#&gt; assuming WGS84 for unprojected angular coordinates</span></code></pre></div>
+<p><img src="man/readmefigs/README-bigger-example-2.png"></p>
+<p>Mollweide.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="st">"+proj=moll"</span><span class="op">)</span>
 
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">m</span>, scale<span class="op">=</span><span class="fl">3e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-mollweide-1.png"></p>
-<p>Eckhert I</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">m</span>, scale<span class="op">=</span><span class="fl">4e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-mollweide-1.png"></p>
+<p>Eckhert III</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
-            proj.out<span class="op">=</span> <span class="st">"+proj=eck1"</span><span class="op">)</span>
+            proj.out<span class="op">=</span> <span class="st">"+proj=eck3"</span><span class="op">)</span>
 
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">e</span>, scale<span class="op">=</span><span class="fl">3e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-eckhert-1.png"></p>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">e</span>, scale<span class="op">=</span><span class="fl">4e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-eckhert-1.png"></p>
+<p>Equidistant</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">aeqd</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
+            proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
+            proj.out<span class="op">=</span> <span class="st">"+proj=aeqd"</span><span class="op">)</span>
+
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">aeqd</span>, scale<span class="op">=</span><span class="fl">4e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-aeqd-1.png"></p>
+<p>Cassini-Soldner (spherical because ellipsoidal seems broken)</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">xx</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
+            proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
+            proj.out<span class="op">=</span> <span class="st">"+proj=cass +R=6378137"</span><span class="op">)</span>
+
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">xx</span>, scale<span class="op">=</span><span class="fl">4e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"transparent"</span><span class="op">)</span>, pch <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-xx-1.png"></p>
 <p>Sinusoidal</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="st">"+proj=sinu"</span><span class="op">)</span>
 
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">s</span>, scale<span class="op">=</span><span class="fl">3e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-sinu-1.png"></p>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">s</span>, scale<span class="op">=</span><span class="fl">3e5</span>, n<span class="op">=</span><span class="fl">71</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="man/readmefigs/README-sinu-1.png"></p>
 </div>
 <div id="polar-example" class="section level1">
 <h1 class="hasAnchor">
 <a href="#polar-example" class="anchor"></a>Polar example</h1>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">xy</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">40</span>, <span class="op">]</span>,
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">xy</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">30</span>, <span class="op">]</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="st">"+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">p</span>, scale <span class="op">=</span> <span class="fl">3e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-polar-stereo-1.png"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">p</span>, scale <span class="op">=</span> <span class="fl">3e5</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="reference/tissot_map.html">tissot_abline</a></span><span class="op">(</span><span class="fl">147</span>, <span class="op">-</span><span class="fl">42</span><span class="op">)</span>
+<span class="co">#&gt; assuming WGS84 for unprojected angular coordinates</span></code></pre></div>
+<p><img src="man/readmefigs/README-polar-stereo-1.png"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">laea</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">xy</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">20</span>, <span class="op">]</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="st">"+proj=laea +lon_0=147 +lat_0=-90 +datum=WGS84"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">laea</span>, scale <span class="op">=</span> <span class="fl">3e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-polar-laea-1.png"></p>
+<p><img src="man/readmefigs/README-polar-laea-1.png"></p>
 <p>Oblique Mercator</p>
 <p>You get the idea … many projections need extra attention for real data.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mp0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">cbind</span>, <span class="fu">maps</span><span class="fu">::</span><span class="fu">map</span><span class="op">(</span>plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>
 <span class="va">omerc</span> <span class="op">&lt;-</span> <span class="st">"+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"</span>
-<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, proj.out <span class="op">=</span> <span class="va">omerc</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
+<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, <span class="va">omerc</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
 <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
             proj.out<span class="op">=</span> <span class="va">omerc</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">o</span>, scale <span class="op">=</span> <span class="fl">3e5</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-omerc-1.png"></p>
+<p><img src="man/readmefigs/README-omerc-1.png"></p>
 <p>VicGrid</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vgrid</span> <span class="op">&lt;-</span> <span class="st">"+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"</span>
-<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, 
-                    proj.out <span class="op">=</span> <span class="va">vgrid</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
+<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, <span class="va">vgrid</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
 <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">120</span>, <span class="fl">165</span>, by <span class="op">=</span><span class="fl">5</span> <span class="op">)</span>, 
                                           <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">45</span>, <span class="op">-</span><span class="fl">35</span>, by <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
@@ -186,12 +230,11 @@
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">v</span>, scale <span class="op">=</span> <span class="fl">2e5</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-vicgrid-1.png"></p>
+<p><img src="man/readmefigs/README-vicgrid-1.png"></p>
 <p>UTM Zone 54 (Hobart)</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">utm</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=54 +south"</span>
-<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, 
-                    proj.out <span class="op">=</span> <span class="va">utm</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
+<span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu">tissot</span><span class="fu">:::</span><span class="fu">.prj</span><span class="op">(</span><span class="va">mp0</span>, <span class="va">utm</span>, proj.in <span class="op">=</span> <span class="st">"OGC:CRS84"</span><span class="op">)</span>
 <span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">108</span>, <span class="fl">162</span>, by <span class="op">=</span><span class="fl">6</span> <span class="op">)</span>, 
                                           <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">65</span>, <span class="fl">55</span>, by <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
             proj.in<span class="op">=</span> <span class="st">"OGC:CRS84"</span>,
@@ -199,7 +242,7 @@
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">u</span>, scale <span class="op">=</span> <span class="fl">2e5</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></code></pre></div>
-<p><img src="readmefigs/README-utm54-1.png"></p>
+<p><img src="man/readmefigs/README-utm54-1.png"></p>
 <div id="code-of-conduct" class="section level2">
 <h2 class="hasAnchor">
 <a href="#code-of-conduct" class="anchor"></a>Code of Conduct</h2>
