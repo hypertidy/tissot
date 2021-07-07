@@ -17,12 +17,13 @@ knitr::opts_chunk$set(
         fig.height = 9, 
        fig.width = 9
 )
-data(wrld_simpl, package = "maptools")
-## something in sp is automating this now so do upfront hack for now
-wrld_simpl <- sp::SpatialPolygonsDataFrame(rgeos::gBuffer(wrld_simpl, width = 0, byid = T), wrld_simpl@data)
 
 
 ```
+
+  <!-- badges: start -->
+  [![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
+  <!-- badges: end -->
 
 # The Tissot Indicatrix
 

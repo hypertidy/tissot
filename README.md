@@ -1,7 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-    ## Warning in rgeos::gBuffer(wrld_simpl, width = 0, byid = T): Spatial object is
-    ## not projected; GEOS expects planar coordinates
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
+<!-- badges: end -->
 
 # The Tissot Indicatrix
 
