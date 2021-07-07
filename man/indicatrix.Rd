@@ -3,6 +3,7 @@
 \name{indicatrix}
 \alias{indicatrix}
 \alias{plot.indicatrixes}
+\alias{indicatrix0}
 \alias{plot.indicatrix0}
 \title{Indicatrix}
 \usage{
@@ -22,6 +23,8 @@ indicatrix(x, scale = 1, ...)
   col.minor = "#C87A8A",
   col.outline = "black"
 )
+
+indicatrix0(x, scale = 1, ...)
 
 \method{plot}{indicatrix0}(
   x,

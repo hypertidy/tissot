@@ -28,18 +28,20 @@
 #' @return list with stuff as per below
 #' @export
 #' @examples
-#' x <- seq(-160, 160, by = 35)
-#' y <- seq(-65, 65, by = 25)
+#' x <- seq(-165, 165, by = 15)
+#' y <- seq(-82.5, 82.5, by = 15)
 #' xy <- expand.grid(x, y)
 #' r <- tissot(xy,
 #'             proj.in= "OGC:CRS84",
 #'             proj.out= "+proj=robin")
 #'
-#' i <- indicatrix0(r[1, ], scale=10^6, n=71)
+#' i <- indicatrix0(r[1, ], scale=10^4, n=71)
 #' plot(i, add = F)
+
+#' ii <- indicatrix(r, scale=3e5, n=71)
+#' plot(ii, add = F)
 #'
-#' ii <- indicatrix(r, scale=10^6, n=71)
-#' plot(ii, add = TRUE)
+#'
 #'
 #' @importFrom grDevices grey rgb
 #' @importFrom graphics lines plot polygon
@@ -171,6 +173,8 @@ plot.indicatrixes <- function(x, asp=1, xlab="x", ylab="y", add = FALSE, ...,
          )
   invisible(NULL)
 }
+#' @name indicatrix
+#' @export
 indicatrix0 <- function(x, scale=1, ...) {
   o <- unlist(x[c("x", "y")])
   base <- ti_ellipse(o, matrix(c(1,0,0,1), 2), scale=scale, ...)             # A reference circle
@@ -184,7 +188,8 @@ indicatrix0 <- function(x, scale=1, ...) {
   d.lambda <- rbind(o + scale * lambda_d, o - scale * lambda_d)
   phi_d <- unlist(x[c("phi_dx", "phi_dy")])
   d.phi <- rbind(o + scale * phi_d, o - scale * phi_d)
-  i <- list(center=unlist(x[c("x", "y")]), base = base, outline = outline,
+
+  i <- list(center=o, base = base, outline = outline,
               axis.major = axis.major, axis.minor = axis.minor,
               d.lambda = d.lambda, d.phi = d.phi)
   class(i) <- c("indicatrix0", "list")

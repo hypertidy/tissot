@@ -47,21 +47,18 @@ Source: Snyder pp 20-26 (WGS 84 defaults for the ellipsoidal parameters).
 All input and output angles are in degrees.
 }
 \examples{
-# NAD 27 in
-# World Robinson projection out
-
-b <- -3
-x <- seq(-160, 160, by = 35)
-y <- seq(-65, 65, by = 25)
+x <- seq(-165, 165, by = 15)
+y <- seq(-82.5, 82.5, by = 15)
 xy <- expand.grid(x, y)
 r <- tissot(xy,
-            proj.in= "EPSG:4267",  ## "NAD27" doesn't work
-            proj.out= "ESRI:54030")
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=robin")
 
 i <- indicatrix0(r[1, ], scale=10^4, n=71)
-plot(i)
+plot(i, add = F)
+ii <- indicatrix(r, scale=3e5, n=71)
+plot(ii, add = F)
 
-ii <- indicatrix(r, scale=10^5, n=71)
-plot(ii)
+
 
 }

@@ -37,13 +37,13 @@ library(tissot)
 # NAD 27 in
 # World Robinson projection out
 r <- tissot(130, 54,
-           proj.in= "EPSG:4267",  ## "NAD27" doesn't work
+           proj.in= "EPSG:4267",  
            proj.out= "ESRI:54030")
 i <- indicatrix(r, scale=10^4, n=71)
 plot(i)
 ```
 
-![](readmefigs/README-unnamed-chunk-2-1.png)
+![](readmefigs/README-minimal-1.png)
 
 Derived from
 
@@ -53,106 +53,129 @@ Also see
 
 <https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix>
 
+Since an original port of whuber’s code we have now made it much easier
+to create many indicatrixes and plot them in one step. Or we can still
+just grab one and plot it on its own. Note that the scale is quite
+different in these plots.
+
+``` r
+x <- seq(-175, 175, by = 20)
+y <- seq(-82.5, 82.5, by = 15)
+xy <- expand.grid(x, y)
+r <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=robin")
+
+i <- indicatrix0(r[1, ], scale=10^4, n=71)
+plot(i, add = F)
+```
+
+![](readmefigs/README-bigger-example-1.png)
+
+``` r
+ii <- indicatrix(r, scale=3e5, n=71)
+plot(ii, add = F)
+```
+
+![](readmefigs/README-bigger-example-2.png)
+
+Mollweide.
+
+``` r
+m <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=moll")
+
+
+plot(indicatrix(m, scale=3e5, n=71), add = F)
+```
+
+![](readmefigs/README-mollweide-1.png)
+
+Eckhert I
+
+``` r
+e <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=eck1")
+
+
+plot(indicatrix(e, scale=3e5, n=71), add = F)
+```
+
+![](readmefigs/README-eckhert-1.png)
+
+Sinusoidal
+
+``` r
+s <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=sinu")
+
+
+plot(indicatrix(s, scale=3e5, n=71), add = F)
+```
+
+![](readmefigs/README-sinu-1.png)
+
 # Polar example
 
 ``` r
-library(tissot)
-library(maptools)
-#> Loading required package: sp
-#> Checking rgeos availability: TRUE
-library(raster)
-buildandplot <- function(data, scale = 5e5, ...) {
-  ## grid of points
-  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = FALSE)
-  ## relying on dev {PROJ} that links to unreleased {libproj}
-  grll <- do.call(cbind, PROJ::proj_trans(gr, "OGC:CRS84", source = projection(data) ))
-  sp::plot(data,  ...)
-  grll <- grll[!is.na(grll[,1]), ]
-  for (i in seq_len(nrow(grll))) {
-    tis <- tissot(grll[i, 1], grll[i, 2],  
-                                               proj.in = projection(wrld_simpl), proj.out = projection(data))
-   ind <- indicatrix(tis, scale = scale, n = 71)
-   plot(ind, add = TRUE)
-  }
-  invisible(NULL)
-}
+p <- tissot(xy[xy[,2] < -40, ],
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84")
 
-
-## choose a projection
-ptarget1 <- "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +ellps=WGS84"
-w1 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget1))
-
-ptarget2 <- "+proj=laea +lon_0=147 +lat_0=-90 +ellps=WGS84"
-w2 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget2))
-
-ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
-w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
-
-
-buildandplot(w1, main = "Polar Stereographic")
+plot(indicatrix(p, scale = 3e5))
 ```
 
-![](readmefigs/README-unnamed-chunk-3-1.png)
+![](readmefigs/README-polar-stereo-1.png)
 
 ``` r
-buildandplot(w2, main = "Lambert Azimuthal Equal Area")
+laea <- tissot(xy[xy[,2] < 20, ],
+            proj.in= "OGC:CRS84",
+            proj.out= "+proj=laea +lon_0=147 +lat_0=-90 +datum=WGS84")
+
+plot(indicatrix(laea, scale = 3e5))
 ```
 
-![](readmefigs/README-unnamed-chunk-3-2.png)
+![](readmefigs/README-polar-laea-1.png)
+
+Oblique Mercator
+
+You get the idea … many projections need extra attention for real data.
 
 ``` r
-buildandplot(w3, main = "Oblique Mercator")
+mp0 <- do.call(cbind, maps::map(plot = FALSE)[1:2])
+omerc <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
+mp <- tissot:::.prj(mp0, proj.out = omerc, proj.in = "OGC:CRS84")
+o <- tissot(xy,
+            proj.in= "OGC:CRS84",
+            proj.out= omerc)
+
+plot(indicatrix(o, scale = 3e5))
+lines(mp)
 ```
 
-![](readmefigs/README-unnamed-chunk-3-3.png)
+![](readmefigs/README-omerc-1.png)
+
+VicGrid
+
+``` r
+vgrid <- "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+mp <- tissot:::.prj(mp0, 
+                    proj.out = vgrid, proj.in = "OGC:CRS84")
+v <- tissot(as.matrix(expand.grid(seq(120, 165, by =5 ), 
+                                          seq(-45, -35, by = 5))),
+            proj.in= "OGC:CRS84",
+            proj.out= vgrid)
+
+plot(indicatrix(v, scale = 2e5))
+lines(mp)
+```
+
+![](readmefigs/README-vicgrid-1.png)
 
 # Non-polar
-
-``` r
-
-## doesn't look right
-# ptarget8 <- "+proj=laea +lat_0=-90"
-# w8 <- spTransform(wrld_simpl, CRS(ptarget8))
-# buildandplot(w8)
-
-
-
-
-library(raster)
-ptarget4 <- "+proj=merc +ellps=WGS84"
-w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
-buildandplot(w4, main = "Mercator")
-```
-
-![](readmefigs/README-unnamed-chunk-4-1.png)
-
-``` r
-ptarget5 <- "+proj=lcc +ellps=WGS84 +lon_0=134 +lat_0=-30 +lat_1=-50 +lat_2=-20"
-w5 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 180, -65, -10), "SpatialPolygons")), ptarget5)
-buildandplot(w5, main = "Lambert Conformal Conic", scale = 3.5e5)
-```
-
-![](readmefigs/README-unnamed-chunk-4-2.png)
-
-``` r
-
-ptarget6 <- "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "
-
-w6 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 160, -65, -10), "SpatialPolygons")), ptarget6)
-buildandplot(w6, main = "UTM South Zone 50 ", col = "grey", scale = 2.5e5)
-```
-
-![](readmefigs/README-unnamed-chunk-4-3.png)
-
-``` r
-
-
-buildandplot(wrld_simpl, main = "Longitude / Latitude")
-degAxis(1)
-degAxis(2)
-```
-
-![](readmefigs/README-unnamed-chunk-4-4.png)
 
 ## SOM
 
