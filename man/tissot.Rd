@@ -49,17 +49,19 @@ All input and output angles are in degrees.
 \examples{
 # NAD 27 in
 # World Robinson projection out
-b <- - 1
-b <- b - 1
-r <- tissot(c(-100, -50, -50, 0, 130, 150)[b],
-            c(-70, -70, -30, 0, 10, 60)[b],
+
+b <- -3
+x <- seq(-160, 160, by = 35)
+y <- seq(-65, 65, by = 25)
+xy <- expand.grid(x, y)
+r <- tissot(xy,
             proj.in= "EPSG:4267",  ## "NAD27" doesn't work
             proj.out= "ESRI:54030")
 
 i <- indicatrix0(r[1, ], scale=10^4, n=71)
 plot(i)
 
-ii <- indicatrix(r, scale=10^6, n=71)
+ii <- indicatrix(r, scale=10^5, n=71)
 plot(ii)
 
 }

@@ -28,22 +28,18 @@
 #' @return list with stuff as per below
 #' @export
 #' @examples
-#' # NAD 27 in
-#' # World Robinson projection out
-#'
-#' b <- -3
 #' x <- seq(-160, 160, by = 35)
 #' y <- seq(-65, 65, by = 25)
 #' xy <- expand.grid(x, y)
 #' r <- tissot(xy,
-#'             proj.in= "EPSG:4267",  ## "NAD27" doesn't work
-#'             proj.out= "ESRI:54030")
+#'             proj.in= "OGC:CRS84",
+#'             proj.out= "+proj=robin")
 #'
-#' i <- indicatrix0(r[1, ], scale=10^4, n=71)
-#' plot(i)
+#' i <- indicatrix0(r[1, ], scale=10^6, n=71)
+#' plot(i, add = F)
 #'
-#' ii <- indicatrix(r, scale=10^5, n=71)
-#' plot(ii)
+#' ii <- indicatrix(r, scale=10^6, n=71)
+#' plot(ii, add = TRUE)
 #'
 #' @importFrom grDevices grey rgb
 #' @importFrom graphics lines plot polygon
@@ -182,7 +178,7 @@ indicatrix0 <- function(x, scale=1, ...) {
   axis.major <- rbind(o + scale * axes_major, o - scale * axes_major)
   axes_minor <- unlist(x[c("axes_x_minor", "axes_y_minor")])
   axis.minor <- rbind(o + scale * axes_minor, o - scale * axes_minor)
-  outline <- ti_ellipse(o, matrix(c(axes_major, axes_minor), 2L, byrow = TRUE), scale=scale, ...)
+  outline <- ti_ellipse(o, matrix(c(axes_major, axes_minor), 2L, byrow = T), scale=scale, ...)
   #dimnames(g) <- list(c("x", "y"), c("lambda", "phi"))
   lambda_d <- unlist(x[c("lambda_dx", "lambda_dy")])
   d.lambda <- rbind(o + scale * lambda_d, o - scale * lambda_d)
