@@ -3,7 +3,8 @@
     message("assuming WGS84 for unprojected angular coordinates")
     proj.in <- "OGC:CRS84"
   }
-   do.call(cbind, PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))
+  capture.output(out <- PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))
+   do.call(cbind, out)
 }
 .to.degrees <- function(x) x * 180 / pi
 .to.radians <- function(x) x * pi / 180

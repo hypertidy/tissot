@@ -44,11 +44,6 @@ plot(i0)
 
 ``` r
 tissot_map(add = FALSE)
-#> Error detected, some values Inf (error code: -20)
-#> 
-#> ' tolerance condition error
-#> 
-#>  '
 i1 <- indicatrix(r, scale=10^6, n=71)
 plot(i1, add = T)
 tissot_abline(130, 54)
@@ -80,11 +75,6 @@ plot(i, add = FALSE)
 ``` r
 ii <- indicatrix(r, scale=4e5, n=71)
 tissot_map(add = FALSE)
-#> Error detected, some values Inf (error code: -20)
-#> 
-#> ' tolerance condition error
-#> 
-#>  '
 plot(ii, add = TRUE)
 tissot_abline(xy[j, 1], xy[j, 2])
 #> assuming WGS84 for unprojected angular coordinates
