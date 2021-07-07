@@ -81,10 +81,10 @@ r <- tissot(xy,
             proj.out= "+proj=robin")
 
 i <- indicatrix0(r[1, ], scale=10^4, n=71)
-plot(i, add = F)
+plot(i, add = FALSE)
 
 ii <- indicatrix(r, scale=3e5, n=71)
-plot(ii, add = F)
+plot(ii, add = FALSE)
 ```
 
 Mollweide. 
@@ -95,7 +95,7 @@ m <- tissot(xy,
             proj.out= "+proj=moll")
 
 
-plot(indicatrix(m, scale=3e5, n=71), add = F)
+plot(indicatrix(m, scale=3e5, n=71), add = FALSE)
 ```
 
 
@@ -107,7 +107,7 @@ e <- tissot(xy,
             proj.out= "+proj=eck1")
 
 
-plot(indicatrix(e, scale=3e5, n=71), add = F)
+plot(indicatrix(e, scale=3e5, n=71), add = FALSE)
 ```
 
 Sinusoidal
@@ -118,7 +118,7 @@ s <- tissot(xy,
             proj.out= "+proj=sinu")
 
 
-plot(indicatrix(s, scale=3e5, n=71), add = F)
+plot(indicatrix(s, scale=3e5, n=71), add = FALSE)
 ```
 
 

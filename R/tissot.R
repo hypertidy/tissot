@@ -19,7 +19,7 @@
 #' All input and output angles are in degrees.
 #' @param lambda longitude
 #' @param phi latitude
-#' @param asDegrees logical, work in degrees or radians
+#' @param degrees logical, work in degrees or radians
 #' @param A ellipsoidal semi-major axis (meters)
 #' @param f.inv the inverse flattening
 #' @param ... passed to internal function
@@ -36,18 +36,19 @@
 #'             proj.out= "+proj=robin")
 #'
 #' i <- indicatrix0(r[1, ], scale=10^4, n=71)
-#' plot(i, add = F)
+#' plot(i, add = FALSE)
 
 #' ii <- indicatrix(r, scale=3e5, n=71)
-#' plot(ii, add = F)
+#' plot(ii, add = FALSE)
 #'
 #'
 #'
 #' @importFrom grDevices grey rgb
 #' @importFrom graphics lines plot polygon
 #' @importFrom stats numericDeriv
-tissot <- function(x, y = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
- xy <- xy.coords(x, y)
+#' @importFrom grDevices xy.coords
+tissot <- function(lambda, phi = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
+ xy <- xy.coords(lambda, phi)
  lam <- xy[[1L]]
  phi <- xy[[2L]]
  out <- vector("list", length(lam))
@@ -56,7 +57,7 @@ tissot <- function(x, y = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257223563,
  }
  do.call(rbind, out)
 }
-
+#' @importFrom tibble tibble
 tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563, ..., proj.in, proj.out) {
   #
   # Precomputation.

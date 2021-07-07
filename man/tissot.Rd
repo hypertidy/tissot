@@ -5,8 +5,8 @@
 \title{Tissot}
 \usage{
 tissot(
-  x,
-  y = NULL,
+  lambda,
+  phi = NULL,
   degrees = TRUE,
   A = 6378137,
   f.inv = 298.257223563,
@@ -16,6 +16,12 @@ tissot(
 )
 }
 \arguments{
+\item{lambda}{longitude}
+
+\item{phi}{latitude}
+
+\item{degrees}{logical, work in degrees or radians}
+
 \item{A}{ellipsoidal semi-major axis (meters)}
 
 \item{f.inv}{the inverse flattening}
@@ -25,12 +31,6 @@ tissot(
 \item{proj.in}{projection of input}
 
 \item{proj.out}{projection of context}
-
-\item{lambda}{longitude}
-
-\item{phi}{latitude}
-
-\item{asDegrees}{logical, work in degrees or radians}
 }
 \value{
 list with stuff as per below
@@ -55,9 +55,9 @@ r <- tissot(xy,
             proj.out= "+proj=robin")
 
 i <- indicatrix0(r[1, ], scale=10^4, n=71)
-plot(i, add = F)
+plot(i, add = FALSE)
 ii <- indicatrix(r, scale=3e5, n=71)
-plot(ii, add = F)
+plot(ii, add = FALSE)
 
 
 

@@ -67,14 +67,14 @@ r <- tissot(xy,
             proj.out= "+proj=robin")
 
 i <- indicatrix0(r[1, ], scale=10^4, n=71)
-plot(i, add = F)
+plot(i, add = FALSE)
 ```
 
 ![](readmefigs/README-bigger-example-1.png)
 
 ``` r
 ii <- indicatrix(r, scale=3e5, n=71)
-plot(ii, add = F)
+plot(ii, add = FALSE)
 ```
 
 ![](readmefigs/README-bigger-example-2.png)
@@ -87,7 +87,7 @@ m <- tissot(xy,
             proj.out= "+proj=moll")
 
 
-plot(indicatrix(m, scale=3e5, n=71), add = F)
+plot(indicatrix(m, scale=3e5, n=71), add = FALSE)
 ```
 
 ![](readmefigs/README-mollweide-1.png)
@@ -100,7 +100,7 @@ e <- tissot(xy,
             proj.out= "+proj=eck1")
 
 
-plot(indicatrix(e, scale=3e5, n=71), add = F)
+plot(indicatrix(e, scale=3e5, n=71), add = FALSE)
 ```
 
 ![](readmefigs/README-eckhert-1.png)
@@ -113,7 +113,7 @@ s <- tissot(xy,
             proj.out= "+proj=sinu")
 
 
-plot(indicatrix(s, scale=3e5, n=71), add = F)
+plot(indicatrix(s, scale=3e5, n=71), add = FALSE)
 ```
 
 ![](readmefigs/README-sinu-1.png)
@@ -174,6 +174,23 @@ lines(mp)
 ```
 
 ![](readmefigs/README-vicgrid-1.png)
+
+UTM Zone 54 (Hobart)
+
+``` r
+utm <- "+proj=utm +zone=54 +south"
+mp <- tissot:::.prj(mp0, 
+                    proj.out = utm, proj.in = "OGC:CRS84")
+u <- tissot(as.matrix(expand.grid(seq(108, 162, by =6 ), 
+                                          seq(-65, 55, by = 15))),
+            proj.in= "OGC:CRS84",
+            proj.out= utm)
+
+plot(indicatrix(u, scale = 2e5))
+lines(mp)
+```
+
+![](readmefigs/README-utm54-1.png)
 
 # Non-polar
 
