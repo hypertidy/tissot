@@ -51,6 +51,8 @@ tissot_map(add = FALSE)
 #>  '
 i1 <- indicatrix(r, scale=10^6, n=71)
 plot(i1, add = T)
+tissot_abline(130, 54)
+#> assuming WGS84 for unprojected angular coordinates
 ```
 
 ![](man/readmefigs/README-minimal-2.png)
@@ -68,7 +70,8 @@ r <- tissot(xy,
             proj.in= "OGC:CRS84",
             proj.out= "+proj=robin")
 
-i <- indicatrix0(r[1, ], scale= 1e4, n=71)
+j <- which.min(abs(135 - r$lon) + abs(54 - r$lat))
+i <- indicatrix0(r[j, ], scale= 1e4, n=71)
 plot(i, add = FALSE)
 ```
 
@@ -83,6 +86,8 @@ tissot_map(add = FALSE)
 #> 
 #>  '
 plot(ii, add = TRUE)
+tissot_abline(xy[j, 1], xy[j, 2])
+#> assuming WGS84 for unprojected angular coordinates
 ```
 
 ![](man/readmefigs/README-bigger-example-2.png)
@@ -158,12 +163,14 @@ tissot_map()
 # Polar example
 
 ``` r
-p <- tissot(xy[xy[,2] < -40, ],
+p <- tissot(xy[xy[,2] < -30, ],
             proj.in= "OGC:CRS84",
             proj.out= "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84")
 
 plot(indicatrix(p, scale = 3e5))
 tissot_map()
+tissot_abline(147, -42)
+#> assuming WGS84 for unprojected angular coordinates
 ```
 
 ![](man/readmefigs/README-polar-stereo-1.png)

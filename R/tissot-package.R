@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @aliases tissot-package
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
@@ -7,6 +8,7 @@
 ## usethis namespace: end
 NULL
 
+globalVariables("world")
 #' world coastline
 #'
 #' A modified matrix version of data from the maps package.

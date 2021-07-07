@@ -6,8 +6,14 @@
 #' 'tissot_get_proj()' When the indicatrix is plotted it registers its projection. This string
 #' can be obtained with this getter function.
 #'
+#' 'tissot_abline()' will draw a vertical and horizontal line at a give longitude latitude (where
+#' they intersect is the actual lon,lat location)
+#'
 #' @param add logical, default 'TRUE' add to existing plot or create new
 #' @param ... graphical parameters for [lines()] if 'add = TRUE', or for [plot()] if 'add = FALSE'
+#' @param lambda longitude at which to draw a vertical line
+#' @param phi latitude at which to draw a horizontal line
+#' @param proj.in projection for expert use
 #' @return 'tissot_map()' returns the internal world map data (projected if one is current) as a matrix
 #' @export
 tissot_map <- function(..., add = TRUE) {
@@ -26,8 +32,9 @@ tissot_map <- function(..., add = TRUE) {
   }
   invisible(w)
 }
-#' @name tissot_abline
+#' @name tissot_map
 #' @export
+#' @importFrom graphics abline
 #' @return 'tissot_abline()' called for its side effect of drawing on the plot
 tissot_abline <- function(lambda, phi  = NULL, ..., proj.in = NULL) {
   xy <- do.call(cbind, xy.coords(lambda, phi)[1:2])
@@ -36,7 +43,7 @@ tissot_abline <- function(lambda, phi  = NULL, ..., proj.in = NULL) {
   if (!is.null(target)) {
     xy <- .prj(xy, target, proj.in = proj.in)
   }
-  abline(v = xy[,1L], h = xy[,2L])
+  graphics::abline(v = xy[,1L], h = xy[,2L])
 }
 #' @name tissot_map
 #' @return 'tissot_get_proj()' returns the value of the current projection, or NULL

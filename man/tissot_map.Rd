@@ -2,10 +2,13 @@
 % Please edit documentation in R/tissot_map.R
 \name{tissot_map}
 \alias{tissot_map}
+\alias{tissot_abline}
 \alias{tissot_get_proj}
 \title{Get last plot projection}
 \usage{
 tissot_map(..., add = TRUE)
+
+tissot_abline(lambda, phi = NULL, ..., proj.in = NULL)
 
 tissot_get_proj()
 }
@@ -13,9 +16,17 @@ tissot_get_proj()
 \item{...}{graphical parameters for [lines()] if 'add = TRUE', or for [plot()] if 'add = FALSE'}
 
 \item{add}{logical, default 'TRUE' add to existing plot or create new}
+
+\item{lambda}{longitude at which to draw a vertical line}
+
+\item{phi}{latitude at which to draw a horizontal line}
+
+\item{proj.in}{projection for expert use}
 }
 \value{
 'tissot_map()' returns the internal world map data (projected if one is current) as a matrix
+
+'tissot_abline()' called for its side effect of drawing on the plot
 
 'tissot_get_proj()' returns the value of the current projection, or NULL
 }
@@ -25,4 +36,7 @@ tissot_get_proj()
 \details{
 'tissot_get_proj()' When the indicatrix is plotted it registers its projection. This string
 can be obtained with this getter function.
+
+'tissot_abline()' will draw a vertical and horizontal line at a give longitude latitude (where
+they intersect is the actual lon,lat location)
 }

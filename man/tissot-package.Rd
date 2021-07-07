@@ -2,8 +2,8 @@
 % Please edit documentation in R/tissot-package.R
 \docType{package}
 \name{tissot-package}
-\alias{tissot}
 \alias{tissot-package}
+\alias{_PACKAGE}
 \title{tissot: The Tissot Indicatrix}
 \description{
 Create and plot the Tissot Indicatrix.
