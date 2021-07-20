@@ -36,21 +36,32 @@ library(tissot)
 r <- tissot(130, 54,
            proj.in= "EPSG:4267",  
            proj.out= "ESRI:54030")
-i0 <- indicatrix(r, scale=10^4, n=71)
+i0 <- indicatrix(r, scale=1e2, n=71)
 plot(i0)
 ```
 
 ![](man/readmefigs/README-minimal-1.png)
 
 ``` r
-tissot_map(add = FALSE)
-i1 <- indicatrix(r, scale=10^6, n=71)
-plot(i1, add = T)
+plot(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 5e2), tissot_get_proj()))
+#> assuming WGS84 for unprojected angular coordinates
 tissot_abline(130, 54)
 #> assuming WGS84 for unprojected angular coordinates
 ```
 
 ![](man/readmefigs/README-minimal-2.png)
+
+``` r
+tissot_map(add = FALSE, xlim = c(8.5e6, 1.3e7), ylim = c(4e6, 7e6))
+i1 <- indicatrix(r, scale=1e6, n=71)
+plot(i1, add = T)
+tissot_abline(130, 54)
+#> assuming WGS84 for unprojected angular coordinates
+lines(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 2e6), tissot_get_proj()) %*% (diag(2) * 2))
+#> assuming WGS84 for unprojected angular coordinates
+```
+
+![](man/readmefigs/README-minimal-3.png)
 
 Since an original port of whuber’s code we have now made it much easier
 to create many indicatrixes and plot them in one step. Or we can still

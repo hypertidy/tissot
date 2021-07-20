@@ -57,12 +57,17 @@ library(tissot)
 r <- tissot(130, 54,
            proj.in= "EPSG:4267",  
            proj.out= "ESRI:54030")
-i0 <- indicatrix(r, scale=10^4, n=71)
+i0 <- indicatrix(r, scale=1e2, n=71)
 plot(i0)
-tissot_map(add = FALSE)
-i1 <- indicatrix(r, scale=10^6, n=71)
+plot(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 5e2), tissot_get_proj()))
+tissot_abline(130, 54)
+
+tissot_map(add = FALSE, xlim = c(8.5e6, 1.3e7), ylim = c(4e6, 7e6))
+i1 <- indicatrix(r, scale=1e6, n=71)
 plot(i1, add = T)
 tissot_abline(130, 54)
+lines(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 2e6), tissot_get_proj()) %*% (diag(2) * 2))
+
 ```
 
 
