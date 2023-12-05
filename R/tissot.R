@@ -3,8 +3,9 @@
     message("assuming WGS84 for unprojected angular coordinates")
     proj.in <- "OGC:CRS84"
   }
-  capture.output(out <- PROJ::proj_trans(matrix(z, ncol = 2), proj.out, source = proj.in))
-   do.call(cbind, out)
+
+  reproj::reproj_xy(matrix(z, ncol = 2L), proj.out, source = proj.in)
+
 }
 .to.degrees <- function(x) x * 180 / pi
 .to.radians <- function(x) x * pi / 180
@@ -60,9 +61,16 @@ tissot <- function(lambda, phi = NULL,  degrees=TRUE, A = 6378137, f.inv=298.257
  lam <- xy[[1L]]
  phi <- xy[[2L]]
  out <- vector("list", length(lam))
- for (i in seq_along(lam)) {
-   out[[i]] <- tissot0(lam[i], phi[i], degrees = degrees, A = A, f.inv = f.inv, proj.in = proj.in, proj.out = proj.out, ...)
- }
+
+#  cl <- parallel::makeForkCluster(parallel::detectCores() - 1)
+#  on.exit(parallel::stopCluster(cl), add = TRUE)
+# out <-  parallel::parLapply(cl, seq_along(lam), function(i) {
+#    tissot0(lam[i], phi[i], degrees = degrees, A = A, f.inv = f.inv, proj.in = proj.in, proj.out = proj.out, ...)
+#  })
+  for (i in seq_along(lam)) {
+    out[[i]] <- tissot0(lam[i], phi[i], degrees = degrees, A = A, f.inv = f.inv, proj.in = proj.in, proj.out = proj.out, ...)
+  }
+
  do.call(rbind, out)
 }
 #' @importFrom tibble tibble
@@ -98,7 +106,8 @@ tissot0 <- function(lambda, phi,  degrees=TRUE, A = 6378137, f.inv=298.257223563
   # The projection and its first derivatives, normalized to unit lengths.
   #
   x <- c(lambda, phi)
-  d <- numericDeriv(quote(.prj(x, proj.out = proj.out, proj.in = proj.in)[1L, ]), theta="x")
+
+  d <- numericDeriv(quote(.prj(x, proj.out = proj.out, proj.in = proj.in)[1L,, drop = TRUE]), theta="x")
   z <- d[1:2]                                                         # Projected coordinates
   names(z) <- c("x", "y")
   g <- attr(d, "gradient")                                            # First derivative (matrix)

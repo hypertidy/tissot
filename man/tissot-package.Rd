@@ -21,7 +21,7 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Bill Huber \email{whuber@quantdec.com}
+  \item Bill Huber
 }
 
 }

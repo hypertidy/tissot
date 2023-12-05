@@ -237,7 +237,7 @@ buildandplot <- function(data, scale = 5e5, ...) {
   ## grid of points
   gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = FALSE)
   ## relying on dev {PROJ} that links to unreleased {libproj}
-  grll <- do.call(cbind, PROJ::proj_trans(gr, "OGC:CRS84", source = projection(data) ))
+  grll <- reproj::reproj_xy(gr, "OGC:CRS84", source = projection(data) ))
   sp::plot(data,  ...)
   grll <- grll[!is.na(grll[,1]), ]
   for (i in seq_len(nrow(grll))) {
