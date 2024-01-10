@@ -16,5 +16,5 @@ LazyData: true
 LazyDataCompression: xz
 Encoding: UTF-8
 Additional_repositories: https://hypertidy.r-universe.dev
-URL: https://github.com/hypertidy/tissot
+URL: https://github.com/hypertidy/tissot, https://hypertidy.github.io/tissot/
 BugReports: https://github.com/hypertidy/tissot/issues
