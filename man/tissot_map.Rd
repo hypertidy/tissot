@@ -13,7 +13,7 @@ tissot_abline(lambda, phi = NULL, ..., proj.in = NULL)
 tissot_get_proj()
 }
 \arguments{
-\item{...}{graphical parameters for [lines()] if 'add = TRUE', or for [plot()] if 'add = FALSE'}
+\item{...}{graphical parameters for \code{\link[=lines]{lines()}} if 'add = TRUE', or for \code{\link[=plot]{plot()}} if 'add = FALSE'}
 
 \item{add}{logical, default 'TRUE' add to existing plot or create new}
 
@@ -31,7 +31,7 @@ tissot_get_proj()
 'tissot_get_proj()' returns the value of the current projection, or NULL
 }
 \description{
-'tissot_map()' will add the [world] coastline to any map.
+'tissot_map()' will add the \link{world} coastline to any map.
 }
 \details{
 'tissot_get_proj()' When the indicatrix is plotted it registers its projection. This string

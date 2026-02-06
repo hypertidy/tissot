@@ -2,66 +2,50 @@
 % Please edit documentation in R/tissot.R
 \name{tissot}
 \alias{tissot}
-\title{Tissot}
+\title{Compute Tissot indicatrix properties}
 \usage{
 tissot(
-  lambda,
-  phi = NULL,
-  degrees = TRUE,
+  x,
+  y = NULL,
+  proj.in = "EPSG:4326",
+  proj.out,
   A = 6378137,
   f.inv = 298.257223563,
-  ...,
-  proj.in,
-  proj.out
+  dx = 1e-04
 )
 }
 \arguments{
-\item{lambda}{longitude}
+\item{x}{longitude values (or a two-column matrix/data.frame of lon, lat)}
 
-\item{phi}{latitude}
+\item{y}{latitude values (ignored if x is a matrix)}
 
-\item{degrees}{logical, work in degrees or radians}
+\item{proj.in}{input CRS (default "EPSG:4326")}
 
-\item{A}{ellipsoidal semi-major axis (meters)}
+\item{proj.out}{target projection CRS}
 
-\item{f.inv}{the inverse flattening}
+\item{A}{semi-major axis of the ellipsoid (default WGS84)}
 
-\item{...}{passed to internal function}
+\item{f.inv}{inverse flattening (default WGS84)}
 
-\item{proj.in}{projection of input}
-
-\item{proj.out}{projection of context}
+\item{dx}{finite difference step in degrees (default 1e-4)}
 }
 \value{
-list with stuff as per below
+A tibble with columns: x (lon), y (lat), dx_dlam, dy_dlam,
+dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
+scale.b, scale.area, angle_deformation, convergence
 }
 \description{
-Create the Tissot Indicatrix.
+Compute the Tissot indicatrix at given longitude/latitude locations for a
+map projection. Returns scale factors, angular deformation, convergence,
+and related distortion properties.
 }
 \details{
-Compute properties of scale distortion and Tissot's indicatrix at location x = c(lambda, phi)
-using prj as the projection.  A is the ellipsoidal semi-major axis (in meters) and f.inv is
-the inverse flattening.  The projection must return a vector (x, y) when given a vector (lambda, phi).
-(Not vectorized.)  Optional arguments ... are passed to prj.
-Source: Snyder pp 20-26 (WGS 84 defaults for the ellipsoidal parameters).
-All input and output angles are in degrees.
+The Jacobian of the projection is computed via finite differences, projecting
+all base and offset points in a single batched call to
+\code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}. All subsequent calculations (SVD, distortion
+metrics) are fully vectorized.
 }
 \examples{
-x <- seq(-175, 175, by = 15)
-y <- seq(-82.5, 82.5, by = 15)
-xy <- expand.grid(x, y)
-r <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=robin")
-
-j <- which.min(abs(135 - r$lon) + abs(54 - r$lat))
-idx0 <- indicatrix0(r[j, ], scale=10^4, n=71)
-op <- par(mfrow =   c(2, 1))
-plot(idx0, add = FALSE)
-idx <- indicatrix(r, scale=3e5, n=71)
-plot(idx, add = FALSE)
-tissot_abline(r$lon[j], r$lat[j])
-par(op)
-
-
+tissot(0, 45, proj.out = "+proj=robin")
+tissot(seq(-180, 180, by = 30), 0, proj.out = "+proj=robin")
 }

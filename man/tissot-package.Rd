@@ -3,10 +3,9 @@
 \docType{package}
 \name{tissot-package}
 \alias{tissot-package}
-\alias{_PACKAGE}
-\title{tissot: The Tissot Indicatrix}
+\title{tissot: Tissot Indicatrix}
 \description{
-Create and plot the Tissot Indicatrix.
+Attempt to formalize the Tissot indicatrix calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Attempt to translate and automate the computation for any projection with a given set of longitude latitude locations. The indicatrix characterizes map projection distortion by computing scale factors, angular deformation, and convergence at each point.
 }
 \seealso{
 Useful links:
@@ -17,11 +16,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Michael D. Sumner \email{mdsumner@gmail.com}
+\strong{Maintainer}: Michael Sumner \email{mdsumner@gmail.com} (\href{https://orcid.org/0000-0002-2471-7511}{ORCID})
 
 Authors:
 \itemize{
-  \item Bill Huber
+  \item Bill Huber (original algorithm and calculations)
 }
 
 }

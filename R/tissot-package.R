@@ -1,5 +1,6 @@
 #' @keywords internal
 #' @aliases tissot-package
+#' @importFrom gdalraster transform_xy
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage

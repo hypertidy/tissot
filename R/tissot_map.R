@@ -17,7 +17,6 @@
 #' @return 'tissot_map()' returns the internal world map data (projected if one is current) as a matrix
 #' @export
 tissot_map <- function(..., add = TRUE) {
-  ## we might catch list(...) and see if something can project them? (one day)
   props <- list(...)
   w <- .project_world()
   if (is.null(props$col)) props$col <- rgb(.7, .7, .7)
@@ -41,7 +40,8 @@ tissot_abline <- function(lambda, phi  = NULL, ..., proj.in = NULL) {
 
   target <- tissot_get_proj()
   if (!is.null(target)) {
-    xy <- .prj(xy, target, proj.in = proj.in)
+    if (is.null(proj.in)) proj.in <- "EPSG:4326"
+    xy <- gdalraster::transform_xy(xy, proj.in, target)
   }
   graphics::abline(v = xy[,1L], h = xy[,2L])
 }
@@ -54,6 +54,6 @@ tissot_get_proj <- function() {
 
 .project_world <- function() {
   target <- tissot_get_proj()
-  if (is.null(target)) return(world)  ## no projection in effect
-  .prj(world, target, proj.in = "OGC:CRS84")
+  if (is.null(target)) return(world)
+  gdalraster::transform_xy(world, "OGC:CRS84", target)
 }
