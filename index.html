@@ -103,7 +103,7 @@
 <code class="sourceCode R"><span><span class="va">xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">150</span>, <span class="fl">150</span>, by <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">60</span>, <span class="fl">60</span>, by <span class="op">=</span> <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">xy</span>, <span class="st">"+proj=robin"</span><span class="op">)</span></span>
 <span><span class="va">ii</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ii</span>, scale <span class="op">=</span> <span class="fl">6e5</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ii</span>, scale <span class="op">=</span> <span class="fl">6e5</span>, add <span class="op">=</span> <span class="cn">FALSE</span>, show.axes  <span class="op">=</span> <span class="cn">TRUE</span>, show.circle <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
@@ -232,7 +232,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/hypertidy/tissot/actions" class="external-link"><img src="https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 
