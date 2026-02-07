@@ -1,59 +1,94 @@
-#' Get last plot projection
+#' Plot world coastline on a projected map
 #'
+#' `tissot_map()` draws the bundled [world] coastline, projected if a
+#' projection is current. The projection is determined in this order:
+#' 1. An explicit `target` argument
+#' 2. The projection stored by the last [plot.indicatrix_list()] call
 #'
-#' 'tissot_map()' will add the [world] coastline to any map.
+#' `tissot_abline()` draws vertical and horizontal reference lines at a
+#' given longitude/latitude in projected coordinates.
 #'
-#' 'tissot_get_proj()' When the indicatrix is plotted it registers its projection. This string
-#' can be obtained with this getter function.
-#'
-#' 'tissot_abline()' will draw a vertical and horizontal line at a give longitude latitude (where
-#' they intersect is the actual lon,lat location)
-#'
-#' @param add logical, default 'TRUE' add to existing plot or create new
-#' @param ... graphical parameters for [lines()] if 'add = TRUE', or for [plot()] if 'add = FALSE'
-#' @param lambda longitude at which to draw a vertical line
-#' @param phi latitude at which to draw a horizontal line
-#' @param proj.in projection for expert use
-#' @return 'tissot_map()' returns the internal world map data (projected if one is current) as a matrix
+#' @param target target CRS. If `NULL`, uses the last plot projection
+#'   (from `plot.indicatrix_list()`) or draws in lon/lat.
+#' @param add logical; add to existing plot (default `TRUE`) or create new
+#' @param ... graphical parameters passed to [graphics::lines()] (if adding)
+#'   or [graphics::plot()] (if creating new)
+#' @return `tissot_map()` invisibly returns the (projected) world coastline matrix
+#' @seealso [plot.indicatrix_list()], [tissot()]
 #' @export
-tissot_map <- function(..., add = TRUE) {
-  ## we might catch list(...) and see if something can project them? (one day)
+#' @examples
+#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
+#' ii <- indicatrix(r)
+#' plot(ii, scale = 6e5, add = FALSE)
+#' tissot_map()
+tissot_map <- function(..., target = NULL, add = TRUE) {
   props <- list(...)
-  w <- .project_world()
-  if (is.null(props$col)) props$col <- rgb(.7, .7, .7)
+
+  if (is.null(target)) {
+    target <- getOption("tissot.last.plot.proj")
+  }
+
+  w <- if (is.null(target)) {
+    world
+  } else {
+    gdalraster::transform_xy(world, "OGC:CRS84", target)
+  }
+
+  if (is.null(props$col)) props$col <- grDevices::rgb(.7, .7, .7)
   if (add) {
     props$x <- w
-    do.call(lines, props)
+    do.call(graphics::lines, props)
   } else {
     props$x <- w
     if (is.null(props$pch)) props$pch <- "."
-
-    do.call(plot, props)
+    do.call(graphics::plot, props)
+    if (!is.null(target)) {
+      options(tissot.last.plot.proj = target)
+    }
   }
   invisible(w)
 }
-#' @name tissot_map
+
+
+#' @rdname tissot_map
+#' @param x longitude values (or any xy-ish input; see [tissot()])
+#' @param y latitude values (ignored if `x` is a matrix)
+#' @param source source CRS for the coordinates (default `"EPSG:4326"`)
+#' @return `tissot_abline()` is called for its side effect
 #' @export
 #' @importFrom graphics abline
-#' @return 'tissot_abline()' called for its side effect of drawing on the plot
-tissot_abline <- function(lambda, phi  = NULL, ..., proj.in = NULL) {
-  xy <- do.call(cbind, xy.coords(lambda, phi)[1:2])
+tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
+                          target = NULL) {
+  xy <- as_xy(if (is.null(y)) x else cbind(x, y))
 
-  target <- tissot_get_proj()
-  if (!is.null(target)) {
-    xy <- .prj(xy, target, proj.in = proj.in)
+  if (is.null(target)) {
+    target <- getOption("tissot.last.plot.proj")
   }
-  graphics::abline(v = xy[,1L], h = xy[,2L])
+  if (!is.null(target)) {
+    xy <- gdalraster::transform_xy(xy, source, target)
+  }
+  graphics::abline(v = xy[, 1L], h = xy[, 2L], ...)
 }
-#' @name tissot_map
-#' @return 'tissot_get_proj()' returns the value of the current projection, or NULL
+
+
+#' Get or set the current plot projection
+#'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' These functions access a global option. Prefer passing `target`
+#' explicitly to [tissot_map()] and [tissot_abline()], or let
+#' [plot.indicatrix_list()] set the projection automatically.
+#'
+#' @return `tissot_get_proj()` returns the current projection string or `NULL`
 #' @export
 tissot_get_proj <- function() {
   getOption("tissot.last.plot.proj")
 }
 
-.project_world <- function() {
-  target <- tissot_get_proj()
-  if (is.null(target)) return(world)  ## no projection in effect
-  .prj(world, target, proj.in = "OGC:CRS84")
+#' @rdname tissot_get_proj
+#' @param target projection CRS string
+#' @export
+tissot_set_proj <- function(target) {
+  options(tissot.last.plot.proj = target)
 }

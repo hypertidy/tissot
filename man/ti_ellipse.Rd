@@ -2,26 +2,25 @@
 % Please edit documentation in R/tissot.R
 \name{ti_ellipse}
 \alias{ti_ellipse}
-\title{Ellipse}
+\title{Generate ellipse coordinates for an indicatrix}
 \usage{
-ti_ellipse(center, axes, scale = 1, n = 36, from = 0, to = 2 * pi)
+ti_ellipse(x, scale = 1e+05, n = 72, ...)
 }
 \arguments{
-\item{center}{center}
+\item{x}{an indicatrix object}
 
-\item{axes}{axes}
+\item{scale}{scaling factor for the ellipse size in projected units}
 
-\item{scale}{scale}
+\item{n}{number of points on the ellipse}
 
-\item{n}{n}
-
-\item{from}{from}
-
-\item{to}{to}
+\item{...}{ignored}
 }
 \value{
-matrix
+A two-column matrix of projected coordinates tracing the ellipse
 }
 \description{
-Ellipse
+Generate ellipse coordinates for an indicatrix
+}
+\seealso{
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=plot.indicatrix]{plot.indicatrix()}}
 }

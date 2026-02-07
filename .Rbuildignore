@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^README\.html$
 ^README-.*\.png$
 ^man/readmefigs/*
 ^cran-comments\.md$
@@ -9,3 +10,4 @@
 ^\.github$
 ^data-raw$
 ^gdalwmscache$
+^LICENSE\.md$

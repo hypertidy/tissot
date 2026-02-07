@@ -3,10 +3,9 @@
 \docType{package}
 \name{tissot-package}
 \alias{tissot-package}
-\alias{_PACKAGE}
-\title{tissot: The Tissot Indicatrix}
+\title{tissot: Tissot Indicatrix for Map Projection Distortion}
 \description{
-Create and plot the Tissot Indicatrix.
+Compute and visualize the Tissot indicatrix for map projections. The indicatrix characterizes projection distortion by computing scale factors, angular deformation, areal distortion, and convergence at arbitrary points. Based on the calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Uses GDAL (via 'gdalraster') for coordinate transformation and supports any projection that GDAL/PROJ can handle. The Tissot Indicatrix is developed using the method described by as described in the manual by John P. Snyder (1987) \doi{10.3133/pp1395}.
 }
 \seealso{
 Useful links:
@@ -17,11 +16,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Michael D. Sumner \email{mdsumner@gmail.com}
+\strong{Maintainer}: Michael Sumner \email{mdsumner@gmail.com} (\href{https://orcid.org/0000-0002-2471-7511}{ORCID})
 
 Authors:
 \itemize{
-  \item Bill Huber
+  \item Bill Huber (original algorithm and calculations)
 }
 
 }

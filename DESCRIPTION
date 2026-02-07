@@ -1,20 +1,38 @@
 Package: tissot
-Type: Package
-Title: The Tissot Indicatrix
-Version: 0.0.1.9006
-Authors@R: c(person("Michael D.","Sumner", role = c("aut", "cre"), email = "mdsumner@gmail.com"),
-     person("Bill", "Huber", role  = "aut"))
-Description: Create and plot the Tissot Indicatrix.
-License: GPL-3
-Depends:
-    R (>= 4.0.0)
+Title: Tissot Indicatrix for Map Projection Distortion
+Version: 0.2.0
+Authors@R: c(
+    person("Michael", "Sumner", email = "mdsumner@gmail.com", role = c("aut", "cre"), 
+           comment = c(ORCID = "0000-0002-2471-7511")),
+    person("Bill", "Huber", role = "aut", 
+           comment = "original algorithm and calculations")
+  )
+Description: Compute and visualize the Tissot indicatrix for map projections. 
+    The indicatrix characterizes projection distortion by computing scale 
+    factors, angular deformation, areal distortion, and convergence at 
+    arbitrary points. Based on the calculations shared by Bill Huber on 
+    Stack Exchange (<https://gis.stackexchange.com/a/5075/482>). Uses 
+    GDAL (via 'gdalraster') for coordinate transformation and supports any 
+    projection that GDAL/PROJ can handle. The Tissot Indicatrix is developed using the method
+    described by as described in the manual by John P. Snyder (1987)  <doi:10.3133/pp1395>. 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 3.6.0)
 Imports: 
     tibble,
-    reproj (>= 0.6.0)
-RoxygenNote: 7.2.3
-LazyData: true
-LazyDataCompression: xz
-Encoding: UTF-8
-Additional_repositories: https://hypertidy.r-universe.dev
-URL: https://github.com/hypertidy/tissot, https://hypertidy.github.io/tissot/
+    gdalraster,
+    graphics,
+    grDevices
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    spelling
+Config/testthat/edition: 3
+URL: https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues
+Language: en-US

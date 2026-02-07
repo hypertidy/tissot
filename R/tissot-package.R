@@ -1,5 +1,8 @@
 #' @keywords internal
 #' @aliases tissot-package
+#' @importFrom gdalraster transform_xy
+#' @importFrom graphics lines polygon abline
+#' @importFrom grDevices adjustcolor hcl.colors rgb
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
@@ -9,11 +12,15 @@
 NULL
 
 globalVariables("world")
-#' world coastline
+
+#' World coastline
 #'
-#' A modified matrix version of data from the maps package.
+#' A matrix of longitude/latitude coordinates representing a simplified
+#' world coastline, derived from the maps package. Continent boundaries
+#' are separated by `NA` rows. Longitudes are constrained to
+#' `abs(lon) <= 180`.
 #'
-#' Basically longitudes have been smooshed to 'abs(lon) < 180'
+#' @format A two-column numeric matrix (longitude, latitude)
 #' @docType data
 #' @name world
-'world'
+"world"

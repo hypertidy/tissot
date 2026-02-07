@@ -3,17 +3,17 @@
 \docType{data}
 \name{world}
 \alias{world}
-\title{world coastline}
+\title{World coastline}
 \format{
-An object of class \code{matrix} (inherits from \code{array}) with 82403 rows and 2 columns.
+A two-column numeric matrix (longitude, latitude)
 }
 \usage{
 world
 }
 \description{
-A modified matrix version of data from the maps package.
-}
-\details{
-Basically longitudes have been smooshed to 'abs(lon) < 180'
+A matrix of longitude/latitude coordinates representing a simplified
+world coastline, derived from the maps package. Continent boundaries
+are separated by \code{NA} rows. Longitudes are constrained to
+\code{abs(lon) <= 180}.
 }
 \keyword{datasets}

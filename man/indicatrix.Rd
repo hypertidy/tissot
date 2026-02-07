@@ -2,77 +2,47 @@
 % Please edit documentation in R/tissot.R
 \name{indicatrix}
 \alias{indicatrix}
-\alias{plot.indicatrixes}
-\alias{indicatrix0}
-\alias{plot.indicatrix0}
-\title{Indicatrix}
+\title{Compute Tissot indicatrix ellipse geometry}
 \usage{
-indicatrix(x, scale = 1, ...)
-
-\method{plot}{indicatrixes}(
-  x,
-  asp = 1,
-  xlab = "x",
-  ylab = "y",
-  add = FALSE,
-  ...,
-  col.base = rgb(0, 0, 0, 0.1),
-  col.lambda = grey(0.75),
-  col.phi = "#1b9e77",
-  col.major = "#7570b3",
-  col.minor = "#d95f02",
-  col.outline = "black"
-)
-
-indicatrix0(x, scale = 1, ...)
-
-\method{plot}{indicatrix0}(
-  x,
-  asp = 1,
-  xlab = "Easting",
-  ylab = "Northing",
-  add = FALSE,
-  ...,
-  col.base = rgb(0, 0, 0, 0.1),
-  col.lambda = grey(0.75),
-  col.phi = "#45A271",
-  col.major = "#A782C3",
-  col.minor = "#C87A8A",
-  col.outline = "black"
-)
+indicatrix(x, target = NULL, ..., source = "EPSG:4326")
 }
 \arguments{
-\item{x}{object from \code{tissot}}
+\item{x}{a \code{tissot_tbl}, or any xy-ish input (see \code{\link[=tissot]{tissot()}})}
 
-\item{scale}{scaling}
+\item{target}{target projection CRS (extracted from \code{tissot_tbl}
+attributes if \code{x} is one; required otherwise)}
 
-\item{...}{arguments \code{n}, \code{from} and \code{to} passed to \code{ti_ellipse} function}
+\item{...}{passed to \code{\link[=tissot]{tissot()}}}
 
-\item{asp}{aspect ratio}
-
-\item{xlab}{x-axis labels}
-
-\item{ylab}{y-axis labels}
-
-\item{add}{add to existing plot}
-
-\item{col.base}{colour of base}
-
-\item{col.lambda}{colour of lambda}
-
-\item{col.phi}{colour of phi}
-
-\item{col.major}{major axis colour}
-
-\item{col.minor}{minor axis colour}
-
-\item{col.outline}{outline colour}
+\item{source}{source CRS (default \code{"EPSG:4326"})}
+}
+\value{
+An \code{indicatrix_list} object (a list of \code{indicatrix} objects with
+\code{source} and \code{target} stored as attributes)
 }
 \description{
-Indicatrix
-
-plot indicatrix
+Generates indicatrix objects for plotting at each point.
+Returns an \code{indicatrix_list} containing individual indicatrix objects.
 }
 \details{
-Reprocesses the output of \code{tissot} into convenient geometrical data.
+\code{indicatrix()} accepts either:
+\itemize{
+\item A \code{tissot_tbl} object (from \code{\link[=tissot]{tissot()}}) — projection is extracted
+from attributes, \code{target} is optional
+\item Any xy-ish input with an explicit \code{target}
+}
+}
+\examples{
+## From a tissot_tbl
+r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
+ii <- indicatrix(r)
+plot(ii)
+
+## From raw coordinates
+ii2 <- indicatrix(c(0, 45), "+proj=stere +lat_0=90")
+plot(ii2)
+}
+\seealso{
+\code{\link[=tissot]{tissot()}}, \code{\link[=plot.indicatrix]{plot.indicatrix()}}, \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}},
+\code{\link[=ti_ellipse]{ti_ellipse()}}
 }

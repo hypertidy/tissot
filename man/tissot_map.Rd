@@ -3,40 +3,50 @@
 \name{tissot_map}
 \alias{tissot_map}
 \alias{tissot_abline}
-\alias{tissot_get_proj}
-\title{Get last plot projection}
+\title{Plot world coastline on a projected map}
 \usage{
-tissot_map(..., add = TRUE)
+tissot_map(..., target = NULL, add = TRUE)
 
-tissot_abline(lambda, phi = NULL, ..., proj.in = NULL)
-
-tissot_get_proj()
+tissot_abline(x, y = NULL, ..., source = "EPSG:4326", target = NULL)
 }
 \arguments{
-\item{...}{graphical parameters for [lines()] if 'add = TRUE', or for [plot()] if 'add = FALSE'}
+\item{...}{graphical parameters passed to \code{\link[graphics:lines]{graphics::lines()}} (if adding)
+or \code{\link[graphics:plot.default]{graphics::plot()}} (if creating new)}
 
-\item{add}{logical, default 'TRUE' add to existing plot or create new}
+\item{target}{target CRS. If \code{NULL}, uses the last plot projection
+(from \code{plot.indicatrix_list()}) or draws in lon/lat.}
 
-\item{lambda}{longitude at which to draw a vertical line}
+\item{add}{logical; add to existing plot (default \code{TRUE}) or create new}
 
-\item{phi}{latitude at which to draw a horizontal line}
+\item{x}{longitude values (or any xy-ish input; see \code{\link[=tissot]{tissot()}})}
 
-\item{proj.in}{projection for expert use}
+\item{y}{latitude values (ignored if \code{x} is a matrix)}
+
+\item{source}{source CRS for the coordinates (default \code{"EPSG:4326"})}
 }
 \value{
-'tissot_map()' returns the internal world map data (projected if one is current) as a matrix
+\code{tissot_map()} invisibly returns the (projected) world coastline matrix
 
-'tissot_abline()' called for its side effect of drawing on the plot
-
-'tissot_get_proj()' returns the value of the current projection, or NULL
+\code{tissot_abline()} is called for its side effect
 }
 \description{
-'tissot_map()' will add the [world] coastline to any map.
+\code{tissot_map()} draws the bundled \link{world} coastline, projected if a
+projection is current. The projection is determined in this order:
+\enumerate{
+\item An explicit \code{target} argument
+\item The projection stored by the last \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} call
+}
 }
 \details{
-'tissot_get_proj()' When the indicatrix is plotted it registers its projection. This string
-can be obtained with this getter function.
-
-'tissot_abline()' will draw a vertical and horizontal line at a give longitude latitude (where
-they intersect is the actual lon,lat location)
+\code{tissot_abline()} draws vertical and horizontal reference lines at a
+given longitude/latitude in projected coordinates.
+}
+\examples{
+r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
+ii <- indicatrix(r)
+plot(ii, scale = 6e5, add = FALSE)
+tissot_map()
+}
+\seealso{
+\code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}}, \code{\link[=tissot]{tissot()}}
 }
