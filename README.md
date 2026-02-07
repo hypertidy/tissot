@@ -110,12 +110,50 @@ plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 
 ![](man/figures/README-single-1.png)<!-- -->
 
+## Arbitrary projections
+
+Lambert Conformal Conic
+
+``` r
+pxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
+p <- tissot(pxy, "+proj=lcc +lat_0=-60 +lon_0=147 +lat_1=-70 +lat_2=-55")
+plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale.area")
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/figures/README-lcc-1.png)<!-- -->
+
+Universal Transverse Mercator
+
+``` r
+qxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
+p <- tissot(qxy, "EPSG:32755")
+plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale.area")
+tissot_map()
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> GDAL FAILURE 1: Point outside of projection domain
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 8 point(s) failed to
+#> transform, NA returned in that case
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/figures/README-utm-1.png)<!-- -->
+
 ## Polar projections
 
 ``` r
-polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-85, -30, by = 10))
+polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-80, -50, by = 10))
 p <- tissot(polar_xy, "+proj=stere +lat_0=-90 +lon_0=147")
-plot(indicatrix(p), scale = 5e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
@@ -125,13 +163,25 @@ tissot_map()
 
 ``` r
 la <- tissot(polar_xy, "+proj=laea +lat_0=-90 +lon_0=147")
-plot(indicatrix(la), scale = 5e5, add = FALSE)
+plot(indicatrix(la), scale = 2.5e5, add = FALSE)
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
 ```
 
 ![](man/figures/README-laea-1.png)<!-- -->
+
+Let’s push away from the pole in Lambert Azimuthal Equidistant
+
+``` r
+lea <- tissot(polar_xy, "+proj=aeqd +lat_0=-20 +lon_0=147")
+plot(indicatrix(lea), scale = 2.5e5, add = FALSE)
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/figures/README-aeqd-1.png)<!-- -->
 
 ## Distortion summary
 
