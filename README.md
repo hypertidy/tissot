@@ -75,7 +75,7 @@ Build indicatrix ellipses and plot them over a map:
 
 ``` r
 ii <- indicatrix(r)
-plot(ii, scale = 6e5, add = FALSE)
+plot(ii, scale = 6e5, add = FALSE, show.circle = TRUE, show.axes = TRUE)
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case

@@ -34,11 +34,12 @@
 \item{add}{logical; add to existing plot? If \code{FALSE}, creates a new
 plot sized to contain all ellipses.}
 
-\item{show.axes}{logical; draw lambda/phi direction lines?}
+\item{show.axes}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters.
+See \code{\link[=plot.indicatrix]{plot.indicatrix()}} for defaults.}
 
-\item{show.circle}{logical; draw reference unit circles? Default \code{TRUE}
-for the list method (the circle-vs-ellipse comparison makes distortion
-visible at map scale).}
+\item{show.circle}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters.
+Default \code{TRUE} for the list method (the circle-vs-ellipse comparison makes
+distortion visible at map scale). See \code{\link[=plot.indicatrix]{plot.indicatrix()}} for defaults.}
 
 \item{fill.by}{character; name of a distortion metric to colour-code
 the fill. One of \code{"scale.area"}, \code{"angle_deformation"}, \code{"scale.h"},

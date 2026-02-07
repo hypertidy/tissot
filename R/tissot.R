@@ -351,14 +351,22 @@ ti_axes <- function(x, scale = 1e5) {
 #' shows the distortion of a unit circle under the map projection. Optional
 #' overlays include a reference unit circle, and lambda/phi direction axes.
 #'
+#' `show.circle` and `show.axes` accept `TRUE` (use defaults), `FALSE`
+#' (hide), or a named list of graphical parameters to override defaults.
+#' For example, `show.circle = list(border = "blue", lty = 3)`.
+#'
 #' @param x an `indicatrix` object (from [indicatrix()])
 #' @param scale scaling factor for the ellipse size in projected units
 #' @param n number of points on the ellipse
 #' @param col fill colour for the ellipse
 #' @param border border colour
 #' @param add logical; add to existing plot?
-#' @param show.axes logical; draw lambda (red) and phi (blue) direction lines?
-#' @param show.circle logical; draw white reference unit circle?
+#' @param show.axes `TRUE`, `FALSE`, or a named list of graphical parameters
+#'   for the direction lines. Defaults: `list(col.lambda = "red",
+#'   col.phi = "blue", lwd = 1.5)`.
+#' @param show.circle `TRUE`, `FALSE`, or a named list of graphical parameters
+#'   for the reference circle. Defaults: `list(col = adjustcolor("white",
+#'   alpha.f = 0.6), border = "grey70", lty = 2)`.
 #' @param ... passed to [graphics::polygon()]
 #' @seealso [indicatrix()], [plot.indicatrix_list()], [ti_ellipse()]
 #' @export
@@ -374,21 +382,34 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
   }
 
   ## Reference unit circle (behind the ellipse)
-  if (show.circle) {
+  circle_gp <- resolve_gpar(show.circle, list(
+    col = grDevices::adjustcolor("white", alpha.f = 0.6),
+    border = "grey70", lwd = 2.5,
+    lty = 2
+  ))
+  if (!is.null(circle_gp)) {
     circ <- ti_circle(x, scale = scale, n = n)
     graphics::polygon(circ[, 1L], circ[, 2L],
-                      col = grDevices::adjustcolor("white", alpha.f = 0.6),
-                      border = "grey70", lty = 2)
+                      col = circle_gp$col,
+                      border = circle_gp$border,
+                      lty = circle_gp$lty)
   }
 
   ## Filled ellipse
   graphics::polygon(ell[, 1L], ell[, 2L], col = col, border = border, ...)
 
   ## Direction axes
-  if (show.axes) {
+  axes_gp <- resolve_gpar(show.axes, list(
+    col.lambda = "red",
+    col.phi = "blue",
+    lwd = 1.5
+  ))
+  if (!is.null(axes_gp)) {
     ax <- ti_axes(x, scale = scale)
-    graphics::lines(ax$lambda[, 1L], ax$lambda[, 2L], col = "red", lwd = 1.5)
-    graphics::lines(ax$phi[, 1L], ax$phi[, 2L], col = "blue", lwd = 1.5)
+    graphics::lines(ax$lambda[, 1L], ax$lambda[, 2L],
+                    col = axes_gp$col.lambda, lwd = axes_gp$lwd)
+    graphics::lines(ax$phi[, 1L], ax$phi[, 2L],
+                    col = axes_gp$col.phi, lwd = axes_gp$lwd)
   }
 
   invisible(x)
@@ -409,10 +430,11 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 #' @param border border colour
 #' @param add logical; add to existing plot? If `FALSE`, creates a new
 #'   plot sized to contain all ellipses.
-#' @param show.axes logical; draw lambda/phi direction lines?
-#' @param show.circle logical; draw reference unit circles? Default `TRUE`
-#'   for the list method (the circle-vs-ellipse comparison makes distortion
-#'   visible at map scale).
+#' @param show.axes `TRUE`, `FALSE`, or a named list of graphical parameters.
+#'   See [plot.indicatrix()] for defaults.
+#' @param show.circle `TRUE`, `FALSE`, or a named list of graphical parameters.
+#'   Default `TRUE` for the list method (the circle-vs-ellipse comparison makes
+#'   distortion visible at map scale). See [plot.indicatrix()] for defaults.
 #' @param fill.by character; name of a distortion metric to colour-code
 #'   the fill. One of `"scale.area"`, `"angle_deformation"`, `"scale.h"`,
 #'   `"scale.k"`, `"scale.a"`, `"scale.b"`. Default `NULL` (uniform fill).

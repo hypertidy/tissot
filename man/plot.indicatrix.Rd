@@ -29,9 +29,11 @@
 
 \item{add}{logical; add to existing plot?}
 
-\item{show.axes}{logical; draw lambda (red) and phi (blue) direction lines?}
+\item{show.axes}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters
+for the direction lines. Defaults: \code{list(col.lambda = "red", col.phi = "blue", lwd = 1.5)}.}
 
-\item{show.circle}{logical; draw white reference unit circle?}
+\item{show.circle}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters
+for the reference circle. Defaults: \code{list(col = adjustcolor("white", alpha.f = 0.6), border = "grey70", lty = 2)}.}
 
 \item{...}{passed to \code{\link[graphics:polygon]{graphics::polygon()}}}
 }
@@ -39,6 +41,11 @@
 Draws a single Tissot indicatrix ellipse on the current plot. The ellipse
 shows the distortion of a unit circle under the map projection. Optional
 overlays include a reference unit circle, and lambda/phi direction axes.
+}
+\details{
+\code{show.circle} and \code{show.axes} accept \code{TRUE} (use defaults), \code{FALSE}
+(hide), or a named list of graphical parameters to override defaults.
+For example, \code{show.circle = list(border = "blue", lty = 3)}.
 }
 \seealso{
 \code{\link[=indicatrix]{indicatrix()}}, \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}}, \code{\link[=ti_ellipse]{ti_ellipse()}}
