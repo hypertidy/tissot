@@ -107,7 +107,7 @@
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-robinson-1.png"><!-- --></p>
+<p><img src="reference/figures/README-robinson-1.png"><!-- --></p>
 </div>
 <div class="section level2">
 <h2 id="colour-coded-distortion">Colour-coded distortion<a class="anchor" aria-label="anchor" href="#colour-coded-distortion"></a>
@@ -118,7 +118,7 @@
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-coloured-1.png"><!-- --></p>
+<p><img src="reference/figures/README-coloured-1.png"><!-- --></p>
 </div>
 <div class="section level2">
 <h2 id="projection-comparison">Projection comparison<a class="anchor" aria-label="anchor" href="#projection-comparison"></a>
@@ -129,7 +129,7 @@
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-mollweide-1.png"><!-- --></p>
+<p><img src="reference/figures/README-mollweide-1.png"><!-- --></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merc_xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">150</span>, <span class="fl">150</span>, by <span class="op">=</span> <span class="fl">30</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">75</span>, <span class="fl">75</span>, by <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">me</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">merc_xy</span>, <span class="st">"+proj=merc"</span><span class="op">)</span></span>
@@ -137,7 +137,7 @@
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-mercator-1.png"><!-- --></p>
+<p><img src="reference/figures/README-mercator-1.png"><!-- --></p>
 </div>
 <div class="section level2">
 <h2 id="rich-single-indicatrix-plots">Rich single-indicatrix plots<a class="anchor" aria-label="anchor" href="#rich-single-indicatrix-plots"></a>
@@ -146,7 +146,7 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ii2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">147</span>, <span class="op">-</span><span class="fl">42</span><span class="op">)</span>, <span class="st">"+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ii2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, scale <span class="op">=</span> <span class="fl">1e4</span>, add <span class="op">=</span> <span class="cn">FALSE</span>, show.axes <span class="op">=</span> <span class="cn">TRUE</span>, show.circle <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-single-1.png"><!-- --></p>
+<p><img src="reference/figures/README-single-1.png"><!-- --></p>
 </div>
 <div class="section level2">
 <h2 id="polar-projections">Polar projections<a class="anchor" aria-label="anchor" href="#polar-projections"></a>
@@ -158,14 +158,14 @@
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-polar-1.png"><!-- --></p>
+<p><img src="reference/figures/README-polar-1.png"><!-- --></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">la</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tissot.html">tissot</a></span><span class="op">(</span><span class="va">polar_xy</span>, <span class="st">"+proj=laea +lat_0=-90 +lon_0=147"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/indicatrix.html">indicatrix</a></span><span class="op">(</span><span class="va">la</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fl">5e5</span>, add <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/tissot_map.html">tissot_map</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing</span></span>
 <span><span class="co">#&gt; values, NA returned in that case</span></span></code></pre></div>
-<p><img src="man/readmefigs/README-laea-1.png"><!-- --></p>
+<p><img src="reference/figures/README-laea-1.png"><!-- --></p>
 </div>
 <div class="section level2">
 <h2 id="distortion-summary">Distortion summary<a class="anchor" aria-label="anchor" href="#distortion-summary"></a>
