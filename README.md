@@ -1,3 +1,4 @@
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 <!-- badges: start -->
@@ -34,9 +35,9 @@ library(tissot)
 tissot(c(147, -42), "+proj=utm +zone=55 +south")
 #> Tissot indicatrix: 1 point, +proj=utm +zone=55 +south
 #> # A tibble: 1 × 14
-#>       x     y dx_dlam      dy_dlam dx_dphi dy_dphi scale.h scale.k scale.omega
-#>   <dbl> <dbl>   <dbl>        <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
-#> 1   147   -42   1.000 -0.000000584       0   1.000   1.000   1.000   0.0000335
+#>       x     y dx_dlam    dy_dlam dx_dphi dy_dphi scale.h scale.k scale.omega
+#>   <dbl> <dbl>   <dbl>      <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
+#> 1   147   -42 0.99960 -5.8386e-7       0 0.99960 0.99960 0.99960 0.000033471
 #> # ℹ 5 more variables: scale.a <dbl>, scale.b <dbl>, scale.area <dbl>,
 #> #   angle_deformation <dbl>, convergence <dbl>
 ```
@@ -108,7 +109,14 @@ ii2 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_
 plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
 
-![](man/figures/README-single-1.png)<!-- -->
+![](man/figures/README-single2-1.png)<!-- -->
+
+``` r
+ii3 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-15 +lat_2=5 +lat_0=0 +lon_0=145")
+plot(ii3[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
+```
+
+![](man/figures/README-single3-1.png)<!-- -->
 
 ## Arbitrary projections
 

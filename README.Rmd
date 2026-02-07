@@ -1,8 +1,6 @@
 ---
-output:
-  md_document:
-    variant: gfm
-editor_options:
+output: github_document
+editor_options: 
   chunk_output_type: console
 ---
 
@@ -95,10 +93,17 @@ tissot_map()
 
 A single indicatrix with axes and reference circle:
 
-```{r single}
+```{r single2}
 ii2 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145")
 plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
+
+
+```{r single3}
+ii3 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-15 +lat_2=5 +lat_0=0 +lon_0=145")
+plot(ii3[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
+```
+
 
 ## Arbitrary projections
 
@@ -149,6 +154,19 @@ tissot_map()
 ```{r summary}
 summary(r)
 ```
+
+
+## Why this package?
+
+Most "Tissot indicatrix" plots you'll find online are just geographic
+circles drawn on the map. They show what happens to a circle under
+the projection, which is useful — but it's not the indicatrix.
+The indicatrix is the Jacobian of the projection at a point: it gives
+you actual scale factors, angular deformation, and areal distortion.
+This package computes those.
+
+Other examples: [mgimond](https://mgimond.github.io/tissot/). 
+
 
 ## Code of Conduct
 

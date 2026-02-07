@@ -208,7 +208,7 @@ summary.tissot_tbl <- function(object, ...) {
 #' ## From a tissot_tbl
 #' r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
 #' ii <- indicatrix(r)
-#' plot(ii)
+#' plot(ii, scale = 5e5)
 #'
 #' ## From raw coordinates
 #' ii2 <- indicatrix(c(0, 45), "+proj=stere +lat_0=90")
@@ -374,8 +374,8 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 
   ## Reference unit circle (behind the ellipse)
   circle_gp <- resolve_gpar(show.circle, list(
-    col = grDevices::adjustcolor("white", alpha.f = 0.6),
-    border = "grey70", lwd = 2.5,
+    col = grDevices::adjustcolor("white", alpha.f = 1),
+    border = "grey70", lwd = 4.5,
     lty = 2
   ))
   if (!is.null(circle_gp)) {
@@ -383,7 +383,7 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
     graphics::polygon(circ[, 1L], circ[, 2L],
                       col = circle_gp$col,
                       border = circle_gp$border,
-                      lty = circle_gp$lty)
+                      lty = circle_gp$lty, lwd = circle_gp$lwd)
   }
 
   ## Filled ellipse
