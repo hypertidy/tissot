@@ -5,24 +5,24 @@
 \alias{tissot_abline}
 \title{Plot world coastline on a projected map}
 \usage{
-tissot_map(..., proj.out = NULL, add = TRUE)
+tissot_map(..., target = NULL, add = TRUE)
 
-tissot_abline(lambda, phi = NULL, ..., proj.in = NULL, proj.out = NULL)
+tissot_abline(x, y = NULL, ..., source = "EPSG:4326", target = NULL)
 }
 \arguments{
 \item{...}{graphical parameters passed to \code{\link[graphics:lines]{graphics::lines()}} (if adding)
 or \code{\link[graphics:plot.default]{graphics::plot()}} (if creating new)}
 
-\item{proj.out}{target CRS. If \code{NULL}, uses the last plot projection
+\item{target}{target CRS. If \code{NULL}, uses the last plot projection
 (from \code{plot.indicatrix_list()}) or draws in lon/lat.}
 
 \item{add}{logical; add to existing plot (default \code{TRUE}) or create new}
 
-\item{lambda}{longitude at which to draw a vertical line}
+\item{x}{longitude values (or any xy-ish input; see \code{\link[=tissot]{tissot()}})}
 
-\item{phi}{latitude at which to draw a horizontal line}
+\item{y}{latitude values (ignored if \code{x} is a matrix)}
 
-\item{proj.in}{source CRS for lambda/phi (default "EPSG:4326")}
+\item{source}{source CRS for the coordinates (default \code{"EPSG:4326"})}
 }
 \value{
 \code{tissot_map()} invisibly returns the (projected) world coastline matrix
@@ -33,7 +33,7 @@ or \code{\link[graphics:plot.default]{graphics::plot()}} (if creating new)}
 \code{tissot_map()} draws the bundled \link{world} coastline, projected if a
 projection is current. The projection is determined in this order:
 \enumerate{
-\item An explicit \code{proj.out} argument
+\item An explicit \code{target} argument
 \item The projection stored by the last \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} call
 }
 }
@@ -42,7 +42,7 @@ projection is current. The projection is determined in this order:
 given longitude/latitude in projected coordinates.
 }
 \examples{
-r <- tissot(cbind(seq(-150, 150, by = 30), 0), proj.out = "+proj=robin")
+r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
 ii <- indicatrix(r)
 plot(ii, scale = 6e5, add = FALSE)
 tissot_map()

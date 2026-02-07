@@ -2,7 +2,7 @@
 #' @aliases tissot-package
 #' @importFrom gdalraster transform_xy
 #' @importFrom graphics lines polygon abline
-#' @importFrom grDevices adjustcolor hcl.colors rgb xy.coords
+#' @importFrom grDevices adjustcolor hcl.colors rgb
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage

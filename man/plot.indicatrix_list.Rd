@@ -2,7 +2,7 @@
 % Please edit documentation in R/tissot.R
 \name{plot.indicatrix_list}
 \alias{plot.indicatrix_list}
-\title{Plot a list of indicatrices}
+\title{Plot a list of indicatrixes}
 \usage{
 \method{plot}{indicatrix_list}(
   x,
@@ -52,13 +52,13 @@ the fill. One of \code{"scale.area"}, \code{"angle_deformation"}, \code{"scale.h
 \item{...}{passed to \code{\link[=plot.indicatrix]{plot.indicatrix()}}}
 }
 \description{
-Draws all indicatrices in an \code{indicatrix_list}, optionally creating a
+Draws all indicatrixes in an \code{indicatrix_list}, optionally creating a
 new plot or adding to an existing one. Can colour-code the fill by a
 distortion metric.
 }
 \examples{
 xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
-r <- tissot(xy, proj.out = "+proj=robin")
+r <- tissot(xy, "+proj=robin")
 ii <- indicatrix(r)
 
 ## Uniform fill

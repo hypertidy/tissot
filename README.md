@@ -1,81 +1,60 @@
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
 <!-- badges: end -->
 
 # tissot
 
-Compute and visualize the [Tissot
-indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for map
-projections. The indicatrix characterizes local distortion — how a unit
-circle on the globe is warped into an ellipse by the projection —
-revealing the trade-offs every map projection makes between preserving
-shape, area, and direction.
+The [Tissot
+Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix)
+characterizes local distortion in map projections. This package computes
+and plots indicatrixes using a vectorized finite-difference Jacobian
+with [gdalraster](https://firelab.github.io/gdalraster/) as the
+projection engine.
 
-Based on the calculations shared by [Bill Huber on GIS Stack
-Exchange](https://gis.stackexchange.com/a/5075/482). Uses
-[gdalraster](https://CRAN.R-project.org/package=gdalraster) for
-coordinate transformation, so any projection that GDAL/PROJ can handle
-works out of the box.
+Derived (with permission) from Bill Huber’s [GIS StackExchange
+answer](https://gis.stackexchange.com/a/5075/482).
 
 ## Installation
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("hypertidy/tissot")
+# install.packages("pak")
+pak::pak("hypertidy/tissot@refactor-2026")
 ```
 
 ## Quick start
 
+`tissot()` returns a tibble of distortion properties. The second
+argument is the projection `target`; `source` defaults to EPSG:4326:
+
 ``` r
 library(tissot)
-
-## Compute distortion properties at a grid of points
-xy <- expand.grid(lon = seq(-150, 150, by = 30),
-                  lat = seq(-60, 60, by = 30))
-
-r <- tissot(xy, proj.out = "+proj=robin")
-r
-#> Tissot indicatrix: 55 points, +proj=robin
-#> # A tibble: 55 × 14
-#>        x     y dx_dlam dy_dlam dx_dphi dy_dphi scale.h scale.k scale.omega
-#>    <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
-#>  1  -150   -60    1.35       0  -0.895   0.946   1.30     1.35        47.0
-#>  2  -120   -60    1.35       0  -0.716   0.946   1.19     1.35        40.0
-#>  3   -90   -60    1.35       0  -0.537   0.946   1.09     1.35        33.2
-#>  4   -60   -60    1.35       0  -0.358   0.946   1.01     1.35        26.9
-#>  5   -30   -60    1.35       0  -0.179   0.946   0.963    1.35        22.2
-#>  6     0   -60    1.35       0   0       0.946   0.946    1.35        20.4
-#>  7    30   -60    1.35       0   0.179   0.946   0.963    1.35        22.2
-#>  8    60   -60    1.35       0   0.358   0.946   1.01     1.35        26.9
-#>  9    90   -60    1.35       0   0.537   0.946   1.09     1.35        33.2
-#> 10   120   -60    1.35       0   0.716   0.946   1.19     1.35        40.0
-#> # ℹ 45 more rows
+tissot(c(147, -42), "+proj=utm +zone=55 +south")
+#> Tissot indicatrix: 1 point, +proj=utm +zone=55 +south
+#> # A tibble: 1 × 14
+#>       x     y dx_dlam      dy_dlam dx_dphi dy_dphi scale.h scale.k scale.omega
+#>   <dbl> <dbl>   <dbl>        <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
+#> 1   147   -42   1.000 -0.000000584       0   1.000   1.000   1.000   0.0000335
 #> # ℹ 5 more variables: scale.a <dbl>, scale.b <dbl>, scale.area <dbl>,
 #> #   angle_deformation <dbl>, convergence <dbl>
 ```
 
-The result is a tibble with one row per input point. Key columns:
+Columns include: `scale.h` (meridional), `scale.k` (parallel), `scale.a`
+/ `scale.b` (max/min singular values), `scale.area`,
+`angle_deformation`, and `convergence`.
 
-| Column | Meaning |
-|----|----|
-| `scale.h` | Meridional (north–south) scale factor |
-| `scale.k` | Parallel (east–west) scale factor |
-| `scale.a`, `scale.b` | Semi-major and semi-minor axes of the indicatrix ellipse |
-| `scale.area` | Areal distortion (= 1 for equal-area projections) |
-| `angle_deformation` | Maximum angular distortion in degrees (= 0 for conformal projections) |
-| `convergence` | Angle of the projected meridian from grid north |
+## Plotting indicatrixes
 
-## Plotting indicatrices
-
-Build indicatrix ellipses and plot them over a map:
+`indicatrix()` builds plottable ellipses. The dashed circle is the
+undistorted reference; the filled ellipse shows the projection’s
+distortion:
 
 ``` r
+xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
+r <- tissot(xy, "+proj=robin")
 ii <- indicatrix(r)
-plot(ii, scale = 6e5, add = FALSE, show.circle = TRUE, show.axes = TRUE)
+plot(ii, scale = 6e5, add = FALSE)
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
@@ -83,110 +62,79 @@ tissot_map()
 
 ![](man/readmefigs/README-robinson-1.png)<!-- -->
 
-The `indicatrix()` function accepts the `tissot_tbl` directly — it
-extracts the projection from its attributes. You can also call it with
-raw coordinates:
+## Colour-coded distortion
+
+Pass `fill.by` to colour ellipses by a distortion metric:
 
 ``` r
-ii_single <- indicatrix(130, -42, proj.out = "+proj=stere +lat_0=-90")
-plot(ii_single, scale = 3e5, add = FALSE, show.axes = TRUE, show.circle = TRUE)
-```
-
-![](man/readmefigs/README-single-1.png)<!-- -->
-
-## Comparing projections
-
-``` r
-xy <- expand.grid(lon = seq(-150, 150, by = 30),
-                  lat = seq(-60, 60, by = 30))
-projs <- c(Robinson = "+proj=robin",
-           Mollweide = "+proj=moll",
-           Mercator = "+proj=merc")
-
-par(mfrow = c(3, 1), mar = c(2, 2, 2, 1))
-for (nm in names(projs)) {
-  r <- tissot(xy, proj.out = projs[nm])
-  ii <- indicatrix(r)
-  plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
-  tissot_map()
-  title(main = nm)
-}
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
-```
-
-![](man/readmefigs/README-comparison-1.png)<!-- -->
-
-Mollweide is equal-area (uniform colour), Mercator is conformal
-(circles, but area grows toward the poles), and Robinson is a
-compromise.
-
-## Colour by distortion
-
-Use `fill.by` to colour-code ellipses by any distortion metric:
-
-``` r
-r <- tissot(expand.grid(seq(-172, 172, by = 15),
-                        seq(-82, 82, by = 15)),
-            proj.out = "+proj=robin")
-ii <- indicatrix(r)
-
-par(mfrow = c(1, 2), mar = c(2, 2, 2, 1))
 plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
-title("Areal distortion")
+```
 
-plot(ii, scale = 6e5, add = FALSE, fill.by = "angle_deformation")
+![](man/readmefigs/README-coloured-1.png)<!-- -->
+
+## Projection comparison
+
+``` r
+m <- tissot(xy, "+proj=moll")
+plot(indicatrix(m), scale = 5e5, add = FALSE)
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
-title("Angular deformation")
 ```
 
-![](man/readmefigs/README-fillby-1.png)<!-- -->
+![](man/readmefigs/README-mollweide-1.png)<!-- -->
+
+``` r
+merc_xy <- expand.grid(seq(-150, 150, by = 30), seq(-75, 75, by = 15))
+me <- tissot(merc_xy, "+proj=merc")
+plot(indicatrix(me), scale = 5e5, add = FALSE)
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/readmefigs/README-mercator-1.png)<!-- -->
 
 ## Rich single-indicatrix plots
 
-Each indicatrix can display the reference unit circle (dashed white),
-lambda direction (red = parallel scale), and phi direction (blue =
-meridional scale):
+A single indicatrix with axes and reference circle:
 
 ``` r
-r <- tissot(147, -42, proj.out = "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145")
-ii <- indicatrix(r)
-plot(ii[[1]], scale = 2e5, add = FALSE, show.axes = TRUE, show.circle = TRUE)
-title("LCC at Hobart")
+ii2 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145")
+plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
 
-![](man/readmefigs/README-rich-1.png)<!-- -->
+![](man/readmefigs/README-single-1.png)<!-- -->
 
 ## Polar projections
 
 ``` r
-polar_pts <- expand.grid(lon = seq(-165, 165, by = 30),
-                         lat = seq(-85, -30, by = 10))
-p <- tissot(polar_pts, proj.out = "+proj=stere +lat_0=-90 +lon_0=147")
-ii <- indicatrix(p)
-plot(ii, scale = 5e5, add = FALSE)
+polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-85, -30, by = 10))
+p <- tissot(polar_xy, "+proj=stere +lat_0=-90 +lon_0=147")
+plot(indicatrix(p), scale = 5e5, add = FALSE, fill.by = "scale.area")
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case
-title("Polar Stereographic")
 ```
 
 ![](man/readmefigs/README-polar-1.png)<!-- -->
 
+``` r
+la <- tissot(polar_xy, "+proj=laea +lat_0=-90 +lon_0=147")
+plot(indicatrix(la), scale = 5e5, add = FALSE)
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/readmefigs/README-laea-1.png)<!-- -->
+
 ## Distortion summary
 
 ``` r
-r <- tissot(expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30)),
-            proj.out = "+proj=robin")
 summary(r)
 #> Tissot indicatrix: 55 points
 #>   Source CRS: EPSG:4326

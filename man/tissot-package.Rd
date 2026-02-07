@@ -3,9 +3,9 @@
 \docType{package}
 \name{tissot-package}
 \alias{tissot-package}
-\title{tissot: Tissot Indicatrix}
+\title{tissot: Tissot Indicatrix for Map Projection Distortion}
 \description{
-Compute and visualize the Tissot indicatrix for map projections. The indicatrix characterizes projection distortion by computing scale factors, angular deformation, areal distortion, and convergence at arbitrary points. Based on the calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Uses GDAL (via 'gdalraster') for coordinate transformation and supports any projection that GDAL/PROJ can handle.
+Compute and visualize the Tissot indicatrix for map projections. The indicatrix characterizes projection distortion by computing scale factors, angular deformation, areal distortion, and convergence at arbitrary points. Based on the calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Uses GDAL (via 'gdalraster') for coordinate transformation and supports any projection that GDAL/PROJ can handle. The Tissot Indicatrix is developed using the method described by as described in the manual by John P. Snyder (1987) \doi{10.3133/pp1395}.
 }
 \seealso{
 Useful links:

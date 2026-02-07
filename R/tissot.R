@@ -12,39 +12,34 @@
 #' [gdalraster::transform_xy()]. All subsequent calculations (SVD, distortion
 #' metrics) are fully vectorized.
 #'
-#' @param x longitude values (or a two-column matrix/data.frame of lon, lat)
-#' @param y latitude values (ignored if x is a matrix)
-#' @param proj.in input CRS (default "EPSG:4326")
-#' @param proj.out target projection CRS
+#' @param x input coordinates — any xy-ish object: a two-column matrix,
+#'   data.frame, tibble, list with `x`/`y` or `lon`/`lat` components,
+#'   or a length-2 numeric vector for a single point
+#' @param target target projection CRS string (required)
+#' @param ... ignored
+#' @param source source CRS (default `"EPSG:4326"`)
 #' @param A semi-major axis of the ellipsoid (default WGS84)
 #' @param f.inv inverse flattening (default WGS84)
 #' @param dx finite difference step in degrees (default 1e-4)
 #' @return A `tissot_tbl` tibble with columns: x (lon), y (lat), dx_dlam,
 #'   dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-#'   scale.b, scale.area, angle_deformation, convergence. The `proj.in` and
-#'   `proj.out` CRS strings are stored as attributes.
+#'   scale.b, scale.area, angle_deformation, convergence. The `source` and
+#'   `target` CRS strings are stored as attributes.
 #' @seealso [indicatrix()], [tissot_map()]
 #' @export
 #' @examples
-#' tissot(0, 45, proj.out = "+proj=robin")
-#' tissot(cbind(seq(-180, 180, by = 30), 0), proj.out = "+proj=robin")
-tissot <- function(x, y = NULL,
-                   proj.in = "EPSG:4326",
-                   proj.out,
+#' tissot(c(0, 45), "+proj=robin")
+#' tissot(cbind(seq(-180, 180, by = 30), 0), "+proj=robin")
+tissot <- function(x, target, ...,
+                   source = "EPSG:4326",
                    A = 6378137,
                    f.inv = 298.257223563,
                    dx = 1e-4) {
 
-  ## Handle matrix/data.frame input
-  if (is.matrix(x) || is.data.frame(x)) {
-    y <- x[, 2L]
-    x <- x[, 1L]
-  }
-  stopifnot(length(x) == length(y))
-
-  n <- length(x)
-  lon <- as.double(x)
-  lat <- as.double(y)
+  xy <- as_xy(x)
+  n <- nrow(xy)
+  lon <- xy[, 1L]
+  lat <- xy[, 2L]
 
   ## Ellipsoid derived quantities
   e.sq <- (2 - 1 / f.inv) / f.inv
@@ -68,7 +63,7 @@ tissot <- function(x, y = NULL,
   pts[2L * n + seq_len(n), ] <- cbind(lon, lat + dx)
 
   ## Single batched projection call
-  proj <- gdalraster::transform_xy(pts, proj.in, proj.out)
+  proj <- gdalraster::transform_xy(pts, source, target)
 
   ## Extract projected coordinates
   idx_base <- seq_len(n)
@@ -148,9 +143,8 @@ tissot <- function(x, y = NULL,
   )
 
   ## Attach projection metadata and subclass
-
-  attr(out, "proj.in") <- proj.in
-  attr(out, "proj.out") <- proj.out
+  attr(out, "source") <- source
+  attr(out, "target") <- target
   class(out) <- c("tissot_tbl", class(out))
   out
 }
@@ -158,20 +152,20 @@ tissot <- function(x, y = NULL,
 
 #' @export
 print.tissot_tbl <- function(x, ...) {
-  proj.out <- attr(x, "proj.out") %||% "unknown"
+  target <- attr(x, "target") %||% "unknown"
   cat(sprintf("Tissot indicatrix: %d point%s, %s\n",
-              nrow(x), if (nrow(x) != 1L) "s" else "", proj.out))
+              nrow(x), if (nrow(x) != 1L) "s" else "", target))
   NextMethod()
 }
 
 #' @export
 summary.tissot_tbl <- function(object, ...) {
-  proj.in <- attr(object, "proj.in") %||% "unknown"
-  proj.out <- attr(object, "proj.out") %||% "unknown"
+  src <- attr(object, "source") %||% "unknown"
+  tgt <- attr(object, "target") %||% "unknown"
   cat(sprintf("Tissot indicatrix: %d point%s\n", nrow(object),
               if (nrow(object) != 1L) "s" else ""))
-  cat(sprintf("  Source CRS: %s\n", proj.in))
-  cat(sprintf("  Target CRS: %s\n", proj.out))
+  cat(sprintf("  Source CRS: %s\n", src))
+  cat(sprintf("  Target CRS: %s\n", tgt))
   cat(sprintf("  Areal scale:  min=%.4f  max=%.4f  mean=%.4f\n",
               min(object$scale.area, na.rm = TRUE),
               max(object$scale.area, na.rm = TRUE),
@@ -197,61 +191,56 @@ summary.tissot_tbl <- function(object, ...) {
 #'
 #' `indicatrix()` accepts either:
 #' - A `tissot_tbl` object (from [tissot()]) — projection is extracted
-#'   from attributes
-#' - Raw longitude/latitude values with an explicit `proj.out`
+#'   from attributes, `target` is optional
+#' - Any xy-ish input with an explicit `target`
 #'
-#' @param x a `tissot_tbl`, or longitude values (or a two-column matrix)
-#' @param y latitude values (ignored if x is a `tissot_tbl` or matrix)
-#' @param proj.out target projection CRS (required if x is not a `tissot_tbl`)
-#' @param proj.in input CRS (default "EPSG:4326")
+#' @param x a `tissot_tbl`, or any xy-ish input (see [tissot()])
+#' @param target target projection CRS (extracted from `tissot_tbl`
+#'   attributes if `x` is one; required otherwise)
 #' @param ... passed to [tissot()]
+#' @param source source CRS (default `"EPSG:4326"`)
 #' @return An `indicatrix_list` object (a list of `indicatrix` objects with
-#'   `proj.out` stored as an attribute)
+#'   `source` and `target` stored as attributes)
 #' @seealso [tissot()], [plot.indicatrix()], [plot.indicatrix_list()],
 #'   [ti_ellipse()]
 #' @export
 #' @examples
 #' ## From a tissot_tbl
-#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), proj.out = "+proj=robin")
+#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
 #' ii <- indicatrix(r)
 #' plot(ii)
 #'
-#' ## From raw lon/lat
-#' ii2 <- indicatrix(0, 45, proj.out = "+proj=stere +lat_0=90")
+#' ## From raw coordinates
+#' ii2 <- indicatrix(c(0, 45), "+proj=stere +lat_0=90")
 #' plot(ii2)
-indicatrix <- function(x, y = NULL, proj.out = NULL,
-                       proj.in = "EPSG:4326", ...) {
+indicatrix <- function(x, target = NULL, ..., source = "EPSG:4326") {
 
   if (inherits(x, "tissot_tbl")) {
     ## Extract projection from the tissot_tbl attributes
     tis <- x
-    proj.in <- attr(tis, "proj.in") %||% proj.in
-    proj.out <- attr(tis, "proj.out") %||% proj.out
-    if (is.null(proj.out)) {
-      stop("proj.out not found in tissot_tbl attributes and not supplied")
+    source <- attr(tis, "source") %||% source
+    target <- target %||% attr(tis, "target")
+    if (is.null(target)) {
+      stop("target not found in tissot_tbl attributes and not supplied")
     }
   } else {
-    ## Raw lon/lat path
-    if (is.null(proj.out)) {
-      stop("proj.out is required when x is not a tissot_tbl")
+    ## Raw coordinate path
+    if (is.null(target)) {
+      stop("target is required when x is not a tissot_tbl")
     }
-    if (is.matrix(x) || is.data.frame(x)) {
-      y <- x[, 2L]
-      x <- x[, 1L]
-    }
-    tis <- tissot(x, y, proj.in = proj.in, proj.out = proj.out, ...)
+    tis <- tissot(x, target, source = source, ...)
   }
 
   ## Project the center points
   centers <- gdalraster::transform_xy(
-    cbind(tis$x, tis$y), proj.in, proj.out
+    cbind(tis$x, tis$y), source, target
   )
 
   out <- lapply(seq_len(nrow(tis)), function(i) {
     structure(list(
       center = centers[i, ],
       A = matrix(c(tis$dx_dlam[i], tis$dy_dlam[i],
-                   tis$dx_dphi[i], tis$dy_dphi[i]), 2L, 2L),
+                    tis$dx_dphi[i], tis$dy_dphi[i]), 2L, 2L),
       scale.h = tis$scale.h[i],
       scale.k = tis$scale.k[i],
       scale.a = tis$scale.a[i],
@@ -266,8 +255,8 @@ indicatrix <- function(x, y = NULL, proj.out = NULL,
 
   structure(out,
             class = "indicatrix_list",
-            proj.in = proj.in,
-            proj.out = proj.out)
+            source = source,
+            target = target)
 }
 
 
@@ -301,6 +290,7 @@ ti_ellipse <- function(x, scale = 1e5, n = 72, ...) {
 #' @param n number of points on the circle
 #' @return A two-column matrix of projected coordinates
 #' @keywords internal
+#' @noRd
 ti_circle <- function(x, scale = 1e5, n = 72) {
   theta <- seq(0, 2 * pi, length.out = n + 1L)
   circle <- cbind(cos(theta), sin(theta)) * scale
@@ -320,6 +310,7 @@ ti_circle <- function(x, scale = 1e5, n = 72) {
 #' @return A list with `lambda` and `phi` components, each a 2x2 matrix
 #'   of endpoint coordinates
 #' @keywords internal
+#' @noRd
 ti_axes <- function(x, scale = 1e5) {
   ## Lambda direction (parallel scale, columns 1 of A)
   lam_dir <- x$A[, 1L]
@@ -366,7 +357,7 @@ ti_axes <- function(x, scale = 1e5) {
 #'   col.phi = "blue", lwd = 1.5)`.
 #' @param show.circle `TRUE`, `FALSE`, or a named list of graphical parameters
 #'   for the reference circle. Defaults: `list(col = adjustcolor("white",
-#'   alpha.f = 0.6), border = "grey70", lty = 2)`.
+#'   alpha.f = 0.6), border = "grey70", lwd = 2.5, lty = 2)`.
 #' @param ... passed to [graphics::polygon()]
 #' @seealso [indicatrix()], [plot.indicatrix_list()], [ti_ellipse()]
 #' @export
@@ -416,9 +407,9 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 }
 
 
-#' Plot a list of indicatrices
+#' Plot a list of indicatrixes
 #'
-#' Draws all indicatrices in an `indicatrix_list`, optionally creating a
+#' Draws all indicatrixes in an `indicatrix_list`, optionally creating a
 #' new plot or adding to an existing one. Can colour-code the fill by a
 #' distortion metric.
 #'
@@ -445,7 +436,7 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 #' @export
 #' @examples
 #' xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
-#' r <- tissot(xy, proj.out = "+proj=robin")
+#' r <- tissot(xy, "+proj=robin")
 #' ii <- indicatrix(r)
 #'
 #' ## Uniform fill
@@ -473,9 +464,9 @@ plot.indicatrix_list <- function(x, scale = 1e5, n = 72,
     plot(xr, yr, type = "n", asp = 1, xlab = "", ylab = "")
 
     ## Register the projection for tissot_map()
-    proj.out <- attr(x, "proj.out")
-    if (!is.null(proj.out)) {
-      options(tissot.last.plot.proj = proj.out)
+    target <- attr(x, "target")
+    if (!is.null(target)) {
+      options(tissot.last.plot.proj = target)
     }
   }
 
@@ -516,15 +507,15 @@ plot.indicatrix_list <- function(x, scale = 1e5, n = 72,
   out <- unclass(x)[i]
   structure(out,
             class = "indicatrix_list",
-            proj.in = attr(x, "proj.in"),
-            proj.out = attr(x, "proj.out"))
+            source = attr(x, "source"),
+            target = attr(x, "target"))
 }
 
 #' @export
 print.indicatrix_list <- function(x, ...) {
-  proj.out <- attr(x, "proj.out") %||% "unknown"
+  target <- attr(x, "target") %||% "unknown"
   cat(sprintf("Indicatrix list: %d ellipse%s, %s\n",
-              length(x), if (length(x) != 1L) "s" else "", proj.out))
+              length(x), if (length(x) != 1L) "s" else "", target))
   invisible(x)
 }
 

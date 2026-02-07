@@ -1,5 +1,5 @@
 Package: tissot
-Title: Tissot Indicatrix
+Title: Tissot Indicatrix for Map Projection Distortion
 Version: 0.2.0
 Authors@R: c(
     person("Michael", "Sumner", email = "mdsumner@gmail.com", role = c("aut", "cre"), 
@@ -13,7 +13,8 @@ Description: Compute and visualize the Tissot indicatrix for map projections.
     arbitrary points. Based on the calculations shared by Bill Huber on 
     Stack Exchange (<https://gis.stackexchange.com/a/5075/482>). Uses 
     GDAL (via 'gdalraster') for coordinate transformation and supports any 
-    projection that GDAL/PROJ can handle.
+    projection that GDAL/PROJ can handle. The Tissot Indicatrix is developed using the method
+    described by as described in the manual by John P. Snyder (1987)  <doi:10.3133/pp1395>. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -29,7 +30,9 @@ Imports:
 Suggests:
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    spelling
 Config/testthat/edition: 3
 URL: https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues
+Language: en-US

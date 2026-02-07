@@ -6,22 +6,24 @@
 \usage{
 tissot(
   x,
-  y = NULL,
-  proj.in = "EPSG:4326",
-  proj.out,
+  target,
+  ...,
+  source = "EPSG:4326",
   A = 6378137,
   f.inv = 298.257223563,
   dx = 1e-04
 )
 }
 \arguments{
-\item{x}{longitude values (or a two-column matrix/data.frame of lon, lat)}
+\item{x}{input coordinates — any xy-ish object: a two-column matrix,
+data.frame, tibble, list with \code{x}/\code{y} or \code{lon}/\code{lat} components,
+or a length-2 numeric vector for a single point}
 
-\item{y}{latitude values (ignored if x is a matrix)}
+\item{target}{target projection CRS string (required)}
 
-\item{proj.in}{input CRS (default "EPSG:4326")}
+\item{...}{ignored}
 
-\item{proj.out}{target projection CRS}
+\item{source}{source CRS (default \code{"EPSG:4326"})}
 
 \item{A}{semi-major axis of the ellipsoid (default WGS84)}
 
@@ -32,8 +34,8 @@ tissot(
 \value{
 A \code{tissot_tbl} tibble with columns: x (lon), y (lat), dx_dlam,
 dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-scale.b, scale.area, angle_deformation, convergence. The \code{proj.in} and
-\code{proj.out} CRS strings are stored as attributes.
+scale.b, scale.area, angle_deformation, convergence. The \code{source} and
+\code{target} CRS strings are stored as attributes.
 }
 \description{
 Compute the Tissot indicatrix at given longitude/latitude locations for a
@@ -47,8 +49,8 @@ all base and offset points in a single batched call to
 metrics) are fully vectorized.
 }
 \examples{
-tissot(0, 45, proj.out = "+proj=robin")
-tissot(cbind(seq(-180, 180, by = 30), 0), proj.out = "+proj=robin")
+tissot(c(0, 45), "+proj=robin")
+tissot(cbind(seq(-180, 180, by = 30), 0), "+proj=robin")
 }
 \seealso{
 \code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}

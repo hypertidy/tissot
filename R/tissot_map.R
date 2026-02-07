@@ -2,13 +2,13 @@
 #'
 #' `tissot_map()` draws the bundled [world] coastline, projected if a
 #' projection is current. The projection is determined in this order:
-#' 1. An explicit `proj.out` argument
+#' 1. An explicit `target` argument
 #' 2. The projection stored by the last [plot.indicatrix_list()] call
 #'
 #' `tissot_abline()` draws vertical and horizontal reference lines at a
 #' given longitude/latitude in projected coordinates.
 #'
-#' @param proj.out target CRS. If `NULL`, uses the last plot projection
+#' @param target target CRS. If `NULL`, uses the last plot projection
 #'   (from `plot.indicatrix_list()`) or draws in lon/lat.
 #' @param add logical; add to existing plot (default `TRUE`) or create new
 #' @param ... graphical parameters passed to [graphics::lines()] (if adding)
@@ -17,21 +17,21 @@
 #' @seealso [plot.indicatrix_list()], [tissot()]
 #' @export
 #' @examples
-#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), proj.out = "+proj=robin")
+#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), "+proj=robin")
 #' ii <- indicatrix(r)
 #' plot(ii, scale = 6e5, add = FALSE)
 #' tissot_map()
-tissot_map <- function(..., proj.out = NULL, add = TRUE) {
+tissot_map <- function(..., target = NULL, add = TRUE) {
   props <- list(...)
 
-  if (is.null(proj.out)) {
-    proj.out <- getOption("tissot.last.plot.proj")
+  if (is.null(target)) {
+    target <- getOption("tissot.last.plot.proj")
   }
 
-  w <- if (is.null(proj.out)) {
+  w <- if (is.null(target)) {
     world
   } else {
-    gdalraster::transform_xy(world, "OGC:CRS84", proj.out)
+    gdalraster::transform_xy(world, "OGC:CRS84", target)
   }
 
   if (is.null(props$col)) props$col <- grDevices::rgb(.7, .7, .7)
@@ -42,8 +42,8 @@ tissot_map <- function(..., proj.out = NULL, add = TRUE) {
     props$x <- w
     if (is.null(props$pch)) props$pch <- "."
     do.call(graphics::plot, props)
-    if (!is.null(proj.out)) {
-      options(tissot.last.plot.proj = proj.out)
+    if (!is.null(target)) {
+      options(tissot.last.plot.proj = target)
     }
   }
   invisible(w)
@@ -51,22 +51,21 @@ tissot_map <- function(..., proj.out = NULL, add = TRUE) {
 
 
 #' @rdname tissot_map
-#' @param lambda longitude at which to draw a vertical line
-#' @param phi latitude at which to draw a horizontal line
-#' @param proj.in source CRS for lambda/phi (default "EPSG:4326")
+#' @param x longitude values (or any xy-ish input; see [tissot()])
+#' @param y latitude values (ignored if `x` is a matrix)
+#' @param source source CRS for the coordinates (default `"EPSG:4326"`)
 #' @return `tissot_abline()` is called for its side effect
 #' @export
 #' @importFrom graphics abline
-tissot_abline <- function(lambda, phi = NULL, ..., proj.in = NULL,
-                          proj.out = NULL) {
-  xy <- do.call(cbind, grDevices::xy.coords(lambda, phi)[1:2])
+tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
+                          target = NULL) {
+  xy <- as_xy(if (is.null(y)) x else cbind(x, y))
 
-  if (is.null(proj.out)) {
-    proj.out <- getOption("tissot.last.plot.proj")
+  if (is.null(target)) {
+    target <- getOption("tissot.last.plot.proj")
   }
-  if (!is.null(proj.out)) {
-    if (is.null(proj.in)) proj.in <- "EPSG:4326"
-    xy <- gdalraster::transform_xy(xy, proj.in, proj.out)
+  if (!is.null(target)) {
+    xy <- gdalraster::transform_xy(xy, source, target)
   }
   graphics::abline(v = xy[, 1L], h = xy[, 2L], ...)
 }
@@ -77,7 +76,7 @@ tissot_abline <- function(lambda, phi = NULL, ..., proj.in = NULL,
 #' @description
 #' `r lifecycle::badge("deprecated")`
 #'
-#' These functions access a global option. Prefer passing `proj.out`
+#' These functions access a global option. Prefer passing `target`
 #' explicitly to [tissot_map()] and [tissot_abline()], or let
 #' [plot.indicatrix_list()] set the projection automatically.
 #'
@@ -88,8 +87,8 @@ tissot_get_proj <- function() {
 }
 
 #' @rdname tissot_get_proj
-#' @param proj.out projection CRS string
+#' @param target projection CRS string
 #' @export
-tissot_set_proj <- function(proj.out) {
-  options(tissot.last.plot.proj = proj.out)
+tissot_set_proj <- function(target) {
+  options(tissot.last.plot.proj = target)
 }
