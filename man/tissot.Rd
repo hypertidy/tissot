@@ -30,9 +30,10 @@ tissot(
 \item{dx}{finite difference step in degrees (default 1e-4)}
 }
 \value{
-A tibble with columns: x (lon), y (lat), dx_dlam, dy_dlam,
-dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-scale.b, scale.area, angle_deformation, convergence
+A \code{tissot_tbl} tibble with columns: x (lon), y (lat), dx_dlam,
+dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
+scale.b, scale.area, angle_deformation, convergence. The \code{proj.in} and
+\code{proj.out} CRS strings are stored as attributes.
 }
 \description{
 Compute the Tissot indicatrix at given longitude/latitude locations for a
@@ -47,5 +48,8 @@ metrics) are fully vectorized.
 }
 \examples{
 tissot(0, 45, proj.out = "+proj=robin")
-tissot(seq(-180, 180, by = 30), 0, proj.out = "+proj=robin")
+tissot(cbind(seq(-180, 180, by = 30), 0), proj.out = "+proj=robin")
+}
+\seealso{
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}
 }

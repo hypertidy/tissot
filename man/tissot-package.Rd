@@ -5,7 +5,7 @@
 \alias{tissot-package}
 \title{tissot: Tissot Indicatrix}
 \description{
-Attempt to formalize the Tissot indicatrix calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Attempt to translate and automate the computation for any projection with a given set of longitude latitude locations. The indicatrix characterizes map projection distortion by computing scale factors, angular deformation, and convergence at each point.
+Compute and visualize the Tissot indicatrix for map projections. The indicatrix characterizes projection distortion by computing scale factors, angular deformation, areal distortion, and convergence at arbitrary points. Based on the calculations shared by Bill Huber on Stack Exchange (\url{https://gis.stackexchange.com/a/5075/482}). Uses GDAL (via 'gdalraster') for coordinate transformation and supports any projection that GDAL/PROJ can handle.
 }
 \seealso{
 Useful links:

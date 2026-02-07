@@ -9,3 +9,4 @@
 ^\.github$
 ^data-raw$
 ^gdalwmscache$
+^LICENSE\.md$

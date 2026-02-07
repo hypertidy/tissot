@@ -1,28 +1,35 @@
 Package: tissot
 Title: Tissot Indicatrix
-Version: 0.0.1.9001
+Version: 0.2.0
 Authors@R: c(
     person("Michael", "Sumner", email = "mdsumner@gmail.com", role = c("aut", "cre"), 
            comment = c(ORCID = "0000-0002-2471-7511")),
     person("Bill", "Huber", role = "aut", 
            comment = "original algorithm and calculations")
   )
-Description: Attempt to formalize the Tissot indicatrix calculations 
-    shared by Bill Huber on Stack Exchange 
-    (<https://gis.stackexchange.com/a/5075/482>). Attempt to translate and 
-    automate the computation for any projection with a given set of longitude 
-    latitude locations. The indicatrix characterizes map projection distortion 
-    by computing scale factors, angular deformation, and convergence at each 
-    point.
+Description: Compute and visualize the Tissot indicatrix for map projections. 
+    The indicatrix characterizes projection distortion by computing scale 
+    factors, angular deformation, areal distortion, and convergence at 
+    arbitrary points. Based on the calculations shared by Bill Huber on 
+    Stack Exchange (<https://gis.stackexchange.com/a/5075/482>). Uses 
+    GDAL (via 'gdalraster') for coordinate transformation and supports any 
+    projection that GDAL/PROJ can handle.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends: 
-    R (>= 2.10)
+    R (>= 3.6.0)
 Imports: 
     tibble,
-    gdalraster
+    gdalraster,
+    graphics,
+    grDevices
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
 URL: https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues

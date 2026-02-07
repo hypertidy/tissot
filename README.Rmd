@@ -1,11 +1,8 @@
 ---
-output:
-  md_document:
-    variant: markdown_github
+output: github_document
 editor_options: 
   chunk_output_type: console
 ---
-
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -13,315 +10,149 @@ editor_options:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/readmefigs/README-", 
-        fig.height = 7, 
-       fig.width = 7
+  fig.path = "man/readmefigs/README-",
+  fig.height = 7,
+  fig.width = 7
 )
-
-
 ```
 
-  <!-- badges: start -->
-  [![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
-  <!-- badges: end -->
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
+<!-- badges: end -->
 
-# The Tissot Indicatrix
+# tissot
 
-The [Tissot Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) is used to characterize local distortions within map projections. 
+Compute and visualize the [Tissot indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for map projections. The indicatrix characterizes local distortion — how a unit circle on the globe is warped into an ellipse by the projection — revealing the trade-offs every map projection makes between preserving shape, area, and direction.
 
+Based on the calculations shared by [Bill Huber on GIS Stack Exchange](https://gis.stackexchange.com/a/5075/482). Uses [gdalraster](https://CRAN.R-project.org/package=gdalraster) for coordinate transformation, so any projection that GDAL/PROJ can handle works out of the box.
 
-I have derived the code in this package (with permission) from Bill Huber's wonderful online answer here: 
+## Installation
 
-http://gis.stackexchange.com/questions/31651/an-example-tissot-ellipse-for-an-equirectangular-projection
-
-Also see
-
-https://gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
-
-
-
-# Installation
-
-Can be installed with 
-
-```R
+```r
+# install.packages("remotes")
 remotes::install_github("hypertidy/tissot")
 ```
 
-# Minimal example
+## Quick start
 
-```{r minimal}
+```{r quickstart}
 library(tissot)
-# NAD 27 in
-# World Robinson projection out
-r <- tissot(130, 54,
-           proj.in= "EPSG:4267",  
-           proj.out= "ESRI:54030")
-i0 <- indicatrix(r, scale=1e2, n=71)
-plot(i0)
-plot(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 5e2), tissot_get_proj()))
-tissot_abline(130, 54)
 
-tissot_map(add = FALSE, xlim = c(8.5e6, 1.3e7), ylim = c(4e6, 7e6))
-i1 <- indicatrix(r, scale=1e6, n=71)
-plot(i1, add = T)
-tissot_abline(130, 54)
-lines(tissot:::.prj(earthcircle::earthcircle(130, 54, scale = 2e6), tissot_get_proj()) %*% (diag(2) * 2))
+## Compute distortion properties at a grid of points
+xy <- expand.grid(lon = seq(-150, 150, by = 30),
+                  lat = seq(-60, 60, by = 30))
 
+r <- tissot(xy, proj.out = "+proj=robin")
+r
 ```
 
+The result is a tibble with one row per input point. Key columns:
 
-Since an original port of whuber's code we have now made it much easier to create many indicatrixes and plot them in one step. Or we can still just grab one and plot it on its own. Note that the scale is quite different in these plots. 
-
-
-```{r bigger-example}
-x <- seq(-172.5, 172.5, by = 15)
-y <- seq(-82.5, 82.5, by = 15)
-xy <- expand.grid(x, y)
-r <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=robin")
-
-j <- which.min(abs(135 - r$lon) + abs(54 - r$lat))
-i <- indicatrix0(r[j, ], scale= 1e4, n=71)
-plot(i, add = FALSE)
-
-ii <- indicatrix(r, scale=4e5, n=71)
-tissot_map(add = FALSE)
-plot(ii, add = TRUE)
-tissot_abline(xy[j, 1], xy[j, 2])
-```
-
-Mollweide. 
-
-```{r mollweide}
-m <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=moll")
+| Column | Meaning |
+|--------|---------|
+| `scale.h` | Meridional (north–south) scale factor |
+| `scale.k` | Parallel (east–west) scale factor |
+| `scale.a`, `scale.b` | Semi-major and semi-minor axes of the indicatrix ellipse |
+| `scale.area` | Areal distortion (= 1 for equal-area projections) |
+| `angle_deformation` | Maximum angular distortion in degrees (= 0 for conformal projections) |
+| `convergence` | Angle of the projected meridian from grid north |
 
 
-plot(indicatrix(m, scale=4e5, n=71), add = FALSE)
+## Plotting indicatrices
+
+Build indicatrix ellipses and plot them over a map:
+
+```{r robinson}
+ii <- indicatrix(r)
+plot(ii, scale = 6e5, add = FALSE)
 tissot_map()
 ```
 
+The `indicatrix()` function accepts the `tissot_tbl` directly — it extracts the projection from its attributes. You can also call it with raw coordinates:
 
-Eckhert III
-
-```{r eckhert}
-e <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=eck3")
-
-
-plot(indicatrix(e, scale=4e5, n=71), add = FALSE)
-```
-
-Equidistant 
-
-```{r aeqd}
-aeqd <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=aeqd")
-
-
-plot(indicatrix(aeqd, scale=4e5, n=71), add = FALSE)
-```
-
-Cassini-Soldner (spherical because ellipsoidal seems broken)
-
-```{r xx}
-xx <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=cass +R=6378137")
-
-
-plot(indicatrix(xx, scale=4e5, n=71), add = FALSE)
-points(tissot_map(col = "transparent"), pch = ".")
-
+```{r single}
+ii_single <- indicatrix(130, -42, proj.out = "+proj=stere +lat_0=-90")
+plot(ii_single, scale = 3e5, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
 
 
-Sinusoidal
+## Comparing projections
 
-```{r sinu}
-s <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=sinu")
+```{r comparison, fig.height = 10, fig.width = 7}
+xy <- expand.grid(lon = seq(-150, 150, by = 30),
+                  lat = seq(-60, 60, by = 30))
+projs <- c(Robinson = "+proj=robin",
+           Mollweide = "+proj=moll",
+           Mercator = "+proj=merc")
 
-
-plot(indicatrix(s, scale=3e5, n=71), add = FALSE)
-tissot_map()
-
-```
-
-
-
-# Polar example
-
-
-```{r polar-stereo}
-p <- tissot(xy[xy[,2] < -30, ],
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +datum=WGS84")
-
-plot(indicatrix(p, scale = 3e5))
-tissot_map()
-tissot_abline(147, -42)
-```
-
-```{r polar-laea}
-laea <- tissot(xy[xy[,2] < 20, ],
-            proj.in= "OGC:CRS84",
-            proj.out= "+proj=laea +lon_0=147 +lat_0=-90 +datum=WGS84")
-
-plot(indicatrix(laea, scale = 3e5))
-
-```
-
-
-Oblique Mercator
-
-You get the idea ... many projections need extra attention for real data. 
-
-
-```{r omerc}
-mp0 <- do.call(cbind, maps::map(plot = FALSE)[1:2])
-omerc <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
-mp <- tissot:::.prj(mp0, omerc, proj.in = "OGC:CRS84")
-o <- tissot(xy,
-            proj.in= "OGC:CRS84",
-            proj.out= omerc)
-
-plot(indicatrix(o, scale = 3e5))
-lines(mp)
-
-```
-
-
-VicGrid
-
-```{r vicgrid}
-
-vgrid <- "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-mp <- tissot:::.prj(mp0, vgrid, proj.in = "OGC:CRS84")
-v <- tissot(as.matrix(expand.grid(seq(120, 165, by =5 ), 
-                                          seq(-45, -35, by = 5))),
-            proj.in= "OGC:CRS84",
-            proj.out= vgrid)
-
-plot(indicatrix(v, scale = 2e5))
-lines(mp)
-```
-
-UTM Zone 54 (Hobart)
-
-
-```{r utm54}
-
-utm <- "+proj=utm +zone=54 +south"
-mp <- tissot:::.prj(mp0, utm, proj.in = "OGC:CRS84")
-u <- tissot(as.matrix(expand.grid(seq(108, 162, by =6 ), 
-                                          seq(-65, 55, by = 15))),
-            proj.in= "OGC:CRS84",
-            proj.out= utm)
-
-plot(indicatrix(u, scale = 2e5))
-lines(mp)
-```
-
-```{r, warning=FALSE,eval=F,include=FALSE}
-library(tissot)
-library(maptools)
-library(raster)
-buildandplot <- function(data, scale = 5e5, ...) {
-  ## grid of points
-  gr <- rasterToPoints(raster(data, nrow = 7, ncol = 7), spatial = FALSE)
-  ## relying on dev {PROJ} that links to unreleased {libproj}
-  grll <- reproj::reproj_xy(gr, "OGC:CRS84", source = projection(data) ))
-  sp::plot(data,  ...)
-  grll <- grll[!is.na(grll[,1]), ]
-  for (i in seq_len(nrow(grll))) {
-    tis <- tissot(grll[i, 1], grll[i, 2],  
-                                               proj.in = projection(wrld_simpl), proj.out = projection(data))
-   ind <- indicatrix(tis, scale = scale, n = 71)
-   plot(ind, add = TRUE)
-  }
-  invisible(NULL)
+par(mfrow = c(3, 1), mar = c(2, 2, 2, 1))
+for (nm in names(projs)) {
+  r <- tissot(xy, proj.out = projs[nm])
+  ii <- indicatrix(r)
+  plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+  tissot_map()
+  title(main = nm)
 }
+```
+
+Mollweide is equal-area (uniform colour), Mercator is conformal (circles, but area grows toward the poles), and Robinson is a compromise.
 
 
-## choose a projection
-ptarget1 <- "+proj=stere +lon_0=147 +lat_ts-71 +lat_0=-90 +ellps=WGS84"
-w1 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget1))
+## Colour by distortion
 
-ptarget2 <- "+proj=laea +lon_0=147 +lat_0=-90 +ellps=WGS84"
-w2 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < 10), CRS(ptarget2))
+Use `fill.by` to colour-code ellipses by any distortion metric:
 
-ptarget3 <- "+proj=omerc +lonc=147 +gamma=9 +alpha=9 +lat_0=-80 +ellps=WGS84"
-w3 <- spTransform(subset(wrld_simpl, coordinates(wrld_simpl)[,2] < -12), CRS(ptarget3), scale = 3e5)
+```{r fillby}
+r <- tissot(expand.grid(seq(-172, 172, by = 15),
+                        seq(-82, 82, by = 15)),
+            proj.out = "+proj=robin")
+ii <- indicatrix(r)
 
+par(mfrow = c(1, 2), mar = c(2, 2, 2, 1))
+plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+tissot_map()
+title("Areal distortion")
 
-buildandplot(w1, main = "Polar Stereographic")
-buildandplot(w2, main = "Lambert Azimuthal Equal Area")
-
-buildandplot(w3, main = "Oblique Mercator")
-
-
-
+plot(ii, scale = 6e5, add = FALSE, fill.by = "angle_deformation")
+tissot_map()
+title("Angular deformation")
 ```
 
 
-```{r, message=FALSE, warning=FALSE, include=F, eval=F}
+## Rich single-indicatrix plots
 
+Each indicatrix can display the reference unit circle (dashed white), lambda direction (red = parallel scale), and phi direction (blue = meridional scale):
 
-## doesn't look right
-# ptarget8 <- "+proj=laea +lat_0=-90"
-# w8 <- spTransform(wrld_simpl, CRS(ptarget8))
-# buildandplot(w8)
-
-
-
-
-library(raster)
-ptarget4 <- "+proj=merc +ellps=WGS84"
-w4 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(-180, 180, -85, 90), "SpatialPolygons")), ptarget4)
-buildandplot(w4, main = "Mercator")
-
-ptarget5 <- "+proj=lcc +ellps=WGS84 +lon_0=134 +lat_0=-30 +lat_1=-50 +lat_2=-20"
-w5 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 180, -65, -10), "SpatialPolygons")), ptarget5)
-buildandplot(w5, main = "Lambert Conformal Conic", scale = 3.5e5)
-
-
-ptarget6 <- "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs "
-
-w6 <- spTransform(raster::intersect(disaggregate(wrld_simpl), as(extent(80, 160, -65, -10), "SpatialPolygons")), ptarget6)
-buildandplot(w6, main = "UTM South Zone 50 ", col = "grey", scale = 2.5e5)
-
-
-
-buildandplot(wrld_simpl, main = "Longitude / Latitude")
-degAxis(1)
-degAxis(2)
-
+```{r rich}
+r <- tissot(147, -42, proj.out = "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145")
+ii <- indicatrix(r)
+plot(ii[[1]], scale = 2e5, add = FALSE, show.axes = TRUE, show.circle = TRUE)
+title("LCC at Hobart")
 ```
 
 
-```{r, eval = F, include=F}
-## changes in spatial break this old hack
-library(dplyr)
-ex <- extent(c(20891678,  40158321, -13438415,  10618277))
-target7 <- "+proj=lsat +lsat=5 +path=188"
-library(spbabel)
-tab <- sptable(spTransform(disaggregate(wrld_simpl), target7)) %>% filter(x_ >= xmin(ex), x_ <= xmax(ex), y_ >= ymin(ex), y_ <= ymax(ex))
-## egregiously naive crop here, but good enough for the task
-w7 <- sp(tab  %>% group_by(branch_)  %>% summarize(n = n())  %>% filter(n > 2) %>% inner_join(tab), crs = target7)
-library(graticule)
-g <- graticule(seq(-180, 165, by = 15), seq(-85, -20, by = 5), proj = target7, xlim = c(-180, 180), ylim = c(-85, -5))
-buildandplot(w7, main = "Space Oblique Mercator, lsat=5, path=188 ", col = "grey", scale = 5e5)
-plot(g, add = TRUE, lty = 2)
+## Polar projections
+
+```{r polar}
+polar_pts <- expand.grid(lon = seq(-165, 165, by = 30),
+                         lat = seq(-85, -30, by = 10))
+p <- tissot(polar_pts, proj.out = "+proj=stere +lat_0=-90 +lon_0=147")
+ii <- indicatrix(p)
+plot(ii, scale = 5e5, add = FALSE)
+tissot_map()
+title("Polar Stereographic")
+```
+
+
+## Distortion summary
+
+```{r summary}
+r <- tissot(expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30)),
+            proj.out = "+proj=robin")
+summary(r)
 ```
 
 
 ## Code of Conduct
-  
+
 Please note that the tissot project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.

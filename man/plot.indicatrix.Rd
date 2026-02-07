@@ -11,13 +11,15 @@
   col = "#FF990055",
   border = "black",
   add = TRUE,
+  show.axes = TRUE,
+  show.circle = TRUE,
   ...
 )
 }
 \arguments{
-\item{x}{an indicatrix object}
+\item{x}{an \code{indicatrix} object (from \code{\link[=indicatrix]{indicatrix()}})}
 
-\item{scale}{scaling factor for the ellipse size}
+\item{scale}{scaling factor for the ellipse size in projected units}
 
 \item{n}{number of points on the ellipse}
 
@@ -27,8 +29,17 @@
 
 \item{add}{logical; add to existing plot?}
 
-\item{...}{passed to \code{\link[=polygon]{polygon()}}}
+\item{show.axes}{logical; draw lambda (red) and phi (blue) direction lines?}
+
+\item{show.circle}{logical; draw white reference unit circle?}
+
+\item{...}{passed to \code{\link[graphics:polygon]{graphics::polygon()}}}
 }
 \description{
-Plot an indicatrix
+Draws a single Tissot indicatrix ellipse on the current plot. The ellipse
+shows the distortion of a unit circle under the map projection. Optional
+overlays include a reference unit circle, and lambda/phi direction axes.
+}
+\seealso{
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}}, \code{\link[=ti_ellipse]{ti_ellipse()}}
 }

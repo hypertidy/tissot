@@ -4,24 +4,46 @@
 \alias{indicatrix}
 \title{Compute Tissot indicatrix ellipse geometry}
 \usage{
-indicatrix(x, y = NULL, proj.out, proj.in = "EPSG:4326", ...)
+indicatrix(x, y = NULL, proj.out = NULL, proj.in = "EPSG:4326", ...)
 }
 \arguments{
-\item{x}{longitude values (or a two-column matrix)}
+\item{x}{a \code{tissot_tbl}, or longitude values (or a two-column matrix)}
 
-\item{y}{latitude values}
+\item{y}{latitude values (ignored if x is a \code{tissot_tbl} or matrix)}
 
-\item{proj.out}{target projection CRS}
+\item{proj.out}{target projection CRS (required if x is not a \code{tissot_tbl})}
 
 \item{proj.in}{input CRS (default "EPSG:4326")}
 
 \item{...}{passed to \code{\link[=tissot]{tissot()}}}
 }
 \value{
-A list of indicatrix objects, each containing ellipse geometry
-and distortion properties
+An \code{indicatrix_list} object (a list of \code{indicatrix} objects with
+\code{proj.out} stored as an attribute)
 }
 \description{
 Generates indicatrix objects for plotting at each point.
-Returns a list of indicatrix objects suitable for \code{\link[=plot.indicatrix]{plot.indicatrix()}}.
+Returns an \code{indicatrix_list} containing individual indicatrix objects.
+}
+\details{
+\code{indicatrix()} accepts either:
+\itemize{
+\item A \code{tissot_tbl} object (from \code{\link[=tissot]{tissot()}}) — projection is extracted
+from attributes
+\item Raw longitude/latitude values with an explicit \code{proj.out}
+}
+}
+\examples{
+## From a tissot_tbl
+r <- tissot(cbind(seq(-150, 150, by = 30), 0), proj.out = "+proj=robin")
+ii <- indicatrix(r)
+plot(ii)
+
+## From raw lon/lat
+ii2 <- indicatrix(0, 45, proj.out = "+proj=stere +lat_0=90")
+plot(ii2)
+}
+\seealso{
+\code{\link[=tissot]{tissot()}}, \code{\link[=plot.indicatrix]{plot.indicatrix()}}, \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}},
+\code{\link[=ti_ellipse]{ti_ellipse()}}
 }

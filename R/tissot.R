@@ -19,13 +19,15 @@
 #' @param A semi-major axis of the ellipsoid (default WGS84)
 #' @param f.inv inverse flattening (default WGS84)
 #' @param dx finite difference step in degrees (default 1e-4)
-#' @return A tibble with columns: x (lon), y (lat), dx_dlam, dy_dlam,
-#'   dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-#'   scale.b, scale.area, angle_deformation, convergence
+#' @return A `tissot_tbl` tibble with columns: x (lon), y (lat), dx_dlam,
+#'   dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
+#'   scale.b, scale.area, angle_deformation, convergence. The `proj.in` and
+#'   `proj.out` CRS strings are stored as attributes.
+#' @seealso [indicatrix()], [tissot_map()]
 #' @export
 #' @examples
 #' tissot(0, 45, proj.out = "+proj=robin")
-#' tissot(seq(-180, 180, by = 30), 0, proj.out = "+proj=robin")
+#' tissot(cbind(seq(-180, 180, by = 30), 0), proj.out = "+proj=robin")
 tissot <- function(x, y = NULL,
                    proj.in = "EPSG:4326",
                    proj.out,
@@ -128,7 +130,7 @@ tissot <- function(x, y = NULL,
   ## Convergence: angle of the projected meridian from north
   convergence <- atan2(dX_dphi_deg, dY_dphi_deg) * 180 / pi
 
-  tibble::tibble(
+  out <- tibble::tibble(
     x = lon,
     y = lat,
     dx_dlam = dX_dlam,
@@ -144,40 +146,112 @@ tissot <- function(x, y = NULL,
     angle_deformation = angle_deformation,
     convergence = convergence
   )
+
+  ## Attach projection metadata and subclass
+
+  attr(out, "proj.in") <- proj.in
+  attr(out, "proj.out") <- proj.out
+  class(out) <- c("tissot_tbl", class(out))
+  out
+}
+
+
+#' @export
+print.tissot_tbl <- function(x, ...) {
+  proj.out <- attr(x, "proj.out") %||% "unknown"
+  cat(sprintf("Tissot indicatrix: %d point%s, %s\n",
+              nrow(x), if (nrow(x) != 1L) "s" else "", proj.out))
+  NextMethod()
+}
+
+#' @export
+summary.tissot_tbl <- function(object, ...) {
+  proj.in <- attr(object, "proj.in") %||% "unknown"
+  proj.out <- attr(object, "proj.out") %||% "unknown"
+  cat(sprintf("Tissot indicatrix: %d point%s\n", nrow(object),
+              if (nrow(object) != 1L) "s" else ""))
+  cat(sprintf("  Source CRS: %s\n", proj.in))
+  cat(sprintf("  Target CRS: %s\n", proj.out))
+  cat(sprintf("  Areal scale:  min=%.4f  max=%.4f  mean=%.4f\n",
+              min(object$scale.area, na.rm = TRUE),
+              max(object$scale.area, na.rm = TRUE),
+              mean(object$scale.area, na.rm = TRUE)))
+  cat(sprintf("  Angular def:  min=%.4f  max=%.4f  mean=%.4f deg\n",
+              min(object$angle_deformation, na.rm = TRUE),
+              max(object$angle_deformation, na.rm = TRUE),
+              mean(object$angle_deformation, na.rm = TRUE)))
+  cat(sprintf("  Scale h:      min=%.4f  max=%.4f  (meridional)\n",
+              min(object$scale.h, na.rm = TRUE),
+              max(object$scale.h, na.rm = TRUE)))
+  cat(sprintf("  Scale k:      min=%.4f  max=%.4f  (parallel)\n",
+              min(object$scale.k, na.rm = TRUE),
+              max(object$scale.k, na.rm = TRUE)))
+  invisible(object)
 }
 
 
 #' Compute Tissot indicatrix ellipse geometry
 #'
 #' Generates indicatrix objects for plotting at each point.
-#' Returns a list of indicatrix objects suitable for [plot.indicatrix()].
+#' Returns an `indicatrix_list` containing individual indicatrix objects.
 #'
-#' @param x longitude values (or a two-column matrix)
-#' @param y latitude values
-#' @param proj.out target projection CRS
+#' `indicatrix()` accepts either:
+#' - A `tissot_tbl` object (from [tissot()]) — projection is extracted
+#'   from attributes
+#' - Raw longitude/latitude values with an explicit `proj.out`
+#'
+#' @param x a `tissot_tbl`, or longitude values (or a two-column matrix)
+#' @param y latitude values (ignored if x is a `tissot_tbl` or matrix)
+#' @param proj.out target projection CRS (required if x is not a `tissot_tbl`)
 #' @param proj.in input CRS (default "EPSG:4326")
 #' @param ... passed to [tissot()]
-#' @return A list of indicatrix objects, each containing ellipse geometry
-#'   and distortion properties
+#' @return An `indicatrix_list` object (a list of `indicatrix` objects with
+#'   `proj.out` stored as an attribute)
+#' @seealso [tissot()], [plot.indicatrix()], [plot.indicatrix_list()],
+#'   [ti_ellipse()]
 #' @export
-indicatrix <- function(x, y = NULL, proj.out, proj.in = "EPSG:4326", ...) {
-  if (is.matrix(x) || is.data.frame(x)) {
-    y <- x[, 2L]
-    x <- x[, 1L]
-  }
+#' @examples
+#' ## From a tissot_tbl
+#' r <- tissot(cbind(seq(-150, 150, by = 30), 0), proj.out = "+proj=robin")
+#' ii <- indicatrix(r)
+#' plot(ii)
+#'
+#' ## From raw lon/lat
+#' ii2 <- indicatrix(0, 45, proj.out = "+proj=stere +lat_0=90")
+#' plot(ii2)
+indicatrix <- function(x, y = NULL, proj.out = NULL,
+                       proj.in = "EPSG:4326", ...) {
 
-  tis <- tissot(x, y, proj.in = proj.in, proj.out = proj.out, ...)
+  if (inherits(x, "tissot_tbl")) {
+    ## Extract projection from the tissot_tbl attributes
+    tis <- x
+    proj.in <- attr(tis, "proj.in") %||% proj.in
+    proj.out <- attr(tis, "proj.out") %||% proj.out
+    if (is.null(proj.out)) {
+      stop("proj.out not found in tissot_tbl attributes and not supplied")
+    }
+  } else {
+    ## Raw lon/lat path
+    if (is.null(proj.out)) {
+      stop("proj.out is required when x is not a tissot_tbl")
+    }
+    if (is.matrix(x) || is.data.frame(x)) {
+      y <- x[, 2L]
+      x <- x[, 1L]
+    }
+    tis <- tissot(x, y, proj.in = proj.in, proj.out = proj.out, ...)
+  }
 
   ## Project the center points
   centers <- gdalraster::transform_xy(
     cbind(tis$x, tis$y), proj.in, proj.out
   )
 
-  lapply(seq_len(nrow(tis)), function(i) {
+  out <- lapply(seq_len(nrow(tis)), function(i) {
     structure(list(
       center = centers[i, ],
       A = matrix(c(tis$dx_dlam[i], tis$dy_dlam[i],
-                    tis$dx_dphi[i], tis$dy_dphi[i]), 2L, 2L),
+                   tis$dx_dphi[i], tis$dy_dphi[i]), 2L, 2L),
       scale.h = tis$scale.h[i],
       scale.k = tis$scale.k[i],
       scale.a = tis$scale.a[i],
@@ -189,6 +263,11 @@ indicatrix <- function(x, y = NULL, proj.out, proj.in = "EPSG:4326", ...) {
       lat = tis$y[i]
     ), class = "indicatrix")
   })
+
+  structure(out,
+            class = "indicatrix_list",
+            proj.in = proj.in,
+            proj.out = proj.out)
 }
 
 
@@ -199,6 +278,7 @@ indicatrix <- function(x, y = NULL, proj.out, proj.in = "EPSG:4326", ...) {
 #' @param n number of points on the ellipse
 #' @param ... ignored
 #' @return A two-column matrix of projected coordinates tracing the ellipse
+#' @seealso [indicatrix()], [plot.indicatrix()]
 #' @export
 ti_ellipse <- function(x, scale = 1e5, n = 72, ...) {
   stopifnot(inherits(x, "indicatrix"))
@@ -211,23 +291,222 @@ ti_ellipse <- function(x, scale = 1e5, n = 72, ...) {
 }
 
 
-#' Plot an indicatrix
+#' Generate reference unit circle coordinates
+#'
+#' The unit circle shows what a circle of unit scale factor looks like —
+#' comparing the indicatrix ellipse to this circle shows the distortion.
 #'
 #' @param x an indicatrix object
-#' @param scale scaling factor for the ellipse size
+#' @param scale scaling factor (should match the indicatrix plot scale)
+#' @param n number of points on the circle
+#' @return A two-column matrix of projected coordinates
+#' @keywords internal
+ti_circle <- function(x, scale = 1e5, n = 72) {
+  theta <- seq(0, 2 * pi, length.out = n + 1L)
+  circle <- cbind(cos(theta), sin(theta)) * scale
+  circle[, 1L] <- circle[, 1L] + x$center[1L]
+  circle[, 2L] <- circle[, 2L] + x$center[2L]
+  circle
+}
+
+
+#' Generate axis line coordinates for an indicatrix
+#'
+#' Computes the endpoints for the lambda (parallel) and phi (meridian)
+#' direction lines through the indicatrix center.
+#'
+#' @param x an indicatrix object
+#' @param scale scaling factor
+#' @return A list with `lambda` and `phi` components, each a 2x2 matrix
+#'   of endpoint coordinates
+#' @keywords internal
+ti_axes <- function(x, scale = 1e5) {
+  ## Lambda direction (parallel scale, columns 1 of A)
+  lam_dir <- x$A[, 1L]
+  lam_dir <- lam_dir / sqrt(sum(lam_dir^2))
+  lam_len <- x$scale.k * scale
+
+  lam <- rbind(
+    x$center - lam_dir * lam_len,
+    x$center + lam_dir * lam_len
+  )
+
+  ## Phi direction (meridional scale, columns 2 of A)
+  phi_dir <- x$A[, 2L]
+  phi_dir <- phi_dir / sqrt(sum(phi_dir^2))
+  phi_len <- x$scale.h * scale
+
+  phi <- rbind(
+    x$center - phi_dir * phi_len,
+    x$center + phi_dir * phi_len
+  )
+
+  list(lambda = lam, phi = phi)
+}
+
+
+#' Plot an indicatrix
+#'
+#' Draws a single Tissot indicatrix ellipse on the current plot. The ellipse
+#' shows the distortion of a unit circle under the map projection. Optional
+#' overlays include a reference unit circle, and lambda/phi direction axes.
+#'
+#' @param x an `indicatrix` object (from [indicatrix()])
+#' @param scale scaling factor for the ellipse size in projected units
 #' @param n number of points on the ellipse
 #' @param col fill colour for the ellipse
 #' @param border border colour
 #' @param add logical; add to existing plot?
-#' @param ... passed to [polygon()]
+#' @param show.axes logical; draw lambda (red) and phi (blue) direction lines?
+#' @param show.circle logical; draw white reference unit circle?
+#' @param ... passed to [graphics::polygon()]
+#' @seealso [indicatrix()], [plot.indicatrix_list()], [ti_ellipse()]
 #' @export
 plot.indicatrix <- function(x, scale = 1e5, n = 72,
                             col = "#FF990055", border = "black",
-                            add = TRUE, ...) {
+                            add = TRUE,
+                            show.axes = TRUE,
+                            show.circle = TRUE, ...) {
   ell <- ti_ellipse(x, scale = scale, n = n)
+
   if (!add) {
     plot(ell, type = "n", asp = 1, xlab = "", ylab = "")
   }
-  polygon(ell[, 1L], ell[, 2L], col = col, border = border, ...)
+
+  ## Reference unit circle (behind the ellipse)
+  if (show.circle) {
+    circ <- ti_circle(x, scale = scale, n = n)
+    graphics::polygon(circ[, 1L], circ[, 2L],
+                      col = grDevices::adjustcolor("white", alpha.f = 0.6),
+                      border = "grey70", lty = 2)
+  }
+
+  ## Filled ellipse
+  graphics::polygon(ell[, 1L], ell[, 2L], col = col, border = border, ...)
+
+  ## Direction axes
+  if (show.axes) {
+    ax <- ti_axes(x, scale = scale)
+    graphics::lines(ax$lambda[, 1L], ax$lambda[, 2L], col = "red", lwd = 1.5)
+    graphics::lines(ax$phi[, 1L], ax$phi[, 2L], col = "blue", lwd = 1.5)
+  }
+
   invisible(x)
+}
+
+
+#' Plot a list of indicatrices
+#'
+#' Draws all indicatrices in an `indicatrix_list`, optionally creating a
+#' new plot or adding to an existing one. Can colour-code the fill by a
+#' distortion metric.
+#'
+#' @param x an `indicatrix_list` (from [indicatrix()])
+#' @param scale scaling factor for ellipse size in projected units
+#' @param n number of points per ellipse
+#' @param col fill colour. If a single colour, used for all ellipses. If
+#'   `NULL` and `fill.by` is set, colours are generated automatically.
+#' @param border border colour
+#' @param add logical; add to existing plot? If `FALSE`, creates a new
+#'   plot sized to contain all ellipses.
+#' @param show.axes logical; draw lambda/phi direction lines?
+#' @param show.circle logical; draw reference unit circles? Default `TRUE`
+#'   for the list method (the circle-vs-ellipse comparison makes distortion
+#'   visible at map scale).
+#' @param fill.by character; name of a distortion metric to colour-code
+#'   the fill. One of `"scale.area"`, `"angle_deformation"`, `"scale.h"`,
+#'   `"scale.k"`, `"scale.a"`, `"scale.b"`. Default `NULL` (uniform fill).
+#' @param palette colour palette function (default [grDevices::hcl.colors()])
+#' @param ncolors number of colours in the palette (default 64)
+#' @param ... passed to [plot.indicatrix()]
+#' @seealso [indicatrix()], [plot.indicatrix()], [tissot_map()]
+#' @export
+#' @examples
+#' xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
+#' r <- tissot(xy, proj.out = "+proj=robin")
+#' ii <- indicatrix(r)
+#'
+#' ## Uniform fill
+#' plot(ii, scale = 6e5, add = FALSE)
+#' tissot_map()
+#'
+#' ## Colour by areal distortion
+#' plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+#' tissot_map()
+plot.indicatrix_list <- function(x, scale = 1e5, n = 72,
+                                 col = "#FF990055",
+                                 border = "black",
+                                 add = FALSE,
+                                 show.axes = FALSE,
+                                 show.circle = TRUE,
+                                 fill.by = NULL,
+                                 palette = NULL,
+                                 ncolors = 64L, ...) {
+
+  if (!add) {
+    ## Compute bounding box from all ellipses
+    all_pts <- do.call(rbind, lapply(x, ti_ellipse, scale = scale, n = n))
+    xr <- range(all_pts[, 1L], na.rm = TRUE)
+    yr <- range(all_pts[, 2L], na.rm = TRUE)
+    plot(xr, yr, type = "n", asp = 1, xlab = "", ylab = "")
+
+    ## Register the projection for tissot_map()
+    proj.out <- attr(x, "proj.out")
+    if (!is.null(proj.out)) {
+      options(tissot.last.plot.proj = proj.out)
+    }
+  }
+
+  ## Colour mapping
+  cols <- rep_len(col, length(x))
+  if (!is.null(fill.by)) {
+    vals <- vapply(x, function(xi) xi[[fill.by]], numeric(1L))
+    if (is.null(palette)) {
+      palette <- function(n) grDevices::hcl.colors(n, palette = "YlOrRd",
+                                                   rev = TRUE)
+    }
+    pal <- palette(ncolors)
+    rng <- range(vals, na.rm = TRUE)
+    if (diff(rng) > 0) {
+      idx <- findInterval(vals, seq(rng[1L], rng[2L], length.out = ncolors + 1L),
+                          all.inside = TRUE)
+      cols <- grDevices::adjustcolor(pal[idx], alpha.f = 0.7)
+    }
+  }
+
+  for (i in seq_along(x)) {
+    plot.indicatrix(x[[i]], scale = scale, n = n,
+                    col = cols[i], border = border, add = TRUE,
+                    show.axes = show.axes, show.circle = show.circle, ...)
+  }
+
+  invisible(x)
+}
+
+
+#' Subset an indicatrix_list
+#'
+#' @param x an `indicatrix_list`
+#' @param i indices
+#' @return An `indicatrix_list` with the selected elements
+#' @export
+`[.indicatrix_list` <- function(x, i) {
+  out <- unclass(x)[i]
+  structure(out,
+            class = "indicatrix_list",
+            proj.in = attr(x, "proj.in"),
+            proj.out = attr(x, "proj.out"))
+}
+
+#' @export
+print.indicatrix_list <- function(x, ...) {
+  proj.out <- attr(x, "proj.out") %||% "unknown"
+  cat(sprintf("Indicatrix list: %d ellipse%s, %s\n",
+              length(x), if (length(x) != 1L) "s" else "", proj.out))
+  invisible(x)
+}
+
+#' @export
+length.indicatrix_list <- function(x) {
+  length(unclass(x))
 }

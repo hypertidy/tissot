@@ -21,3 +21,6 @@ A two-column matrix of projected coordinates tracing the ellipse
 \description{
 Generate ellipse coordinates for an indicatrix
 }
+\seealso{
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=plot.indicatrix]{plot.indicatrix()}}
+}
