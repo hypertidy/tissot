@@ -1,7 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/hypertidy/tissot/workflows/R-CMD-check/badge.svg)](https://github.com/hypertidy/tissot/actions)
+
+[![R-CMD-check](https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 # tissot
@@ -54,7 +55,7 @@ distortion:
 xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
 r <- tissot(xy, "+proj=robin")
 ii <- indicatrix(r)
-plot(ii, scale = 6e5, add = FALSE)
+plot(ii, scale = 6e5, add = FALSE, show.axes  = TRUE, show.circle = TRUE)
 tissot_map()
 #> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
 #> values, NA returned in that case

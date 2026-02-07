@@ -11,7 +11,7 @@
   col = "#FF990055",
   border = "black",
   add = FALSE,
-  show.axes = FALSE,
+  show.axes = TRUE,
   show.circle = TRUE,
   fill.by = NULL,
   palette = NULL,

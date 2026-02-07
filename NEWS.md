@@ -1,5 +1,8 @@
 # tissot 0.2.0
 
+* Plots now default to `TRUE` for both `show.axes` and `show.circle`. These aren't just
+  geographic circles.
+ 
 * Switched projection engine from `reproj` to `gdalraster`. All coordinate
   transformations now use `gdalraster::transform_xy()`, supporting any CRS
   that GDAL/PROJ can handle.
