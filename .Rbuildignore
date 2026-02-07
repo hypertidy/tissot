@@ -3,7 +3,6 @@
 ^README\.Rmd$
 ^README\.html$
 ^README-.*\.png$
-^man/readmefigs/*
 ^cran-comments\.md$
 ^\.travis\.yml$
 ^CODE_OF_CONDUCT\.md$

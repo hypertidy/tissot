@@ -12,7 +12,7 @@ editor_options:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/readmefigs/README-",
+  fig.path = "man/figures/README-",
   fig.height = 7,
   fig.width = 7
 )

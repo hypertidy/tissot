@@ -61,7 +61,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-robinson-1.png)<!-- -->
+![](man/figures/README-robinson-1.png)<!-- -->
 
 ## Colour-coded distortion
 
@@ -74,7 +74,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-coloured-1.png)<!-- -->
+![](man/figures/README-coloured-1.png)<!-- -->
 
 ## Projection comparison
 
@@ -86,7 +86,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-mollweide-1.png)<!-- -->
+![](man/figures/README-mollweide-1.png)<!-- -->
 
 ``` r
 merc_xy <- expand.grid(seq(-150, 150, by = 30), seq(-75, 75, by = 15))
@@ -97,7 +97,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-mercator-1.png)<!-- -->
+![](man/figures/README-mercator-1.png)<!-- -->
 
 ## Rich single-indicatrix plots
 
@@ -108,7 +108,7 @@ ii2 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_
 plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
 
-![](man/readmefigs/README-single-1.png)<!-- -->
+![](man/figures/README-single-1.png)<!-- -->
 
 ## Polar projections
 
@@ -121,7 +121,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-polar-1.png)<!-- -->
+![](man/figures/README-polar-1.png)<!-- -->
 
 ``` r
 la <- tissot(polar_xy, "+proj=laea +lat_0=-90 +lon_0=147")
@@ -131,7 +131,7 @@ tissot_map()
 #> values, NA returned in that case
 ```
 
-![](man/readmefigs/README-laea-1.png)<!-- -->
+![](man/figures/README-laea-1.png)<!-- -->
 
 ## Distortion summary
 
