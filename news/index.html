@@ -55,7 +55,7 @@
 <ul><li><p>Projection engine switched from <code>reproj</code> to <code><a href="https://firelab.github.io/gdalraster/reference/transform_xy.html" class="external-link">gdalraster::transform_xy()</a></code>. All projection work is now a single batched GDAL call.</p></li>
 <li><p>API renamed: <code>proj.in</code>/<code>proj.out</code> → <code>source</code>/<code>target</code>, following reproj conventions. <code>target</code> is the second positional argument (required); <code>source</code> defaults to <code>"EPSG:4326"</code>.</p></li>
 <li><p><code><a href="../reference/tissot.html">tissot()</a></code> input is now any “xy-ish” object (matrix, data.frame, list, length-2 vector) via the internal <code>as_xy()</code> helper. The old <code>lambda</code>/<code>phi</code> positional arguments are replaced by <code>x</code>.</p></li>
-<li><p><code><a href="../reference/tissot.html">tissot()</a></code> returns a <code>tissot_tbl</code> (subclassed tibble) with <code>source</code> and <code>target</code> stored as attributes. Column names changed to: <code>x</code>, <code>y</code>, <code>dx_dlam</code>, <code>dy_dlam</code>, <code>dx_dphi</code>, <code>dy_dphi</code>, <code>scale.h</code>, <code>scale.k</code>, <code>scale.omega</code>, <code>scale.a</code>, <code>scale.b</code>, <code>scale.area</code>, <code>angle_deformation</code>, <code>convergence</code>.</p></li>
+<li><p><code><a href="../reference/tissot.html">tissot()</a></code> returns a <code>tissot_tbl</code> (subclassed tibble) with <code>source</code> and <code>target</code> stored as attributes. Column names changed to: <code>x</code>, <code>y</code>, <code>dx_dlam</code>, <code>dy_dlam</code>, <code>dx_dphi</code>, <code>dy_dphi</code>, <code>scale_h</code>, <code>scale_k</code>, <code>scale_omega</code>, <code>scale_a</code>, <code>scale_b</code>, <code>scale_area</code>, <code>angle_deformation</code>, <code>convergence</code>.</p></li>
 <li><p><code><a href="../reference/indicatrix.html">indicatrix()</a></code> returns an <code>indicatrix_list</code> (replaces <code>indicatrixes</code> class). Accepts <code>tissot_tbl</code> or raw coordinates + explicit <code>target</code>.</p></li>
 <li><p>Removed: <code>indicatrix0()</code>, <code>tissot0()</code>, <code>.prj()</code>, and the internal <code>numericDeriv</code> path. The Jacobian is now computed directly via finite differences.</p></li>
 </ul></div>
@@ -67,7 +67,7 @@
 <li>Lambda/phi direction axes (<code>show.axes</code>)</li>
 <li>
 <code>show.circle</code> and <code>show.axes</code> accept <code>TRUE</code>, <code>FALSE</code>, or a named list of graphical parameters for full customization</li>
-<li>Colour-coded fill via <code>fill.by</code> (e.g. <code>"scale.area"</code>, <code>"angle_deformation"</code>)</li>
+<li>Colour-coded fill via <code>fill.by</code> (e.g. <code>"scale_area"</code>, <code>"angle_deformation"</code>)</li>
 </ul></li>
 <li><p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods for <code>tissot_tbl</code>.</p></li>
 <li><p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code>, and <code>[</code> methods for <code>indicatrix_list</code>.</p></li>
