@@ -158,6 +158,10 @@ tissot_map()
 
 ## Polar projections
 
+In any projection we should refer to a regular grid of points in it’s
+crs, else we get weird situations like this, more obvious on an actual
+pole:
+
 ``` r
 polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-80, -50, by = 10))
 p <- tissot(polar_xy, "+proj=stere +lat_0=-90 +lon_0=147")
@@ -179,7 +183,8 @@ tissot_map()
 
 ![](man/figures/README-laea-1.png)<!-- -->
 
-Let’s push away from the pole in Lambert Azimuthal Equidistant
+If we push away from the pole in Lambert Azimuthal Equidistant it’s
+useful to see what happens.
 
 ``` r
 lea <- tissot(polar_xy, "+proj=aeqd +lat_0=-20 +lon_0=147")
@@ -190,6 +195,37 @@ tissot_map()
 ```
 
 ![](man/figures/README-aeqd-1.png)<!-- -->
+
+Far better is to generate a grid in the crs we are assessing.
+
+``` r
+op <- par(mfrow = c(1, 2))
+ext <- c(-180, 150, -80, -50)
+crs <- "+proj=stere +lat_0=-90 +lon_0=147"
+projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
+
+polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
+polar_xy <- gdalraster::transform_xy(polar, srs_to = "EPSG:4326", srs_from = crs)
+p <- tissot(polar_xy, crs, source = "EPSG:4326")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+
+ext <- c(-180, 150, -80, -50)
+crs <- "+proj=laea +lat_0=-90 +lon_0=147"
+projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
+
+polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
+polar_xy <- gdalraster::transform_xy(polar, srs_to = "EPSG:4326", srs_from = crs)
+p <- tissot(polar_xy, crs, source = "EPSG:4326")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
+tissot_map()
+#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
+#> values, NA returned in that case
+```
+
+![](man/figures/README-polar-proj-1.png)<!-- -->
 
 ## Distortion summary
 
@@ -203,6 +239,17 @@ summary(r)
 #>   Scale h:      min=0.8790  max=1.3023  (meridional)
 #>   Scale k:      min=0.8487  max=1.3521  (parallel)
 ```
+
+## Why this package?
+
+Most “Tissot indicatrix” plots you’ll find online are just geographic
+circles drawn on the map. They show what happens to a circle under the
+projection, which is useful — but it’s not the indicatrix. The
+indicatrix is the Jacobian of the projection at a point: it gives you
+actual scale factors, angular deformation, and areal distortion. This
+package computes those.
+
+Other examples: [mgimond](https://mgimond.github.io/tissot/).
 
 ## Code of Conduct
 
