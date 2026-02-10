@@ -35,22 +35,79 @@ library(tissot)
 tissot(c(147, -42), "+proj=utm +zone=55 +south")
 #> Tissot indicatrix: 1 point, +proj=utm +zone=55 +south
 #> # A tibble: 1 × 14
-#>       x     y dx_dlam    dy_dlam dx_dphi dy_dphi scale.h scale.k scale.omega
+#>       x     y dx_dlam    dy_dlam dx_dphi dy_dphi scale_h scale_k scale_omega
 #>   <dbl> <dbl>   <dbl>      <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
 #> 1   147   -42 0.99960 -5.8386e-7       0 0.99960 0.99960 0.99960 0.000033471
-#> # ℹ 5 more variables: scale.a <dbl>, scale.b <dbl>, scale.area <dbl>,
+#> # ℹ 5 more variables: scale_a <dbl>, scale_b <dbl>, scale_area <dbl>,
 #> #   angle_deformation <dbl>, convergence <dbl>
 ```
 
-Columns include: `scale.h` (meridional), `scale.k` (parallel), `scale.a`
-/ `scale.b` (max/min singular values), `scale.area`,
+Columns include: `scale_h` (meridional), `scale_k` (parallel), `scale_a`
+/ `scale_b` (max/min singular values), `scale_area`,
 `angle_deformation`, and `convergence`.
 
 ## Plotting indicatrixes
 
 `indicatrix()` builds plottable ellipses. The dashed circle is the
 undistorted reference; the filled ellipse shows the projection’s
-distortion:
+distortion.
+
+``` r
+xy <- expand.grid(x = seq(0, 1e6, length.out = 5), y = seq(4900000, 5700000, length.out = 4))
+lonlat <- tissot_unproject(xy, source = "+proj=utm +zone=55 +south")
+tis <- tissot(lonlat, "+proj=utm +zone=55 +south")
+plot(indicatrix(tis), scale = 3e4)
+tissot_map()
+```
+
+![](man/figures/README-utm55-1.png)<!-- -->
+
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+
+What does that top left indicatrix look like?
+
+``` r
+plot(indicatrix(tis)[1])
+```
+
+![](man/figures/README-topleft-1.png)<!-- -->
+
+Far from our UTM zone we are in a lot more trouble.
+
+``` r
+## UTM zone 55 is at 147 longitude (55 * 6 - 183)
+tis <- tissot(cbind(100, -42), "+proj=utm +zone=55 +south")
+plot(indicatrix(tis))
+```
+
+![](man/figures/README-very-bad-trouble-1.png)<!-- -->
+
+``` r
+
+##  In Mercator we have well known problems 
+tis <- tissot(cbind(147, -42), "+proj=merc")
+plot(indicatrix(tis))
+```
+
+![](man/figures/README-very-bad-trouble-2.png)<!-- -->
+
+``` r
+
+## close to the equator Mercator is ok (in exactly the same way that UTM Zone 55 is ok near 147E longitude)
+tis <- tissot(cbind(147, 0), "+proj=merc")
+plot(indicatrix(tis))
+```
+
+![](man/figures/README-very-bad-trouble-3.png)<!-- -->
+
+Map projection is arbitrary.
 
 ``` r
 xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
@@ -58,24 +115,40 @@ r <- tissot(xy, "+proj=robin")
 ii <- indicatrix(r)
 plot(ii, scale = 6e5, add = FALSE, show.axes  = TRUE, show.circle = TRUE)
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-robinson-1.png)<!-- -->
+
+### Distortion summary
+
+``` r
+summary(r)
+#> Tissot indicatrix: 55 points
+#>   Source CRS: EPSG:4326
+#>   Target CRS: +proj=robin
+#>   Areal scale:  min=0.8209  max=1.2790  mean=1.0468
+#>   Angular def:  min=1.5058  max=52.3188  mean=21.3786 deg
+#>   Scale h:      min=0.8790  max=1.3023  (meridional)
+#>   Scale k:      min=0.8487  max=1.3521  (parallel)
+```
 
 ## Colour-coded distortion
 
 Pass `fill.by` to colour ellipses by a distortion metric:
 
 ``` r
-plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+plot(ii, scale = 6e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-coloured-1.png)<!-- -->
+
+``` r
+plot(ii, scale = 6e5, add = FALSE, fill.by = "angle_deformation")
+tissot_map()
+```
+
+![](man/figures/README-angle_deformation-1.png)<!-- -->
 
 ## Projection comparison
 
@@ -83,8 +156,6 @@ tissot_map()
 m <- tissot(xy, "+proj=moll")
 plot(indicatrix(m), scale = 5e5, add = FALSE)
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-mollweide-1.png)<!-- -->
@@ -94,8 +165,6 @@ merc_xy <- expand.grid(seq(-150, 150, by = 30), seq(-75, 75, by = 15))
 me <- tissot(merc_xy, "+proj=merc")
 plot(indicatrix(me), scale = 5e5, add = FALSE)
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-mercator-1.png)<!-- -->
@@ -125,10 +194,8 @@ Lambert Conformal Conic
 ``` r
 pxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(pxy, "+proj=lcc +lat_0=-60 +lon_0=147 +lat_1=-70 +lat_2=-55")
-plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-lcc-1.png)<!-- -->
@@ -138,37 +205,32 @@ Universal Transverse Mercator
 ``` r
 qxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(qxy, "EPSG:32755")
-plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> GDAL FAILURE 1: Point outside of projection domain
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 8 point(s) failed to
-#> transform, NA returned in that case
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-utm-1.png)<!-- -->
 
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+    #> GDAL FAILURE 1: Point outside of projection domain
+
 ## Polar projections
 
-In any projection we should refer to a regular grid of points in it’s
+In any projection we should refer to a regular grid of points in its
 crs, else we get weird situations like this, more obvious on an actual
 pole:
 
 ``` r
 polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-80, -50, by = 10))
 p <- tissot(polar_xy, "+proj=stere +lat_0=-90 +lon_0=147")
-plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-polar-1.png)<!-- -->
@@ -177,8 +239,6 @@ tissot_map()
 la <- tissot(polar_xy, "+proj=laea +lat_0=-90 +lon_0=147")
 plot(indicatrix(la), scale = 2.5e5, add = FALSE)
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-laea-1.png)<!-- -->
@@ -190,13 +250,16 @@ useful to see what happens.
 lea <- tissot(polar_xy, "+proj=aeqd +lat_0=-20 +lon_0=147")
 plot(indicatrix(lea), scale = 2.5e5, add = FALSE)
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-aeqd-1.png)<!-- -->
 
-Far better is to generate a grid in the crs we are assessing.
+## Consider generating input in the crs you are assessing
+
+As with the UTM example above with `tissot_unproject()` it is usually
+far better is to generate a grid in the crs we are assessing. A grid in
+lon/lat won’t be very meaningful in many projections depending on the
+context.
 
 ``` r
 op <- par(mfrow = c(1, 2))
@@ -205,39 +268,26 @@ crs <- "+proj=stere +lat_0=-90 +lon_0=147"
 projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
 
 polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
-polar_xy <- gdalraster::transform_xy(polar, srs_to = "EPSG:4326", srs_from = crs)
+polar_xy <- tissot_unproject(polar, "EPSG:4326", source = crs)
 p <- tissot(polar_xy, crs, source = "EPSG:4326")
-plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 
 ext <- c(-180, 150, -80, -50)
 crs <- "+proj=laea +lat_0=-90 +lon_0=147"
 projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
 
 polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
-polar_xy <- gdalraster::transform_xy(polar, srs_to = "EPSG:4326", srs_from = crs)
+polar_xy <- tissot_unproject(polar, "EPSG:4326", source = crs)
 p <- tissot(polar_xy, crs, source = "EPSG:4326")
-plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale.area")
+plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> Warning in .transform_xy(pts_in, srs_from, srs_to): 1972 point(s) had missing
-#> values, NA returned in that case
 ```
 
 ![](man/figures/README-polar-proj-1.png)<!-- -->
 
-## Distortion summary
-
 ``` r
-summary(r)
-#> Tissot indicatrix: 55 points
-#>   Source CRS: EPSG:4326
-#>   Target CRS: +proj=robin
-#>   Areal scale:  min=0.8209  max=1.2790  mean=1.0468
-#>   Angular def:  min=1.5058  max=52.3188  mean=21.3786 deg
-#>   Scale h:      min=0.8790  max=1.3023  (meridional)
-#>   Scale k:      min=0.8487  max=1.3521  (parallel)
+par(op)
 ```
 
 ## Why this package?

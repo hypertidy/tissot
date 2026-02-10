@@ -12,6 +12,9 @@
 #' [gdalraster::transform_xy()]. All subsequent calculations (SVD, distortion
 #' metrics) are fully vectorized.
 #'
+#' Input 'x' is assumed to be longitude,latitude values, with default 'EPSG:4326'. Set 'source'
+#' for a different 'geographic' coordinate reference system.
+#'
 #' @param x input coordinates — any xy-ish object: a two-column matrix,
 #'   data.frame, tibble, list with `x`/`y` or `lon`/`lat` components,
 #'   or a length-2 numeric vector for a single point
@@ -22,10 +25,10 @@
 #' @param f.inv inverse flattening (default WGS84)
 #' @param dx finite difference step in degrees (default 1e-4)
 #' @return A `tissot_tbl` tibble with columns: x (lon), y (lat), dx_dlam,
-#'   dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-#'   scale.b, scale.area, angle_deformation, convergence. The `source` and
+#'   dy_dlam, dx_dphi, dy_dphi, scale_h, scale_k, scale_omega, scale_a,
+#'   scale_b, scale_area, angle_deformation, convergence. The `source` and
 #'   `target` CRS strings are stored as attributes.
-#' @seealso [indicatrix()], [tissot_map()]
+#' @seealso [indicatrix()], [tissot_map()], [tissot_unproject()], [gdalraster::transform_xy()]
 #' @export
 #' @examples
 #' tissot(c(0, 45), "+proj=robin")
@@ -36,6 +39,13 @@ tissot <- function(x, target, ...,
                    f.inv = 298.257223563,
                    dx = 1e-4) {
 
+
+  if (!gdalraster::srs_is_geographic(source)) {
+    stop("'source' must be a geographic (lon/lat) CRS, got: ", source)
+  }
+  if (gdalraster::srs_is_geographic(target)) {
+    stop("'target' must be a projected CRS, got: ", target)
+  }
   xy <- as_xy(x)
   n <- nrow(xy)
   lon <- xy[, 1L]
@@ -106,19 +116,19 @@ tissot <- function(x, target, ...,
   lam2 <- (tr - disc) / 2
 
   ## Scale factors: singular values of J
-  scale.a <- sqrt(pmax(lam1, 0))
-  scale.b <- sqrt(pmax(lam2, 0))
+  scale_a <- sqrt(pmax(lam1, 0))
+  scale_b <- sqrt(pmax(lam2, 0))
 
   ## Meridional scale (h) and parallel scale (k) from Snyder
-  scale.h <- sqrt(a22)
-  scale.k <- sqrt(a11)
+  scale_h <- sqrt(a22)
+  scale_k <- sqrt(a11)
 
   ## Areal scale
-  scale.area <- scale.a * scale.b
+  scale_area <- scale_a * scale_b
 
   ## Maximum angular deformation (omega): Snyder eq 4-1b
-  sin_half_omega <- ifelse(scale.a + scale.b > 0,
-                           (scale.a - scale.b) / (scale.a + scale.b),
+  sin_half_omega <- ifelse(scale_a + scale_b > 0,
+                           (scale_a - scale_b) / (scale_a + scale_b),
                            0)
   angle_deformation <- 2 * asin(pmin(sin_half_omega, 1)) * 180 / pi
 
@@ -132,12 +142,12 @@ tissot <- function(x, target, ...,
     dy_dlam = dY_dlam,
     dx_dphi = dX_dphi,
     dy_dphi = dY_dphi,
-    scale.h = scale.h,
-    scale.k = scale.k,
-    scale.omega = angle_deformation,
-    scale.a = scale.a,
-    scale.b = scale.b,
-    scale.area = scale.area,
+    scale_h = scale_h,
+    scale_k = scale_k,
+    scale_omega = angle_deformation,
+    scale_a = scale_a,
+    scale_b = scale_b,
+    scale_area = scale_area,
     angle_deformation = angle_deformation,
     convergence = convergence
   )
@@ -147,6 +157,41 @@ tissot <- function(x, target, ...,
   attr(out, "target") <- target
   class(out) <- c("tissot_tbl", class(out))
   out
+}
+
+#' Unproject coordinates to geographic (lon/lat) CRS
+#'
+#' A convenience wrapper around [gdalraster::transform_xy()] for converting
+#' projected coordinates to geographic. Useful for generating regular grids
+#' in a projected CRS to feed to [tissot()], which requires lon/lat input.
+#'
+#' @param x input coordinates — any xy-ish object: a two-column matrix,
+#'   data.frame, tibble, list with `x`/`y` or `lon`/`lat` components,
+#'   or a length-2 numeric vector for a single point
+#' @param target target CRS string (default `"EPSG:4326"`). Must be geographic.
+#' @param ... ignored
+#' @param source source CRS string (required). Must be a projected CRS.
+#' @return A two-column matrix of longitude and latitude values.
+#' @seealso [tissot()], [gdalraster::transform_xy()]
+#' @export
+#' @examples
+#' ## regular grid in UTM zone 55S, unprojected to lon/lat for tissot()
+#' xy <- expand.grid(x = seq(4e5, 6e5, length.out = 5),
+#'                   y = seq(5200000, 5400000, length.out = 4))
+#' ll <- tissot_unproject(xy, source = "EPSG:32755")
+#' tissot(ll, "+proj=utm +zone=55 +south")
+tissot_unproject <- function(x, target = "EPSG:4326", ..., source = NULL) {
+  if (is.null(source)) {
+    stop("'source' must be provided")
+  }
+  if (gdalraster::srs_is_geographic(source)) {
+    stop("'source' must be a projected CRS, got: ", source)
+  }
+  if (!gdalraster::srs_is_geographic(target)) {
+    stop("'target' must be a geographic (lon/lat) CRS, got: ", target)
+  }
+  xy <- as_xy(x)
+  gdalraster::transform_xy(xy, srs_from = source, srs_to = target)
 }
 
 
@@ -167,19 +212,19 @@ summary.tissot_tbl <- function(object, ...) {
   cat(sprintf("  Source CRS: %s\n", src))
   cat(sprintf("  Target CRS: %s\n", tgt))
   cat(sprintf("  Areal scale:  min=%.4f  max=%.4f  mean=%.4f\n",
-              min(object$scale.area, na.rm = TRUE),
-              max(object$scale.area, na.rm = TRUE),
-              mean(object$scale.area, na.rm = TRUE)))
+              min(object$scale_area, na.rm = TRUE),
+              max(object$scale_area, na.rm = TRUE),
+              mean(object$scale_area, na.rm = TRUE)))
   cat(sprintf("  Angular def:  min=%.4f  max=%.4f  mean=%.4f deg\n",
               min(object$angle_deformation, na.rm = TRUE),
               max(object$angle_deformation, na.rm = TRUE),
               mean(object$angle_deformation, na.rm = TRUE)))
   cat(sprintf("  Scale h:      min=%.4f  max=%.4f  (meridional)\n",
-              min(object$scale.h, na.rm = TRUE),
-              max(object$scale.h, na.rm = TRUE)))
+              min(object$scale_h, na.rm = TRUE),
+              max(object$scale_h, na.rm = TRUE)))
   cat(sprintf("  Scale k:      min=%.4f  max=%.4f  (parallel)\n",
-              min(object$scale.k, na.rm = TRUE),
-              max(object$scale.k, na.rm = TRUE)))
+              min(object$scale_k, na.rm = TRUE),
+              max(object$scale_k, na.rm = TRUE)))
   invisible(object)
 }
 
@@ -241,11 +286,11 @@ indicatrix <- function(x, target = NULL, ..., source = "EPSG:4326") {
       center = centers[i, ],
       A = matrix(c(tis$dx_dlam[i], tis$dy_dlam[i],
                     tis$dx_dphi[i], tis$dy_dphi[i]), 2L, 2L),
-      scale.h = tis$scale.h[i],
-      scale.k = tis$scale.k[i],
-      scale.a = tis$scale.a[i],
-      scale.b = tis$scale.b[i],
-      scale.area = tis$scale.area[i],
+      scale_h = tis$scale_h[i],
+      scale_k = tis$scale_k[i],
+      scale_a = tis$scale_a[i],
+      scale_b = tis$scale_b[i],
+      scale_area = tis$scale_area[i],
       angle_deformation = tis$angle_deformation[i],
       convergence = tis$convergence[i],
       lon = tis$x[i],
@@ -315,7 +360,7 @@ ti_axes <- function(x, scale = 1e5) {
   ## Lambda direction (parallel scale, columns 1 of A)
   lam_dir <- x$A[, 1L]
   lam_dir <- lam_dir / sqrt(sum(lam_dir^2))
-  lam_len <- x$scale.k * scale
+  lam_len <- x$scale_k * scale
 
   lam <- rbind(
     x$center - lam_dir * lam_len,
@@ -325,7 +370,7 @@ ti_axes <- function(x, scale = 1e5) {
   ## Phi direction (meridional scale, columns 2 of A)
   phi_dir <- x$A[, 2L]
   phi_dir <- phi_dir / sqrt(sum(phi_dir^2))
-  phi_len <- x$scale.h * scale
+  phi_len <- x$scale_h * scale
 
   phi <- rbind(
     x$center - phi_dir * phi_len,
@@ -427,8 +472,8 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 #'   Default `TRUE` for the list method (the circle-vs-ellipse comparison makes
 #'   distortion visible at map scale). See [plot.indicatrix()] for defaults.
 #' @param fill.by character; name of a distortion metric to colour-code
-#'   the fill. One of `"scale.area"`, `"angle_deformation"`, `"scale.h"`,
-#'   `"scale.k"`, `"scale.a"`, `"scale.b"`. Default `NULL` (uniform fill).
+#'   the fill. One of `"scale_area"`, `"angle_deformation"`, `"scale_h"`,
+#'   `"scale_k"`, `"scale_a"`, `"scale_b"`. Default `NULL` (uniform fill).
 #' @param palette colour palette function (default [grDevices::hcl.colors()])
 #' @param ncolors number of colours in the palette (default 64)
 #' @param ... passed to [plot.indicatrix()]
@@ -444,7 +489,7 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 #' tissot_map()
 #'
 #' ## Colour by areal distortion
-#' plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+#' plot(ii, scale = 6e5, add = FALSE, fill.by = "scale_area")
 #' tissot_map()
 plot.indicatrix_list <- function(x, scale = 1e5, n = 72,
                                  col = "#FF990055",

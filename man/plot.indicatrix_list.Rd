@@ -42,8 +42,8 @@ Default \code{TRUE} for the list method (the circle-vs-ellipse comparison makes
 distortion visible at map scale). See \code{\link[=plot.indicatrix]{plot.indicatrix()}} for defaults.}
 
 \item{fill.by}{character; name of a distortion metric to colour-code
-the fill. One of \code{"scale.area"}, \code{"angle_deformation"}, \code{"scale.h"},
-\code{"scale.k"}, \code{"scale.a"}, \code{"scale.b"}. Default \code{NULL} (uniform fill).}
+the fill. One of \code{"scale_area"}, \code{"angle_deformation"}, \code{"scale_h"},
+\code{"scale_k"}, \code{"scale_a"}, \code{"scale_b"}. Default \code{NULL} (uniform fill).}
 
 \item{palette}{colour palette function (default \code{\link[grDevices:palettes]{grDevices::hcl.colors()}})}
 
@@ -66,7 +66,7 @@ plot(ii, scale = 6e5, add = FALSE)
 tissot_map()
 
 ## Colour by areal distortion
-plot(ii, scale = 6e5, add = FALSE, fill.by = "scale.area")
+plot(ii, scale = 6e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
 }
 \seealso{

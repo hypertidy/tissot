@@ -33,8 +33,8 @@ or a length-2 numeric vector for a single point}
 }
 \value{
 A \code{tissot_tbl} tibble with columns: x (lon), y (lat), dx_dlam,
-dy_dlam, dx_dphi, dy_dphi, scale.h, scale.k, scale.omega, scale.a,
-scale.b, scale.area, angle_deformation, convergence. The \code{source} and
+dy_dlam, dx_dphi, dy_dphi, scale_h, scale_k, scale_omega, scale_a,
+scale_b, scale_area, angle_deformation, convergence. The \code{source} and
 \code{target} CRS strings are stored as attributes.
 }
 \description{
@@ -47,11 +47,14 @@ The Jacobian of the projection is computed via finite differences, projecting
 all base and offset points in a single batched call to
 \code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}. All subsequent calculations (SVD, distortion
 metrics) are fully vectorized.
+
+Input 'x' is assumed to be longitude,latitude values, with default 'EPSG:4326'. Set 'source'
+for a different 'geographic' coordinate reference system.
 }
 \examples{
 tissot(c(0, 45), "+proj=robin")
 tissot(cbind(seq(-180, 180, by = 30), 0), "+proj=robin")
 }
 \seealso{
-\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}, \code{\link[=tissot_unproject]{tissot_unproject()}}, \code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}
 }

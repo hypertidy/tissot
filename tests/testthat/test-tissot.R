@@ -1,22 +1,22 @@
 ## ---- tissot() core engine ----
 
 test_that("conformal projection has near-zero angular deformation", {
-  ## Mercator is conformal: scale.a ≈ scale.b, angle_deformation ≈ 0
+  ## Mercator is conformal: scale_a ≈ scale_b, angle_deformation ≈ 0
   r <- tissot(cbind(0, 45), "+proj=merc")
   expect_lt(r$angle_deformation, 0.01)
-  expect_equal(r$scale.a, r$scale.b, tolerance = 1e-4)
+  expect_equal(r$scale_a, r$scale_b, tolerance = 1e-4)
 })
 
 test_that("equal-area projection has areal scale ≈ 1", {
   ## Mollweide is equal-area
   r <- tissot(cbind(0, 45), "+proj=moll")
-  expect_equal(r$scale.area, 1.0, tolerance = 5e-3)
+  expect_equal(r$scale_area, 1.0, tolerance = 5e-3)
 })
 
-test_that("Plate Carrée at equator: scale.h ≈ 1, scale.k ≈ 1", {
+test_that("Plate Carrée at equator: scale_h ≈ 1, scale_k ≈ 1", {
   r <- tissot(cbind(0, 0), "+proj=eqc")
-  expect_equal(r$scale.h, 1.0, tolerance = 0.01)
-  expect_equal(r$scale.k, 1.0, tolerance = 0.01)
+  expect_equal(r$scale_h, 1.0, tolerance = 0.01)
+  expect_equal(r$scale_k, 1.0, tolerance = 0.01)
 })
 
 test_that("vectorized: multiple points return correct nrow", {
@@ -29,7 +29,7 @@ test_that("matrix input == expand.grid input", {
   m <- cbind(c(-30, 0, 30), c(-45, 0, 45))
   r1 <- tissot(m, "+proj=robin")
   r2 <- tissot(as.data.frame(m), "+proj=robin")
-  expect_equal(r1$scale.area, r2$scale.area, tolerance = 1e-10)
+  expect_equal(r1$scale_area, r2$scale_area, tolerance = 1e-10)
 })
 
 test_that("single point via length-2 vector", {
@@ -38,22 +38,34 @@ test_that("single point via length-2 vector", {
   expect_true(all(is.finite(unlist(r[, 7:14]))))
 })
 
-test_that("equal-area batch: all scale.area ≈ 1", {
+test_that("equal-area batch: all scale_area ≈ 1", {
   xy <- expand.grid(seq(-120, 120, by = 60), seq(-60, 60, by = 30))
   r <- tissot(xy, "+proj=cea")
-  expect_equal(r$scale.area, rep(1, nrow(xy)), tolerance = 5e-3)
+  expect_equal(r$scale_area, rep(1, nrow(xy)), tolerance = 5e-3)
 })
 
 test_that("polar points don't produce NaN", {
   r <- tissot(cbind(0, 89), "+proj=stere +lat_0=90")
-  expect_true(all(is.finite(r$scale.a)))
+  expect_true(all(is.finite(r$scale_a)))
 })
 
 test_that("custom source CRS works", {
   r <- tissot(cbind(0, 45), "+proj=robin", source = "EPSG:4267")
   expect_equal(nrow(r), 1L)
-  expect_true(is.finite(r$scale.area))
+  expect_true(is.finite(r$scale_area))
 })
+
+test_that("projected source CRS is rejected", {
+  expect_error(tissot(cbind(500000, 6000000), "+proj=robin",
+                      source = "+proj=utm +zone=55 +south"),
+               "geographic")
+})
+
+test_that("geographic target CRS is rejected", {
+  expect_error(tissot(cbind(0, 45), "EPSG:4326"),
+               "projected")
+})
+
 
 ## ---- tissot_tbl class ----
 
@@ -150,7 +162,7 @@ test_that("multiple projection families work", {
              "+proj=utm +zone=55 +south")
   for (p in projs) {
     r <- tissot(cbind(147, -42), p)
-    expect_true(all(is.finite(r$scale.area)),
+    expect_true(all(is.finite(r$scale_area)),
                 info = paste("Failed for", p))
   }
 })

@@ -31,7 +31,7 @@ tissot_map <- function(..., target = NULL, add = TRUE) {
   w <- if (is.null(target)) {
     world
   } else {
-    gdalraster::transform_xy(world, "OGC:CRS84", target)
+    suppressWarnings(gdalraster::transform_xy(world, "OGC:CRS84", target))
   }
 
   if (is.null(props$col)) props$col <- grDevices::rgb(.7, .7, .7)

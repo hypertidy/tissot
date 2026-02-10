@@ -17,8 +17,8 @@ Major refactor — modernized engine, new API, and rich plotting.
 
 * `tissot()` returns a `tissot_tbl` (subclassed tibble) with `source` and
   `target` stored as attributes. Column names changed to: `x`, `y`,
-  `dx_dlam`, `dy_dlam`, `dx_dphi`, `dy_dphi`, `scale.h`, `scale.k`,
-  `scale.omega`, `scale.a`, `scale.b`, `scale.area`, `angle_deformation`,
+  `dx_dlam`, `dy_dlam`, `dx_dphi`, `dy_dphi`, `scale_h`, `scale_k`,
+  `scale_omega`, `scale_a`, `scale_b`, `scale_area`, `angle_deformation`,
   `convergence`.
 
 * `indicatrix()` returns an `indicatrix_list` (replaces `indicatrixes`
@@ -35,7 +35,7 @@ Major refactor — modernized engine, new API, and rich plotting.
     - Lambda/phi direction axes (`show.axes`)
     - `show.circle` and `show.axes` accept `TRUE`, `FALSE`, or a named list
       of graphical parameters for full customization
-    - Colour-coded fill via `fill.by` (e.g. `"scale.area"`,
+    - Colour-coded fill via `fill.by` (e.g. `"scale_area"`,
       `"angle_deformation"`)
 
 * `print()` and `summary()` methods for `tissot_tbl`.
