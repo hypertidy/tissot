@@ -21,6 +21,5 @@ globalVariables("world")
 #' `abs(lon) <= 180`.
 #'
 #' @format A two-column numeric matrix (longitude, latitude)
-#' @docType data
 #' @name world
 "world"

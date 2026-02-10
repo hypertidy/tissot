@@ -404,6 +404,7 @@ ti_axes <- function(x, scale = 1e5) {
 #'   for the reference circle. Defaults: `list(col = adjustcolor("white",
 #'   alpha.f = 0.6), border = "grey70", lwd = 2.5, lty = 2)`.
 #' @param ... passed to [graphics::polygon()]
+#' @return The input `x`, invisibly.
 #' @seealso [indicatrix()], [plot.indicatrix_list()], [ti_ellipse()]
 #' @export
 plot.indicatrix <- function(x, scale = 1e5, n = 72,
@@ -478,6 +479,7 @@ plot.indicatrix <- function(x, scale = 1e5, n = 72,
 #' @param ncolors number of colours in the palette (default 64)
 #' @param ... passed to [plot.indicatrix()]
 #' @seealso [indicatrix()], [plot.indicatrix()], [tissot_map()]
+#' @return The input `x`, invisibly.
 #' @export
 #' @examples
 #' xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))

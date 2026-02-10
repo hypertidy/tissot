@@ -37,6 +37,9 @@ for the reference circle. Defaults: \code{list(col = adjustcolor("white", alpha.
 
 \item{...}{passed to \code{\link[graphics:polygon]{graphics::polygon()}}}
 }
+\value{
+The input \code{x}, invisibly.
+}
 \description{
 Draws a single Tissot indicatrix ellipse on the current plot. The ellipse
 shows the distortion of a unit circle under the map projection. Optional

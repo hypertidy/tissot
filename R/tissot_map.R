@@ -74,7 +74,7 @@ tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
 #' Get or set the current plot projection
 #'
 #' @description
-#' `r lifecycle::badge("deprecated")`
+#'  **Deprecated.** Prefer passing `target` explicitly.
 #'
 #' These functions access a global option. Prefer passing `target`
 #' explicitly to [tissot_map()] and [tissot_abline()], or let

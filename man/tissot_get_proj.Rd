@@ -16,7 +16,7 @@ tissot_set_proj(target)
 \code{tissot_get_proj()} returns the current projection string or \code{NULL}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\strong{Deprecated.} Prefer passing \code{target} explicitly.
 
 These functions access a global option. Prefer passing \code{target}
 explicitly to \code{\link[=tissot_map]{tissot_map()}} and \code{\link[=tissot_abline]{tissot_abline()}}, or let

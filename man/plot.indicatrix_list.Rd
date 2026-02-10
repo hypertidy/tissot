@@ -51,6 +51,9 @@ the fill. One of \code{"scale_area"}, \code{"angle_deformation"}, \code{"scale_h
 
 \item{...}{passed to \code{\link[=plot.indicatrix]{plot.indicatrix()}}}
 }
+\value{
+The input \code{x}, invisibly.
+}
 \description{
 Draws all indicatrixes in an \code{indicatrix_list}, optionally creating a
 new plot or adding to an existing one. Can colour-code the fill by a
