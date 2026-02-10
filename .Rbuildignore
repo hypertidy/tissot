@@ -10,3 +10,4 @@
 ^data-raw$
 ^gdalwmscache$
 ^LICENSE\.md$
+^CRAN-SUBMISSION$

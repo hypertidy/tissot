@@ -4,6 +4,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hypertidy/tissot/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/tissot)](https://CRAN.R-project.org/package=tissot)
 <!-- badges: end -->
 
 # tissot
