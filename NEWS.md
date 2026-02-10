@@ -1,69 +1,56 @@
 # tissot 0.2.0
 
-* Plots now default to `TRUE` for both `show.axes` and `show.circle`. These aren't just
-  geographic circles.
- 
-* Switched projection engine from `reproj` to `gdalraster`. All coordinate
-  transformations now use `gdalraster::transform_xy()`, supporting any CRS
-  that GDAL/PROJ can handle.
+Major refactor — modernized engine, new API, and rich plotting.
 
-* **API rename**: `proj.in`/`proj.out` replaced by `source`/`target` throughout,
-  following the reproj convention. `target` is the second positional argument
-  to `tissot()` (required); `source` defaults to `"EPSG:4326"`. This reads
-  naturally both positionally (`tissot(xy, "+proj=robin")`) and named.
+## Breaking changes
 
-* `tissot()` accepts any "xy-ish" input (matrix, data.frame, list with
-  x/y or lon/lat, length-2 vector) via the internal `as_xy()` helper. The
-  old separate `x`/`y` positional arguments are replaced by a single `x`.
+* Projection engine switched from `reproj` to `gdalraster::transform_xy()`.
+  All projection work is now a single batched GDAL call.
 
-* `tissot()` computes the Jacobian via a single batched projection call
-  (3N points in one shot) with fully vectorized distortion metrics — no
-  per-point loop.
+* API renamed: `proj.in`/`proj.out` → `source`/`target`, following reproj
+  conventions. `target` is the second positional argument (required);
+  `source` defaults to `"EPSG:4326"`.
 
-* `tissot()` now returns a `tissot_tbl` subclass carrying `source` and
-  `target` as attributes. New `print()` and `summary()` methods give a
-  quick overview of distortion statistics.
+* `tissot()` input is now any "xy-ish" object (matrix, data.frame, list,
+  length-2 vector) via the internal `as_xy()` helper. The old
+  `lambda`/`phi` positional arguments are replaced by `x`.
 
-* `indicatrix()` accepts either a `tissot_tbl` (projection extracted
-  automatically from attributes) or raw coordinates with explicit `target`.
-  The `scale` and `n` parameters moved to the plot methods where they belong.
+* `tissot()` returns a `tissot_tbl` (subclassed tibble) with `source` and
+  `target` stored as attributes. Column names changed to: `x`, `y`,
+  `dx_dlam`, `dy_dlam`, `dx_dphi`, `dy_dphi`, `scale.h`, `scale.k`,
+  `scale.omega`, `scale.a`, `scale.b`, `scale.area`, `angle_deformation`,
+  `convergence`.
 
-* `indicatrix()` now returns an `indicatrix_list` class with `[`, `print`,
-  and `length` methods, replacing the old unclassed list of `indicatrixes`.
+* `indicatrix()` returns an `indicatrix_list` (replaces `indicatrixes`
+  class). Accepts `tissot_tbl` or raw coordinates + explicit `target`.
 
-* Rich plotting for `plot.indicatrix()`: reference unit circle
-  (`show.circle`), lambda direction line in red and phi direction line in
-  blue (`show.axes`), drawn behind and over the filled ellipse. Both
-  `show.circle` and `show.axes` accept `TRUE`, `FALSE`, or a named list
-  of graphical parameters for customization.
+* Removed: `indicatrix0()`, `tissot0()`, `.prj()`, and the internal
+  `numericDeriv` path. The Jacobian is now computed directly via
+  finite differences.
 
-* `plot.indicatrix_list()` gains `fill.by` for colour-coded distortion
-  (e.g. `fill.by = "scale.area"`) using `hcl.colors()` with no extra
-  dependencies. Reference circles are shown by default to make distortion
-  visible at map scale.
+## New features
 
-* `tissot_map()` and `tissot_abline()` gain an explicit `target`
-  argument. `tissot_get_proj()` and `tissot_set_proj()` are retained but
-  soft-deprecated in favour of the projection carried by `indicatrix_list`
-  attributes.
+* `plot.indicatrix()` and `plot.indicatrix_list()` with:
+    - Reference unit circle overlay (`show.circle`)
+    - Lambda/phi direction axes (`show.axes`)
+    - `show.circle` and `show.axes` accept `TRUE`, `FALSE`, or a named list
+      of graphical parameters for full customization
+    - Colour-coded fill via `fill.by` (e.g. `"scale.area"`,
+      `"angle_deformation"`)
 
-* Added comprehensive test suite via `testthat`: conformal, equal-area,
-  and equidistant property checks, vectorization consistency, matrix input,
-  class structure, polar edge cases, and method output.
+* `print()` and `summary()` methods for `tissot_tbl`.
 
-* README rewritten to showcase the new API with projection comparisons,
-  colour-coded distortion, and rich single-indicatrix plots.
+* `print()`, `length()`, and `[` methods for `indicatrix_list`.
 
-# tissot 0.1.0
+* `tissot_map()` and `tissot_abline()` accept explicit `target` argument.
 
-* New functions `tissot_map()` and `tissot_abline()` to easily add contextual
-  world map data and location lines.
-* Improved ability to build more than one tissot and to easily plot multiple
-  indicatrixes.
-* New function `tissot_get_proj()` with no arguments, just gets the last value
-  of a plot projection registered by plot.indicatrixes.
+* `as_xy()` internal helper coerces diverse coordinate inputs.
 
-# tissot 0.0.1
+* `resolve_gpar()` internal helper for the logical-or-list graphical
+  parameter pattern.
 
-* Removed some old stuff.
-* Using PROJ and libproj, dev only versions.
+## Internal
+
+* Fully vectorized Jacobian computation — no per-point loop.
+* Computation uses 3N batched `transform_xy()` call.
+* Test suite added (testthat).
