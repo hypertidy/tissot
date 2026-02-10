@@ -49,31 +49,39 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="tissot-020">tissot 0.2.0<a class="anchor" aria-label="anchor" href="#tissot-020"></a></h2>
-<ul><li><p>Plots now default to <code>TRUE</code> for both <code>show.axes</code> and <code>show.circle</code>. These aren’t just geographic circles.</p></li>
-<li><p>Switched projection engine from <code>reproj</code> to <code>gdalraster</code>. All coordinate transformations now use <code><a href="https://firelab.github.io/gdalraster/reference/transform_xy.html" class="external-link">gdalraster::transform_xy()</a></code>, supporting any CRS that GDAL/PROJ can handle.</p></li>
-<li><p><strong>API rename</strong>: <code>proj.in</code>/<code>proj.out</code> replaced by <code>source</code>/<code>target</code> throughout, following the reproj convention. <code>target</code> is the second positional argument to <code><a href="../reference/tissot.html">tissot()</a></code> (required); <code>source</code> defaults to <code>"EPSG:4326"</code>. This reads naturally both positionally (<code>tissot(xy, "+proj=robin")</code>) and named.</p></li>
-<li><p><code><a href="../reference/tissot.html">tissot()</a></code> accepts any “xy-ish” input (matrix, data.frame, list with x/y or lon/lat, length-2 vector) via the internal <code>as_xy()</code> helper. The old separate <code>x</code>/<code>y</code> positional arguments are replaced by a single <code>x</code>.</p></li>
-<li><p><code><a href="../reference/tissot.html">tissot()</a></code> computes the Jacobian via a single batched projection call (3N points in one shot) with fully vectorized distortion metrics — no per-point loop.</p></li>
-<li><p><code><a href="../reference/tissot.html">tissot()</a></code> now returns a <code>tissot_tbl</code> subclass carrying <code>source</code> and <code>target</code> as attributes. New <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods give a quick overview of distortion statistics.</p></li>
-<li><p><code><a href="../reference/indicatrix.html">indicatrix()</a></code> accepts either a <code>tissot_tbl</code> (projection extracted automatically from attributes) or raw coordinates with explicit <code>target</code>. The <code>scale</code> and <code>n</code> parameters moved to the plot methods where they belong.</p></li>
-<li><p><code><a href="../reference/indicatrix.html">indicatrix()</a></code> now returns an <code>indicatrix_list</code> class with <code>[</code>, <code>print</code>, and <code>length</code> methods, replacing the old unclassed list of <code>indicatrixes</code>.</p></li>
-<li><p>Rich plotting for <code><a href="../reference/plot.indicatrix.html">plot.indicatrix()</a></code>: reference unit circle (<code>show.circle</code>), lambda direction line in red and phi direction line in blue (<code>show.axes</code>), drawn behind and over the filled ellipse. Both <code>show.circle</code> and <code>show.axes</code> accept <code>TRUE</code>, <code>FALSE</code>, or a named list of graphical parameters for customization.</p></li>
-<li><p><code><a href="../reference/plot.indicatrix_list.html">plot.indicatrix_list()</a></code> gains <code>fill.by</code> for colour-coded distortion (e.g. <code>fill.by = "scale.area"</code>) using <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors()</a></code> with no extra dependencies. Reference circles are shown by default to make distortion visible at map scale.</p></li>
-<li><p><code><a href="../reference/tissot_map.html">tissot_map()</a></code> and <code><a href="../reference/tissot_map.html">tissot_abline()</a></code> gain an explicit <code>target</code> argument. <code><a href="../reference/tissot_get_proj.html">tissot_get_proj()</a></code> and <code><a href="../reference/tissot_get_proj.html">tissot_set_proj()</a></code> are retained but soft-deprecated in favour of the projection carried by <code>indicatrix_list</code> attributes.</p></li>
-<li><p>Added comprehensive test suite via <code>testthat</code>: conformal, equal-area, and equidistant property checks, vectorization consistency, matrix input, class structure, polar edge cases, and method output.</p></li>
-<li><p>README rewritten to showcase the new API with projection comparisons, colour-coded distortion, and rich single-indicatrix plots.</p></li>
+<p>Major refactor — modernized engine, new API, and rich plotting.</p>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li><p>Projection engine switched from <code>reproj</code> to <code><a href="https://firelab.github.io/gdalraster/reference/transform_xy.html" class="external-link">gdalraster::transform_xy()</a></code>. All projection work is now a single batched GDAL call.</p></li>
+<li><p>API renamed: <code>proj.in</code>/<code>proj.out</code> → <code>source</code>/<code>target</code>, following reproj conventions. <code>target</code> is the second positional argument (required); <code>source</code> defaults to <code>"EPSG:4326"</code>.</p></li>
+<li><p><code><a href="../reference/tissot.html">tissot()</a></code> input is now any “xy-ish” object (matrix, data.frame, list, length-2 vector) via the internal <code>as_xy()</code> helper. The old <code>lambda</code>/<code>phi</code> positional arguments are replaced by <code>x</code>.</p></li>
+<li><p><code><a href="../reference/tissot.html">tissot()</a></code> returns a <code>tissot_tbl</code> (subclassed tibble) with <code>source</code> and <code>target</code> stored as attributes. Column names changed to: <code>x</code>, <code>y</code>, <code>dx_dlam</code>, <code>dy_dlam</code>, <code>dx_dphi</code>, <code>dy_dphi</code>, <code>scale.h</code>, <code>scale.k</code>, <code>scale.omega</code>, <code>scale.a</code>, <code>scale.b</code>, <code>scale.area</code>, <code>angle_deformation</code>, <code>convergence</code>.</p></li>
+<li><p><code><a href="../reference/indicatrix.html">indicatrix()</a></code> returns an <code>indicatrix_list</code> (replaces <code>indicatrixes</code> class). Accepts <code>tissot_tbl</code> or raw coordinates + explicit <code>target</code>.</p></li>
+<li><p>Removed: <code>indicatrix0()</code>, <code>tissot0()</code>, <code>.prj()</code>, and the internal <code>numericDeriv</code> path. The Jacobian is now computed directly via finite differences.</p></li>
 </ul></div>
-    <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.0" id="tissot-010">tissot 0.1.0<a class="anchor" aria-label="anchor" href="#tissot-010"></a></h2>
-<ul><li>New functions <code><a href="../reference/tissot_map.html">tissot_map()</a></code> and <code><a href="../reference/tissot_map.html">tissot_abline()</a></code> to easily add contextual world map data and location lines.</li>
-<li>Improved ability to build more than one tissot and to easily plot multiple indicatrixes.</li>
-<li>New function <code><a href="../reference/tissot_get_proj.html">tissot_get_proj()</a></code> with no arguments, just gets the last value of a plot projection registered by plot.indicatrixes.</li>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>
+<p><code><a href="../reference/plot.indicatrix.html">plot.indicatrix()</a></code> and <code><a href="../reference/plot.indicatrix_list.html">plot.indicatrix_list()</a></code> with:</p>
+<ul><li>Reference unit circle overlay (<code>show.circle</code>)</li>
+<li>Lambda/phi direction axes (<code>show.axes</code>)</li>
+<li>
+<code>show.circle</code> and <code>show.axes</code> accept <code>TRUE</code>, <code>FALSE</code>, or a named list of graphical parameters for full customization</li>
+<li>Colour-coded fill via <code>fill.by</code> (e.g. <code>"scale.area"</code>, <code>"angle_deformation"</code>)</li>
+</ul></li>
+<li><p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods for <code>tissot_tbl</code>.</p></li>
+<li><p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code>, and <code>[</code> methods for <code>indicatrix_list</code>.</p></li>
+<li><p><code><a href="../reference/tissot_map.html">tissot_map()</a></code> and <code><a href="../reference/tissot_map.html">tissot_abline()</a></code> accept explicit <code>target</code> argument.</p></li>
+<li><p><code>as_xy()</code> internal helper coerces diverse coordinate inputs.</p></li>
+<li><p><code>resolve_gpar()</code> internal helper for the logical-or-list graphical parameter pattern.</p></li>
 </ul></div>
-    <div class="section level2">
-<h2 class="page-header" data-toc-text="0.0.1" id="tissot-001">tissot 0.0.1<a class="anchor" aria-label="anchor" href="#tissot-001"></a></h2>
-<ul><li>Removed some old stuff.</li>
-<li>Using PROJ and libproj, dev only versions.</li>
+<div class="section level3">
+<h3 id="internal-0-2-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-2-0"></a></h3>
+<ul><li>Fully vectorized Jacobian computation — no per-point loop.</li>
+<li>Computation uses 3N batched <code>transform_xy()</code> call.</li>
+<li>Test suite added (testthat).</li>
 </ul></div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
