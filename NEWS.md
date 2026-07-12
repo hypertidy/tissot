@@ -36,7 +36,7 @@ Major refactor — modernized engine, new API, and rich plotting.
 
 ## Breaking changes
 
-* Projection engine switched from `reproj` to `gdalraster::transform_xy()`.
+* Projection engine switched from `reproj` to `transform_xy()` from gdalraster.
   All projection work is now a single batched GDAL call.
 
 * API renamed: `proj.in`/`proj.out` → `source`/`target`, following reproj
