@@ -1,3 +1,18 @@
+# tissot 0.2.0.9001
+
+## New features
+
+* `tissot_raster()` computes distortion surfaces on a regular projected grid,
+  returning a `tissot_raster` object with `image()` and `plot()` methods.
+  Extent is auto-detected from the global lon/lat bounding box (clamped by
+  `radius`) or supplied explicitly. Supports any metric from [tissot()] output.
+
+## Bug fixes
+
+* Fixed default `metrics` in `tissot_raster()`: names now use underscores
+  (`"scale_area"`, `"scale_h"`, `"scale_k"`) matching the actual `tissot_tbl`
+  column names (previously used dots, causing silently all-NA output).
+
 # tissot 0.2.0
 
 Major refactor — modernized engine, new API, and rich plotting.

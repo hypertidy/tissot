@@ -12,7 +12,7 @@ tissot_raster(
   radius = 2e+07,
   nx = 100L,
   ny = NULL,
-  metrics = c("scale.area", "angle_deformation", "scale.h", "scale.k"),
+  metrics = c("scale_area", "angle_deformation", "scale_h", "scale_k"),
   ...,
   source = "EPSG:4326"
 )

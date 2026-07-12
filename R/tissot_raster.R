@@ -56,8 +56,8 @@
 #' tissot_map()
 tissot_raster <- function(target, extent = NULL, radius = 2e7,
                           nx = 100L, ny = NULL,
-                          metrics = c("scale.area", "angle_deformation",
-                                      "scale.h", "scale.k"),
+                          metrics = c("scale_area", "angle_deformation",
+                                      "scale_h", "scale_k"),
                           ..., source = "EPSG:4326") {
 
   ## Auto-detect extent from global bounding box, clamped by radius
