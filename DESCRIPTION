@@ -32,7 +32,7 @@ Suggests:
     rmarkdown,
     spelling
 Config/testthat/edition: 3
-URL: https://github.com/hypertidy/tissot
+URL: https://hypertidy.github.io/tissot/, https://github.com/hypertidy/tissot
 BugReports: https://github.com/hypertidy/tissot/issues
 Language: en-US
 Config/roxygen2/version: 8.0.0

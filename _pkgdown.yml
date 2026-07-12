@@ -1,0 +1,77 @@
+url: https://hypertidy.github.io/tissot/
+
+template:
+  bootstrap: 5
+  light-switch: true
+
+home:
+  title: tissot - Tissot Indicatrix for Map Projection Distortion
+  links:
+  - text: hypertidy on GitHub
+    href: https://github.com/hypertidy
+  - text: PROJ R package
+    href: https://hypertidy.github.io/PROJ/
+  - text: reproj (coordinate transformation)
+    href: https://hypertidy.github.io/reproj/
+
+navbar:
+  structure:
+    left: [intro, reference, news]
+    right: [search, github, lightswitch]
+
+reference:
+- title: Distortion metrics
+  desc: >
+    Compute Tissot indicatrix properties at arbitrary points or over a
+    regular projected grid. Returns scale factors, angular deformation,
+    areal distortion, and convergence.
+  contents:
+  - tissot
+  - tissot_raster
+
+- title: Indicatrix objects and plotting
+  desc: >
+    Build indicatrix objects from distortion results, extract raw ellipse
+    coordinates, and draw single or multiple indicatrixes on a map.
+  contents:
+  - indicatrix
+  - "[.indicatrix_list"
+  - ti_ellipse
+  - plot.indicatrix
+  - plot.indicatrix_list
+
+- title: Raster distortion plots
+  desc: >
+    Visualize a `tissot_raster` distortion surface with `image()` or `plot()`.
+  contents:
+  - image.tissot_raster
+  - plot.tissot_raster
+
+- title: Map utilities
+  desc: >
+    Add a world coastline overlay, reference ablines at given
+    lon/lat positions, or convert projected coordinates back to
+    geographic for use with `tissot()`.
+  contents:
+  - tissot_map
+  - tissot_abline
+  - tissot_unproject
+
+- title: Data
+  desc: Bundled datasets used in examples.
+  contents:
+  - world
+
+- title: Deprecated
+  desc: >
+    Superseded helpers for accessing the package-level projection state.
+    Prefer passing `target` explicitly to `tissot_map()` and
+    `tissot_abline()`.
+  contents:
+  - tissot_get_proj
+  - tissot_set_proj
+
+news:
+  releases:
+  - text: tissot 0.2.0
+    href: https://github.com/hypertidy/tissot/releases
