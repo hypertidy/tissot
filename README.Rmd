@@ -25,8 +25,8 @@ knitr::opts_chunk$set(
 
 The [Tissot Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix)
 characterizes local distortion in map projections. This package computes and
-plots indicatrixes using the [PROJ](https://proj.org/) library via the 
-[PROJ R package](https://hypertidy.github.io/PROJ/) for `proj_factors()`. 
+plots indicatrixes using the [PROJ](https://proj.org/) library directly via the
+[PROJ R package](https://hypertidy.github.io/PROJ/).
 
 Derived (with permission) from Bill Huber's
 [GIS StackExchange answer](https://gis.stackexchange.com/a/5075/482).
@@ -71,7 +71,7 @@ What does that top left indicatrix look like?
 plot(indicatrix(tis)[1])
 ```
 
-Far from our UTM zone we are in a lot more  trouble. 
+Far from our UTM zone we are in a lot more trouble.
 
 ```{r very-bad-trouble}
 ## UTM zone 55 is at 147 longitude (55 * 6 - 183)
@@ -191,7 +191,7 @@ plot(indicatrix(la), scale = 2.5e5, add = FALSE)
 tissot_map()
 ```
 
-If we push away from the pole in Lambert Azimuthal Equidistant it's useful to see what happens. 
+If we push the centre away from the pole in Azimuthal Equidistant, it's useful to see what happens.
 
 ```{r aeqd}
 lea <- tissot(polar_xy, "+proj=aeqd +lat_0=-20 +lon_0=147")
@@ -201,7 +201,7 @@ tissot_map()
 
 ## Consider generating input in the crs you are assessing
 
-As with the UTM example above with `tissot_unproject()` it is usually far better is to generate a grid in the crs we are assessing. A grid in lon/lat won't be very meaningful in many projections depending on the context.  
+As with the UTM example above, using `tissot_unproject()` it is usually far better to generate a grid in the CRS being assessed. A grid in lon/lat won't be very meaningful in many projections.
 
 ```{r polar-proj}
 op <- par(mfrow = c(1, 2))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/tissot.R
 \name{indicatrix}
 \alias{indicatrix}
-\title{Compute Tissot indicatrix ellipse geometry}
+\title{Build Tissot indicatrix objects}
 \usage{
 indicatrix(x, target = NULL, ..., source = "EPSG:4326")
 }
@@ -21,8 +21,8 @@ An \code{indicatrix_list} object (a list of \code{indicatrix} objects with
 \code{source} and \code{target} stored as attributes)
 }
 \description{
-Generates indicatrix objects for plotting at each point.
-Returns an \code{indicatrix_list} containing individual indicatrix objects.
+Computes an \code{indicatrix_list} containing per-point distortion objects
+suitable for plotting with \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} or querying directly.
 }
 \details{
 \code{indicatrix()} accepts either:

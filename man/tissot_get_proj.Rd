@@ -18,9 +18,9 @@ tissot_set_proj(target)
 \description{
 \strong{Deprecated.} Prefer passing \code{target} explicitly.
 
-These functions access a global option. Prefer passing \code{target}
-explicitly to \code{\link[=tissot_map]{tissot_map()}} and \code{\link[=tissot_abline]{tissot_abline()}}, or let
-\code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} set the projection automatically.
+These functions access the package-level projection state. Prefer passing
+\code{target} explicitly to \code{\link[=tissot_map]{tissot_map()}} and \code{\link[=tissot_abline]{tissot_abline()}}, or let
+\code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} or \code{\link[=image.tissot_raster]{image.tissot_raster()}} set it automatically.
 }
 \examples{
 tissot_set_proj("+proj=robin")

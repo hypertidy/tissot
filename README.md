@@ -13,9 +13,8 @@ status](https://www.r-pkg.org/badges/version/tissot)](https://CRAN.R-project.org
 The [Tissot
 Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix)
 characterizes local distortion in map projections. This package computes
-and plots indicatrixes using the [PROJ](https://proj.org/) library via
-the [PROJ R package](https://hypertidy.github.io/PROJ/) for
-`proj_factors()`.
+and plots indicatrixes using the [PROJ](https://proj.org/) library
+directly via the [PROJ R package](https://hypertidy.github.io/PROJ/).
 
 Derived (with permission) from Bill Huber’s [GIS StackExchange
 answer](https://gis.stackexchange.com/a/5075/482).
@@ -37,9 +36,9 @@ library(tissot)
 tissot(c(147, -42), "+proj=utm +zone=55 +south")
 #> Tissot indicatrix: 1 point, +proj=utm +zone=55 +south
 #> # A tibble: 1 × 14
-#>       x     y dx_dlam    dy_dlam dx_dphi dy_dphi scale_h scale_k scale_omega
-#>   <dbl> <dbl>   <dbl>      <dbl>   <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
-#> 1   147   -42 0.99960 -5.8386e-7       0 0.99960 0.99960 0.99960 0.000033471
+#>       x     y dx_dlam dy_dlam  dx_dphi dy_dphi scale_h scale_k scale_omega
+#>   <dbl> <dbl>   <dbl>   <dbl>    <dbl>   <dbl>   <dbl>   <dbl>       <dbl>
+#> 1   147   -42   0.744       0 6.14e-16   0.997   1.000   1.000           0
 #> # ℹ 5 more variables: scale_a <dbl>, scale_b <dbl>, scale_area <dbl>,
 #> #   angle_deformation <dbl>, convergence <dbl>
 ```
@@ -60,14 +59,6 @@ lonlat <- tissot_unproject(xy, source = "+proj=utm +zone=55 +south")
 tis <- tissot(lonlat, "+proj=utm +zone=55 +south")
 plot(indicatrix(tis), scale = 3e4)
 tissot_map()
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
 ```
 
 ![](man/figures/README-utm55-1.png)<!-- -->
@@ -127,10 +118,10 @@ summary(r)
 #> Tissot indicatrix: 55 points
 #>   Source CRS: EPSG:4326
 #>   Target CRS: +proj=robin
-#>   Areal scale:  min=0.8209  max=1.2790  mean=1.0468
-#>   Angular def:  min=1.5058  max=52.3188  mean=21.3786 deg
-#>   Scale h:      min=0.8790  max=1.3023  (meridional)
-#>   Scale k:      min=0.8487  max=1.3521  (parallel)
+#>   Areal scale:  min=0.8154  max=1.2004  mean=1.0095
+#>   Angular def:  min=1.9369  max=51.8469  mean=21.3801 deg
+#>   Scale h:      min=0.8856  max=1.3030  (meridional)
+#>   Scale k:      min=0.8487  max=1.3555  (parallel)
 ```
 
 ## Colour-coded distortion
@@ -208,14 +199,6 @@ qxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(qxy, "EPSG:32755")
 plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
-#> ✖ GDAL FAILURE 1: Point outside of projection domain
 ```
 
 ![](man/figures/README-utm-1.png)<!-- -->
@@ -243,7 +226,7 @@ tissot_map()
 
 ![](man/figures/README-laea-1.png)<!-- -->
 
-If we push away from the pole in Lambert Azimuthal Equidistant it’s
+If we push the centre away from the pole in Azimuthal Equidistant, it’s
 useful to see what happens.
 
 ``` r
@@ -256,10 +239,9 @@ tissot_map()
 
 ## Consider generating input in the crs you are assessing
 
-As with the UTM example above with `tissot_unproject()` it is usually
-far better is to generate a grid in the crs we are assessing. A grid in
-lon/lat won’t be very meaningful in many projections depending on the
-context.
+As with the UTM example above, using `tissot_unproject()` it is usually
+far better to generate a grid in the CRS being assessed. A grid in
+lon/lat won’t be very meaningful in many projections.
 
 ``` r
 op <- par(mfrow = c(1, 2))

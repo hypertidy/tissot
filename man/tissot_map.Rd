@@ -34,7 +34,9 @@ or \code{\link[graphics:plot]{graphics::plot()}} (if creating new)}
 projection is current. The projection is determined in this order:
 \enumerate{
 \item An explicit \code{target} argument
-\item The projection stored by the last \code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}} call
+\item The projection recorded by the most recent call to
+\code{\link[=plot.indicatrix_list]{plot.indicatrix_list()}}, \code{\link[=image.tissot_raster]{image.tissot_raster()}}, or
+\code{\link[=tissot_raster]{tissot_raster()}}
 }
 }
 \details{

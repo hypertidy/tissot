@@ -76,10 +76,10 @@ matrices compatible with \code{\link[=image]{image()}} and easily converted to r
 (e.g. via \code{\link[terra:rast]{terra::rast()}}).
 }
 \details{
-If \code{extent} is \code{NULL}, the function projects the four corners and midpoints
-of the \eqn{[-180, 180] \times [-85, 85]}{[-180,180] x [-85,85]} lonlat
-bounding box into the target CRS, and uses the resulting range (padded by
-5\%) as the grid extent.
+If \code{extent} is \code{NULL}, the function samples a dense set of boundary
+coordinates spanning \eqn{[-180, 180] \times [-85, 85]}{[-180,180] x
+[-85,85]} (longitude/latitude), projects them into the target CRS, and uses
+the resulting bounding range (padded by 5\%) as the grid extent.
 }
 \examples{
 tr <- tissot_raster("+proj=robin", nx = 60)

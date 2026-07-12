@@ -1,6 +1,6 @@
 Package: tissot
 Title: Tissot Indicatrix for Map Projection Distortion
-Version: 0.2.0.9003
+Version: 0.2.0.9004
 Authors@R: c(
     person("Michael", "Sumner", email = "mdsumner@gmail.com", role = c("aut", "cre", "cph"), 
            comment = c(ORCID = "0000-0002-2471-7511")),
@@ -11,8 +11,9 @@ Description: Compute and visualize the 'Tissot Indicatrix' for map projections.
     The indicatrix characterizes projection distortion by computing scale 
     factors, angular deformation, areal distortion, and convergence at 
     arbitrary points. Based on the calculations shared by Bill Huber on 
-    <https://gis.stackexchange.com/a/5075/482>. Uses 'GDAL' for coordinate transformation. 
-    Developed using the method published in Snyder, JP (1987)  <doi:10.3133/pp1395>. 
+    <https://gis.stackexchange.com/a/5075/482>. Uses 'PROJ' for coordinate 
+    transformation and distortion factor computation. 
+    Developed using the method published in Snyder, JP (1987) <doi:10.3133/pp1395>. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

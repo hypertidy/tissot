@@ -3,7 +3,9 @@
 #' `tissot_map()` draws the bundled [world] coastline, projected if a
 #' projection is current. The projection is determined in this order:
 #' 1. An explicit `target` argument
-#' 2. The projection stored by the last [plot.indicatrix_list()] call
+#' 2. The projection recorded by the most recent call to
+#'    [plot.indicatrix_list()], [image.tissot_raster()], or
+#'    [tissot_raster()]
 #'
 #' `tissot_abline()` draws vertical and horizontal reference lines at a
 #' given longitude/latitude in projected coordinates.
@@ -76,9 +78,9 @@ tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
 #' @description
 #'  **Deprecated.** Prefer passing `target` explicitly.
 #'
-#' These functions access a global option. Prefer passing `target`
-#' explicitly to [tissot_map()] and [tissot_abline()], or let
-#' [plot.indicatrix_list()] set the projection automatically.
+#' These functions access the package-level projection state. Prefer passing
+#' `target` explicitly to [tissot_map()] and [tissot_abline()], or let
+#' [plot.indicatrix_list()] or [image.tissot_raster()] set it automatically.
 #'
 #' @return `tissot_get_proj()` returns the current projection string or `NULL`
 #' @export

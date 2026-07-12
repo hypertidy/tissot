@@ -58,8 +58,8 @@ based on Snyder (1987) — inspired by Bill Huber's formulation at
 \url{https://gis.stackexchange.com/a/5075/482} — is preserved as
 \code{method = "finitediff"}.
 
-Input 'x' is assumed to be longitude/latitude values with default
-\code{"EPSG:4326"}. Set \code{source} for a different geographic CRS.
+\code{x} is assumed to contain longitude/latitude values; the default source CRS
+is \code{"EPSG:4326"}. Set \code{source} for a different geographic CRS.
 }
 \examples{
 tissot(c(0, 45), "+proj=robin")

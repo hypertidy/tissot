@@ -27,13 +27,13 @@
 
 \item{border}{border colour}
 
-\item{add}{logical; add to existing plot?}
+\item{add}{logical; add to existing plot (default \code{TRUE})?}
 
 \item{show.axes}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters
 for the direction lines. Defaults: \code{list(col.lambda = "red", col.phi = "blue", lwd = 1.5)}.}
 
 \item{show.circle}{\code{TRUE}, \code{FALSE}, or a named list of graphical parameters
-for the reference circle. Defaults: \code{list(col = adjustcolor("white", alpha.f = 0.6), border = "grey70", lwd = 2.5, lty = 2)}.}
+for the reference circle. Defaults: \code{list(col = adjustcolor("white", alpha.f = 1), border = "grey70", lwd = 4.5, lty = 2)}.}
 
 \item{...}{passed to \code{\link[graphics:polygon]{graphics::polygon()}}}
 }

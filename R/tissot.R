@@ -18,8 +18,8 @@
 #' <https://gis.stackexchange.com/a/5075/482> — is preserved as
 #' `method = "finitediff"`.
 #'
-#' Input 'x' is assumed to be longitude/latitude values with default
-#' `"EPSG:4326"`. Set `source` for a different geographic CRS.
+#' `x` is assumed to contain longitude/latitude values; the default source CRS
+#' is `"EPSG:4326"`. Set `source` for a different geographic CRS.
 #'
 #' @param x input coordinates — any xy-ish object: a two-column matrix,
 #'   data.frame, tibble, list with `x`/`y` or `lon`/`lat` components,
@@ -267,10 +267,10 @@ summary.tissot_tbl <- function(object, ...) {
 }
 
 
-#' Compute Tissot indicatrix ellipse geometry
+#' Build Tissot indicatrix objects
 #'
-#' Generates indicatrix objects for plotting at each point.
-#' Returns an `indicatrix_list` containing individual indicatrix objects.
+#' Computes an `indicatrix_list` containing per-point distortion objects
+#' suitable for plotting with [plot.indicatrix_list()] or querying directly.
 #'
 #' `indicatrix()` accepts either:
 #' - A `tissot_tbl` object (from [tissot()]) — projection is extracted
@@ -442,13 +442,13 @@ ti_axes <- function(x, scale = 1e5) {
 #' @param n number of points on the ellipse
 #' @param col fill colour for the ellipse
 #' @param border border colour
-#' @param add logical; add to existing plot?
+#' @param add logical; add to existing plot (default `TRUE`)?
 #' @param show.axes `TRUE`, `FALSE`, or a named list of graphical parameters
 #'   for the direction lines. Defaults: `list(col.lambda = "red",
 #'   col.phi = "blue", lwd = 1.5)`.
 #' @param show.circle `TRUE`, `FALSE`, or a named list of graphical parameters
 #'   for the reference circle. Defaults: `list(col = adjustcolor("white",
-#'   alpha.f = 0.6), border = "grey70", lwd = 2.5, lty = 2)`.
+#'   alpha.f = 1), border = "grey70", lwd = 4.5, lty = 2)`.
 #' @param ... passed to [graphics::polygon()]
 #' @return The input `x`, invisibly.
 #' @seealso [indicatrix()], [plot.indicatrix_list()], [ti_ellipse()]

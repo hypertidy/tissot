@@ -6,10 +6,10 @@
 #' matrices compatible with [image()] and easily converted to raster objects
 #' (e.g. via [terra::rast()]).
 #'
-#' If `extent` is `NULL`, the function projects the four corners and midpoints
-#' of the \eqn{[-180, 180] \times [-85, 85]}{[-180,180] x [-85,85]} lonlat
-#' bounding box into the target CRS, and uses the resulting range (padded by
-#' 5%) as the grid extent.
+#' If `extent` is `NULL`, the function samples a dense set of boundary
+#' coordinates spanning \eqn{[-180, 180] \times [-85, 85]}{[-180,180] x
+#' [-85,85]} (longitude/latitude), projects them into the target CRS, and uses
+#' the resulting bounding range (padded by 5%) as the grid extent.
 #'
 #' @param target target projection CRS string
 #' @param extent numeric length 4: `c(xmin, xmax, ymin, ymax)` in projected
