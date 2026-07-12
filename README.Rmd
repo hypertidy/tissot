@@ -57,7 +57,7 @@ Columns include: `scale_h` (meridional), `scale_k` (parallel), `scale_a` /
 `indicatrix()` builds plottable ellipses. The dashed circle is the
 undistorted reference; the filled ellipse shows the projection's distortion. 
 
-```{r utm55}
+```{r utm55, fig.alt="Tissot indicatrixes on a 5x4 grid across UTM zone 55S, showing near-circular ellipses confirming low distortion near the central meridian at 147°E, with slight elongation toward the zone edges"}
 xy <- expand.grid(x = seq(0, 1e6, length.out = 5), y = seq(4900000, 5700000, length.out = 4))
 lonlat <- tissot_unproject(xy, source = "+proj=utm +zone=55 +south")
 tis <- tissot(lonlat, "+proj=utm +zone=55 +south")
@@ -67,13 +67,13 @@ tissot_map()
 
 What does that top left indicatrix look like? 
 
-```{r topleft}
+```{r topleft, fig.alt="Single Tissot indicatrix from the top-left corner of the UTM zone 55S grid, showing a slightly tilted ellipse due to convergence away from the central meridian"}
 plot(indicatrix(tis)[1])
 ```
 
 Far from our UTM zone we are in a lot more trouble.
 
-```{r very-bad-trouble}
+```{r very-bad-trouble, fig.alt=c("Single Tissot indicatrix for UTM zone 55S evaluated at longitude 100°E, far from the central meridian, showing extreme angular and areal distortion", "Tissot indicatrix for Mercator at latitude -42°, showing strong north-south stretching relative to east-west scale", "Tissot indicatrix for Mercator near the equator, showing a near-circular ellipse confirming low distortion close to latitude 0°")}
 ## UTM zone 55 is at 147 longitude (55 * 6 - 183)
 tis <- tissot(cbind(100, -42), "+proj=utm +zone=55 +south")
 plot(indicatrix(tis))
@@ -91,7 +91,7 @@ plot(indicatrix(tis))
 Map projection is arbitrary. 
 
 
-```{r robinson}
+```{r robinson, fig.alt="Grid of Tissot indicatrixes across the Robinson projection with world coastline overlay, showing rounder ellipses near the equator and increasing distortion toward the poles and edges"}
 xy <- expand.grid(seq(-150, 150, by = 30), seq(-60, 60, by = 30))
 r <- tissot(xy, "+proj=robin")
 ii <- indicatrix(r)
@@ -111,25 +111,25 @@ summary(r)
 
 Pass `fill.by` to colour ellipses by a distortion metric:
 
-```{r coloured}
+```{r coloured, fig.alt="Tissot indicatrixes for the Robinson projection coloured by areal scale factor, with warm colours toward the poles indicating areas where the projection expands area"}
 plot(ii, scale = 6e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
 ```
 
-```{r angle_deformation}
+```{r angle_deformation, fig.alt="Tissot indicatrixes for the Robinson projection coloured by angular deformation in degrees, with warm colours in the corners showing where the projection distorts angles most"}
 plot(ii, scale = 6e5, add = FALSE, fill.by = "angle_deformation")
 tissot_map()
 ```
 
 ## Projection comparison
 
-```{r mollweide}
+```{r mollweide, fig.alt="Grid of Tissot indicatrixes for the Mollweide equal-area projection, showing ellipses of consistent area but varying shape across the map"}
 m <- tissot(xy, "+proj=moll")
 plot(indicatrix(m), scale = 5e5, add = FALSE)
 tissot_map()
 ```
 
-```{r mercator}
+```{r mercator, fig.alt="Grid of Tissot indicatrixes for the Mercator projection, showing circular ellipses near the equator that grow dramatically larger toward the poles while retaining their circular shape"}
 merc_xy <- expand.grid(seq(-150, 150, by = 30), seq(-75, 75, by = 15))
 me <- tissot(merc_xy, "+proj=merc")
 plot(indicatrix(me), scale = 5e5, add = FALSE)
@@ -140,13 +140,13 @@ tissot_map()
 
 A single indicatrix with axes and reference circle:
 
-```{r single2}
+```{r single2, fig.alt="Single Tissot indicatrix for a Lambert Conformal Conic with standard parallels at -36 and -38 degrees, evaluated at 147°E 42°S, showing a near-circular ellipse indicating low distortion close to the standard parallels"}
 ii2 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145")
 plot(ii2[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
 
 
-```{r single3}
+```{r single3, fig.alt="Single Tissot indicatrix for a Lambert Conformal Conic with standard parallels at -15 and +5 degrees, evaluated at 147°E 42°S, showing significant distortion far from the standard parallels"}
 ii3 <- indicatrix(c(147, -42), "+proj=lcc +lat_1=-15 +lat_2=5 +lat_0=0 +lon_0=145")
 plot(ii3[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 ```
@@ -156,7 +156,7 @@ plot(ii3[[1]], scale = 1e4, add = FALSE, show.axes = TRUE, show.circle = TRUE)
 
 Lambert Conformal Conic
 
-```{r lcc}
+```{r lcc, fig.alt="Tissot indicatrixes for a Lambert Conformal Conic projection over the Southern Ocean, coloured by areal scale factor"}
 pxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(pxy, "+proj=lcc +lat_0=-60 +lon_0=147 +lat_1=-70 +lat_2=-55")
 plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
@@ -165,7 +165,7 @@ tissot_map()
 
 Universal Transverse Mercator
 
-```{r utm}
+```{r utm, fig.alt="Tissot indicatrixes for UTM zone 55S across a broad Southern Ocean extent, coloured by areal scale factor, showing distortion growing far from the zone"}
 qxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(qxy, "EPSG:32755")
 plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
@@ -178,14 +178,14 @@ tissot_map()
 In any projection we should refer to a regular grid of points in its crs, else we get weird situations like this, more obvious on an actual pole: 
 
 
-```{r polar}
+```{r polar, fig.alt="Tissot indicatrixes for a polar stereographic projection using a regular lon/lat input grid, showing unevenly spaced and heavily distorted ellipses that illustrate the problem with lon/lat sampling in a polar projection"}
 polar_xy <- expand.grid(seq(-180, 150, by = 30), seq(-80, -50, by = 10))
 p <- tissot(polar_xy, "+proj=stere +lat_0=-90 +lon_0=147")
 plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
 ```
 
-```{r laea}
+```{r laea, fig.alt="Tissot indicatrixes for a polar Lambert Azimuthal Equal Area projection using a regular lon/lat input grid, showing consistent ellipse areas but irregular spacing near the pole"}
 la <- tissot(polar_xy, "+proj=laea +lat_0=-90 +lon_0=147")
 plot(indicatrix(la), scale = 2.5e5, add = FALSE)
 tissot_map()
@@ -193,7 +193,7 @@ tissot_map()
 
 If we push the centre away from the pole in Azimuthal Equidistant, it's useful to see what happens.
 
-```{r aeqd}
+```{r aeqd, fig.alt="Tissot indicatrixes for an Azimuthal Equidistant projection centred at 20°S, applied to a polar-region lon/lat grid, showing the distortion pattern that results from an off-pole projection centre"}
 lea <- tissot(polar_xy, "+proj=aeqd +lat_0=-20 +lon_0=147")
 plot(indicatrix(lea), scale = 2.5e5, add = FALSE)
 tissot_map()
@@ -203,7 +203,7 @@ tissot_map()
 
 As with the UTM example above, using `tissot_unproject()` it is usually far better to generate a grid in the CRS being assessed. A grid in lon/lat won't be very meaningful in many projections.
 
-```{r polar-proj}
+```{r polar-proj, fig.alt="Side-by-side Tissot indicatrix plots comparing polar stereographic and Lambert Azimuthal Equal Area projections, both sampled on a regular grid in projected coordinates, showing much more regular and interpretable distortion patterns than a lon/lat grid"}
 op <- par(mfrow = c(1, 2))
 ext <- c(-180, 150, -80, -50)
 crs <- "+proj=stere +lat_0=-90 +lon_0=147"
