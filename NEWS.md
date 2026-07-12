@@ -1,4 +1,4 @@
-# tissot 0.2.0.9003
+# tissot 0.3.0
 
 ## New features
 

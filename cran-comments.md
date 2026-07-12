@@ -1,5 +1,3 @@
-## R CMD check results
+## tissot 0.3.0
 
-* Spelling of 'I/indicatrix' and 'Tissot' in DESCRIPTION is intended and correct. 
-
-* This is a new release.
+Thanks! 

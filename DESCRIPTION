@@ -1,6 +1,6 @@
 Package: tissot
 Title: Tissot Indicatrix for Map Projection Distortion
-Version: 0.2.0.9004
+Version: 0.3.0
 Authors@R: c(
     person("Michael", "Sumner", email = "mdsumner@gmail.com", role = c("aut", "cre", "cph"), 
            comment = c(ORCID = "0000-0002-2471-7511")),
