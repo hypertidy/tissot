@@ -21,6 +21,15 @@ A two-column matrix of projected coordinates tracing the ellipse
 \description{
 Generate ellipse coordinates for an indicatrix
 }
+\examples{
+ii <- indicatrix(c(0, 45), "+proj=robin")
+ell <- ti_ellipse(ii[[1]], scale = 5e5)
+head(ell)
+
+## draw on a map
+tissot_map(target = "+proj=robin", add = FALSE)
+lines(ell)
+}
 \seealso{
 \code{\link[=indicatrix]{indicatrix()}}, \code{\link[=plot.indicatrix]{plot.indicatrix()}}
 }

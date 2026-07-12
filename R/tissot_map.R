@@ -25,13 +25,13 @@ tissot_map <- function(..., target = NULL, add = TRUE) {
   props <- list(...)
 
   if (is.null(target)) {
-    target <- getOption("tissot.last.plot.proj")
+    target <- .tissot_state$last_proj
   }
 
   w <- if (is.null(target)) {
     world
   } else {
-    suppressWarnings(gdalraster::transform_xy(world, "OGC:CRS84", target))
+    PROJ::proj_trans(world, target_crs = target, source_crs = "OGC:CRS84")
   }
 
   if (is.null(props$col)) props$col <- grDevices::rgb(.7, .7, .7)
@@ -43,7 +43,7 @@ tissot_map <- function(..., target = NULL, add = TRUE) {
     if (is.null(props$pch)) props$pch <- "."
     do.call(graphics::plot, props)
     if (!is.null(target)) {
-      options(tissot.last.plot.proj = target)
+      .tissot_state$last_proj <- target
     }
   }
   invisible(w)
@@ -62,10 +62,10 @@ tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
   xy <- as_xy(if (is.null(y)) x else cbind(x, y))
 
   if (is.null(target)) {
-    target <- getOption("tissot.last.plot.proj")
+    target <- .tissot_state$last_proj
   }
   if (!is.null(target)) {
-    xy <- gdalraster::transform_xy(xy, source, target)
+    xy <- PROJ::proj_trans(xy, target_crs = target, source_crs = source)
   }
   graphics::abline(v = xy[, 1L], h = xy[, 2L], ...)
 }
@@ -82,13 +82,18 @@ tissot_abline <- function(x, y = NULL, ..., source = "EPSG:4326",
 #'
 #' @return `tissot_get_proj()` returns the current projection string or `NULL`
 #' @export
+#' @examples
+#' tissot_set_proj("+proj=robin")
+#' tissot_get_proj()
+#' tissot_set_proj(NULL)  # reset
 tissot_get_proj <- function() {
-  getOption("tissot.last.plot.proj")
+  .tissot_state$last_proj
 }
 
 #' @rdname tissot_get_proj
 #' @param target projection CRS string
 #' @export
 tissot_set_proj <- function(target) {
-  options(tissot.last.plot.proj = target)
+  .tissot_state$last_proj <- target
+  invisible(target)
 }

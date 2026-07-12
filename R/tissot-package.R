@@ -1,6 +1,6 @@
 #' @keywords internal
 #' @aliases tissot-package
-#' @importFrom gdalraster transform_xy
+#' @importFrom PROJ proj_trans proj_crs_text
 #' @importFrom graphics lines polygon abline
 #' @importFrom grDevices adjustcolor hcl.colors rgb
 "_PACKAGE"

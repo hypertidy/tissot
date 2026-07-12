@@ -13,9 +13,9 @@ status](https://www.r-pkg.org/badges/version/tissot)](https://CRAN.R-project.org
 The [Tissot
 Indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix)
 characterizes local distortion in map projections. This package computes
-and plots indicatrixes using a vectorized finite-difference Jacobian
-with [gdalraster](https://firelab.github.io/gdalraster/) as the
-projection engine.
+and plots indicatrixes using the [PROJ](https://proj.org/) library via
+the [PROJ R package](https://hypertidy.github.io/PROJ/) for
+`proj_factors()`.
 
 Derived (with permission) from Bill Huber’s [GIS StackExchange
 answer](https://gis.stackexchange.com/a/5075/482).
@@ -24,7 +24,7 @@ answer](https://gis.stackexchange.com/a/5075/482).
 
 ``` r
 # install.packages("pak")
-pak::pak("hypertidy/tissot@refactor-2026")
+pak::pak("tissot")
 ```
 
 ## Quick start
@@ -60,18 +60,17 @@ lonlat <- tissot_unproject(xy, source = "+proj=utm +zone=55 +south")
 tis <- tissot(lonlat, "+proj=utm +zone=55 +south")
 plot(indicatrix(tis), scale = 3e4)
 tissot_map()
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
 ```
 
 ![](man/figures/README-utm55-1.png)<!-- -->
-
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
 
 What does that top left indicatrix look like?
 
@@ -209,18 +208,17 @@ qxy <- expand.grid(seq(100, 200, by = 25), seq(-75, -45, by = 10))
 p <- tissot(qxy, "EPSG:32755")
 plot(indicatrix(p), scale = 3e5, add = FALSE, fill.by = "scale_area")
 tissot_map()
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
+#> ✖ GDAL FAILURE 1: Point outside of projection domain
 ```
 
 ![](man/figures/README-utm-1.png)<!-- -->
-
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
-    #> GDAL FAILURE 1: Point outside of projection domain
 
 ## Polar projections
 
@@ -267,9 +265,9 @@ context.
 op <- par(mfrow = c(1, 2))
 ext <- c(-180, 150, -80, -50)
 crs <- "+proj=stere +lat_0=-90 +lon_0=147"
-projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
 
-polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
+projext <- reproj::reproj_extent(ext, crs, source = "EPSG:4326")
+polar <- expand.grid(seq(projext[1L], projext[2L], by = 30 * 1e5), seq(projext[3L], projext[4L], by = 10 * 1e5))
 polar_xy <- tissot_unproject(polar, "EPSG:4326", source = crs)
 p <- tissot(polar_xy, crs, source = "EPSG:4326")
 plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")
@@ -277,9 +275,9 @@ tissot_map()
 
 ext <- c(-180, 150, -80, -50)
 crs <- "+proj=laea +lat_0=-90 +lon_0=147"
-projext <- gdalraster::bbox_transform(ext[c(1, 3, 2, 4)], srs_to = crs, srs_from = "EPSG:4326")
+projext <- reproj::reproj_extent(ext, crs, source = "EPSG:4326")
 
-polar <- expand.grid(seq(projext[1L], projext[3L], by = 30 * 1e5), seq(projext[2], projext[4], by = 10 * 1e5))
+polar <- expand.grid(seq(projext[1L], projext[2L], by = 30 * 1e5), seq(projext[3L], projext[4L], by = 10 * 1e5))
 polar_xy <- tissot_unproject(polar, "EPSG:4326", source = crs)
 p <- tissot(polar_xy, crs, source = "EPSG:4326")
 plot(indicatrix(p), scale = 2.5e5, add = FALSE, fill.by = "scale_area")

@@ -9,6 +9,7 @@ tissot(
   target,
   ...,
   source = "EPSG:4326",
+  method = c("proj", "finitediff"),
   A = 6378137,
   f.inv = 298.257223563,
   dx = 1e-04
@@ -25,17 +26,23 @@ or a length-2 numeric vector for a single point}
 
 \item{source}{source CRS (default \code{"EPSG:4326"})}
 
-\item{A}{semi-major axis of the ellipsoid (default WGS84)}
+\item{method}{computation method: \code{"proj"} (default) uses
+\code{\link[PROJ:proj_factors]{PROJ::proj_factors()}}; \code{"finitediff"} uses a finite-difference
+Jacobian (Snyder 1987)}
 
-\item{f.inv}{inverse flattening (default WGS84)}
+\item{A}{semi-major axis of the ellipsoid (default WGS84; \code{method = "finitediff"} only)}
 
-\item{dx}{finite difference step in degrees (default 1e-4)}
+\item{f.inv}{inverse flattening (default WGS84; \code{method = "finitediff"}
+only)}
+
+\item{dx}{finite difference step in degrees (default 1e-4; \code{method = "finitediff"} only)}
 }
 \value{
-A \code{tissot_tbl} tibble with columns: x (lon), y (lat), dx_dlam,
-dy_dlam, dx_dphi, dy_dphi, scale_h, scale_k, scale_omega, scale_a,
-scale_b, scale_area, angle_deformation, convergence. The \code{source} and
-\code{target} CRS strings are stored as attributes.
+A \code{tissot_tbl} tibble with columns: \code{x} (lon), \code{y} (lat),
+\code{dx_dlam}, \code{dy_dlam}, \code{dx_dphi}, \code{dy_dphi}, \code{scale_h}, \code{scale_k},
+\code{scale_omega}, \code{scale_a}, \code{scale_b}, \code{scale_area},
+\code{angle_deformation}, \code{convergence}. The \code{source} and \code{target} CRS
+strings are stored as attributes.
 }
 \description{
 Compute the Tissot indicatrix at given longitude/latitude locations for a
@@ -43,18 +50,26 @@ map projection. Returns scale factors, angular deformation, convergence,
 and related distortion properties.
 }
 \details{
-The Jacobian of the projection is computed via finite differences, projecting
-all base and offset points in a single batched call to
-\code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}. All subsequent calculations (SVD, distortion
-metrics) are fully vectorized.
+By default (\code{method = "proj"}) distortion measures are computed via
+\code{\link[PROJ:proj_factors]{PROJ::proj_factors()}}, which calls the PROJ C library directly and is
+more accurate than finite differences (particularly for tabular or
+piecewise-defined projections).  The original finite-difference path
+based on Snyder (1987) — inspired by Bill Huber's formulation at
+\url{https://gis.stackexchange.com/a/5075/482} — is preserved as
+\code{method = "finitediff"}.
 
-Input 'x' is assumed to be longitude,latitude values, with default 'EPSG:4326'. Set 'source'
-for a different 'geographic' coordinate reference system.
+Input 'x' is assumed to be longitude/latitude values with default
+\code{"EPSG:4326"}. Set \code{source} for a different geographic CRS.
 }
 \examples{
 tissot(c(0, 45), "+proj=robin")
 tissot(cbind(seq(-180, 180, by = 30), 0), "+proj=robin")
+
+## compare methods
+tissot(c(0, 45), "+proj=robin", method = "proj")
+tissot(c(0, 45), "+proj=robin", method = "finitediff")
 }
 \seealso{
-\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}, \code{\link[=tissot_unproject]{tissot_unproject()}}, \code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}
+\code{\link[=indicatrix]{indicatrix()}}, \code{\link[=tissot_map]{tissot_map()}}, \code{\link[=tissot_unproject]{tissot_unproject()}},
+\code{\link[PROJ:proj_factors]{PROJ::proj_factors()}}, \code{\link[PROJ:proj_trans]{PROJ::proj_trans()}}
 }

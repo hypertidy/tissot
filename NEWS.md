@@ -2,10 +2,27 @@
 
 ## New features
 
+* `tissot()` gains a `method` argument (default `"proj"`). The new `"proj"`
+  method delegates to `PROJ::proj_factors()`, calling the PROJ C library
+  directly for exact distortion factors rather than approximating them via
+  finite differences. This is more accurate, especially for tabular or
+  piecewise projections (e.g. Robinson). The original finite-difference
+  computation (Snyder 1987), inspired by Bill Huber's formulation at
+  <https://gis.stackexchange.com/a/5075/482>, is preserved as
+  `method = "finitediff"`. The `PROJ` package is now the sole coordinate
+  transformation dependency; `gdalraster` has been removed.
+
 * `tissot_raster()` computes distortion surfaces on a regular projected grid,
   returning a `tissot_raster` object with `image()` and `plot()` methods.
   Extent is auto-detected from the global lon/lat bounding box (clamped by
   `radius`) or supplied explicitly. Supports any metric from [tissot()] output.
+
+## Dependency change
+
+* `gdalraster` removed from `Imports`. All coordinate transformation now goes
+  through `PROJ::proj_trans()` and `PROJ::proj_crs_text()`. CRS validation
+  (`srs_is_geographic`) is handled by an internal helper using
+  `PROJ::proj_crs_text()`.
 
 ## Bug fixes
 

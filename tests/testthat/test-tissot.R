@@ -7,6 +7,19 @@ test_that("conformal projection has near-zero angular deformation", {
   expect_equal(r$scale_a, r$scale_b, tolerance = 1e-4)
 })
 
+test_that("method = 'proj' and 'finitediff' agree for conformal projection", {
+  ## Mercator: both methods should give essentially zero angular deformation
+  rp <- tissot(cbind(0, 45), "+proj=merc", method = "proj")
+  rf <- tissot(cbind(0, 45), "+proj=merc", method = "finitediff")
+  expect_lt(rp$angle_deformation, 0.01)
+  expect_lt(rf$angle_deformation, 0.01)
+})
+
+test_that("method = 'proj' equal-area gives scale_area ≈ 1", {
+  r <- tissot(cbind(0, 45), "+proj=moll", method = "proj")
+  expect_equal(r$scale_area, 1.0, tolerance = 1e-6)
+})
+
 test_that("equal-area projection has areal scale ≈ 1", {
   ## Mollweide is equal-area
   r <- tissot(cbind(0, 45), "+proj=moll")

@@ -1,5 +1,8 @@
-## Attempt to formalize Bill Huber's Tissot indicatrix calculations
-## https://gis.stackexchange.com/a/5075/482
+## Original algorithm by Bill Huber:
+##   https://gis.stackexchange.com/a/5075/482
+## The default implementation now delegates to PROJ::proj_factors() for
+## accuracy; the finite-difference path (Snyder 1987) is retained as
+## 'method = "finitediff"'.
 
 #' Compute Tissot indicatrix properties
 #'
@@ -7,13 +10,16 @@
 #' map projection. Returns scale factors, angular deformation, convergence,
 #' and related distortion properties.
 #'
-#' The Jacobian of the projection is computed via finite differences, projecting
-#' all base and offset points in a single batched call to
-#' [gdalraster::transform_xy()]. All subsequent calculations (SVD, distortion
-#' metrics) are fully vectorized.
+#' By default (`method = "proj"`) distortion measures are computed via
+#' [PROJ::proj_factors()], which calls the PROJ C library directly and is
+#' more accurate than finite differences (particularly for tabular or
+#' piecewise-defined projections).  The original finite-difference path
+#' based on Snyder (1987) — inspired by Bill Huber's formulation at
+#' <https://gis.stackexchange.com/a/5075/482> — is preserved as
+#' `method = "finitediff"`.
 #'
-#' Input 'x' is assumed to be longitude,latitude values, with default 'EPSG:4326'. Set 'source'
-#' for a different 'geographic' coordinate reference system.
+#' Input 'x' is assumed to be longitude/latitude values with default
+#' `"EPSG:4326"`. Set `source` for a different geographic CRS.
 #'
 #' @param x input coordinates — any xy-ish object: a two-column matrix,
 #'   data.frame, tibble, list with `x`/`y` or `lon`/`lat` components,
@@ -21,35 +27,97 @@
 #' @param target target projection CRS string (required)
 #' @param ... ignored
 #' @param source source CRS (default `"EPSG:4326"`)
-#' @param A semi-major axis of the ellipsoid (default WGS84)
-#' @param f.inv inverse flattening (default WGS84)
-#' @param dx finite difference step in degrees (default 1e-4)
-#' @return A `tissot_tbl` tibble with columns: x (lon), y (lat), dx_dlam,
-#'   dy_dlam, dx_dphi, dy_dphi, scale_h, scale_k, scale_omega, scale_a,
-#'   scale_b, scale_area, angle_deformation, convergence. The `source` and
-#'   `target` CRS strings are stored as attributes.
-#' @seealso [indicatrix()], [tissot_map()], [tissot_unproject()], [gdalraster::transform_xy()]
+#' @param method computation method: `"proj"` (default) uses
+#'   [PROJ::proj_factors()]; `"finitediff"` uses a finite-difference
+#'   Jacobian (Snyder 1987)
+#' @param A semi-major axis of the ellipsoid (default WGS84; `method =
+#'   "finitediff"` only)
+#' @param f.inv inverse flattening (default WGS84; `method = "finitediff"`
+#'   only)
+#' @param dx finite difference step in degrees (default 1e-4; `method =
+#'   "finitediff"` only)
+#' @return A `tissot_tbl` tibble with columns: `x` (lon), `y` (lat),
+#'   `dx_dlam`, `dy_dlam`, `dx_dphi`, `dy_dphi`, `scale_h`, `scale_k`,
+#'   `scale_omega`, `scale_a`, `scale_b`, `scale_area`,
+#'   `angle_deformation`, `convergence`. The `source` and `target` CRS
+#'   strings are stored as attributes.
+#' @seealso [indicatrix()], [tissot_map()], [tissot_unproject()],
+#'   [PROJ::proj_factors()], [PROJ::proj_trans()]
+#' @importFrom PROJ proj_factors
 #' @export
 #' @examples
 #' tissot(c(0, 45), "+proj=robin")
 #' tissot(cbind(seq(-180, 180, by = 30), 0), "+proj=robin")
+#'
+#' ## compare methods
+#' tissot(c(0, 45), "+proj=robin", method = "proj")
+#' tissot(c(0, 45), "+proj=robin", method = "finitediff")
 tissot <- function(x, target, ...,
                    source = "EPSG:4326",
+                   method = c("proj", "finitediff"),
                    A = 6378137,
                    f.inv = 298.257223563,
                    dx = 1e-4) {
 
+  method <- match.arg(method)
 
-  if (!gdalraster::srs_is_geographic(source)) {
+  if (!.srs_is_geographic(source)) {
     stop("'source' must be a geographic (lon/lat) CRS, got: ", source)
   }
-  if (gdalraster::srs_is_geographic(target)) {
+  if (.srs_is_geographic(target)) {
     stop("'target' must be a projected CRS, got: ", target)
   }
   xy <- as_xy(x)
-  n <- nrow(xy)
   lon <- xy[, 1L]
   lat <- xy[, 2L]
+
+  out <- if (method == "proj") {
+    .tissot_proj(xy, lon, lat, target)
+  } else {
+    .tissot_finitediff(xy, lon, lat, target, source, A, f.inv, dx)
+  }
+
+  attr(out, "source") <- source
+  attr(out, "target") <- target
+  class(out) <- c("tissot_tbl", class(out))
+  out
+}
+
+
+## ---- PROJ path ----
+
+.tissot_proj <- function(xy, lon, lat, target) {
+  ## as.data.frame() strips the named-scalar issue that arises when
+  ## subsetting a single-row matrix (pf[, "col"] returns a named scalar)
+  pf <- as.data.frame(PROJ::proj_factors(xy, target))
+
+  ## PROJ returns angles in radians; convert to degrees
+  ang_def <- pf$angular_distortion  * 180 / pi
+  conv    <- pf$meridian_convergence * 180 / pi
+
+  tibble::tibble(
+    x    = lon,
+    y    = lat,
+    dx_dlam = pf$dx_dlam,
+    dy_dlam = pf$dy_dlam,
+    dx_dphi = pf$dx_dphi,
+    dy_dphi = pf$dy_dphi,
+    scale_h           = pf$meridional_scale,
+    scale_k           = pf$parallel_scale,
+    scale_omega       = ang_def,
+    scale_a           = pf$tissot_semimajor,
+    scale_b           = pf$tissot_semiminor,
+    scale_area        = pf$areal_scale,
+    angle_deformation = ang_def,
+    convergence       = conv
+  )
+}
+
+
+## ---- Finite-difference path (Snyder 1987 / Bill Huber) ----
+
+.tissot_finitediff <- function(xy, lon, lat, target, source, A, f.inv, dx) {
+  n <- nrow(xy)
 
   ## Ellipsoid derived quantities
   e.sq <- (2 - 1 / f.inv) / f.inv
@@ -58,8 +126,8 @@ tissot <- function(x, target, ...,
   ## Radii of curvature (Snyder 4-18 to 4-21)
   sin_phi <- sin(phi)
   cos_phi <- cos(phi)
-  sin2 <- sin_phi^2
-  N_radius <- A / sqrt(1 - e.sq * sin2)
+  sin2    <- sin_phi^2
+  N_radius  <- A / sqrt(1 - e.sq * sin2)
   R_meridian <- A * (1 - e.sq) / (1 - e.sq * sin2)^1.5
 
   ## Metric scale: degrees to metres on the ellipsoid
@@ -68,100 +136,70 @@ tissot <- function(x, target, ...,
 
   ## Build the 3N-point matrix: [base; lam+dx; phi+dx]
   pts <- matrix(NA_real_, nrow = 3L * n, ncol = 2L)
-  pts[seq_len(n), ] <- cbind(lon, lat)
-  pts[n + seq_len(n), ] <- cbind(lon + dx, lat)
-  pts[2L * n + seq_len(n), ] <- cbind(lon, lat + dx)
+  pts[seq_len(n), ]            <- cbind(lon, lat)
+  pts[n  + seq_len(n), ]       <- cbind(lon + dx, lat)
+  pts[2L * n + seq_len(n), ]   <- cbind(lon, lat + dx)
 
   ## Single batched projection call
-  proj <- gdalraster::transform_xy(pts, source, target)
+  proj <- PROJ::proj_trans(pts, target_crs = target, source_crs = source)
 
-  ## Extract projected coordinates
   idx_base <- seq_len(n)
-  idx_lam <- n + seq_len(n)
-  idx_phi <- 2L * n + seq_len(n)
+  idx_lam  <- n  + seq_len(n)
+  idx_phi  <- 2L * n + seq_len(n)
 
-  X0 <- proj[idx_base, 1L]
-  Y0 <- proj[idx_base, 2L]
-  X_lam <- proj[idx_lam, 1L]
-  Y_lam <- proj[idx_lam, 2L]
-  X_phi <- proj[idx_phi, 1L]
-  Y_phi <- proj[idx_phi, 2L]
+  X0    <- proj[idx_base, 1L];  Y0    <- proj[idx_base, 2L]
+  X_lam <- proj[idx_lam,  1L];  Y_lam <- proj[idx_lam,  2L]
+  X_phi <- proj[idx_phi,  1L];  Y_phi <- proj[idx_phi,  2L]
 
   ## Jacobian in projected coords per degree
-  dX_dlam_deg <- (X_lam - X0) / dx
-  dY_dlam_deg <- (Y_lam - Y0) / dx
-  dX_dphi_deg <- (X_phi - X0) / dx
-  dY_dphi_deg <- (Y_phi - Y0) / dx
+  dX_dlam_deg <- (X_lam - X0) / dx;  dY_dlam_deg <- (Y_lam - Y0) / dx
+  dX_dphi_deg <- (X_phi - X0) / dx;  dY_dphi_deg <- (Y_phi - Y0) / dx
 
-  ## Jacobian normalised to dimensionless scale factors
-  ## Dividing by h_lam/h_phi converts from projected-per-degree
-  ## to projected-per-metre-on-the-ellipsoid
-  dX_dlam <- dX_dlam_deg / h_lam
-  dY_dlam <- dY_dlam_deg / h_lam
-  dX_dphi <- dX_dphi_deg / h_phi
-  dY_dphi <- dY_dphi_deg / h_phi
+  ## Normalise: projected-per-degree → projected-per-metre-on-ellipsoid
+  dX_dlam <- dX_dlam_deg / h_lam;  dY_dlam <- dY_dlam_deg / h_lam
+  dX_dphi <- dX_dphi_deg / h_phi;  dY_dphi <- dY_dphi_deg / h_phi
 
-  ## Tissot parameters from the Jacobian (vectorized)
-  ## Components of J^T J (2x2 symmetric matrix per point)
+  ## Tissot parameters from J^T J eigenvalues
   a11 <- dX_dlam^2 + dY_dlam^2
   a12 <- dX_dlam * dX_dphi + dY_dlam * dY_dphi
   a22 <- dX_dphi^2 + dY_dphi^2
 
-  ## Eigenvalues of J^T J via quadratic formula
-  tr <- a11 + a22
-  det <- a11 * a22 - a12^2
+  tr   <- a11 + a22
+  det  <- a11 * a22 - a12^2
   disc <- sqrt(pmax(tr^2 - 4 * det, 0))
 
-  lam1 <- (tr + disc) / 2
-  lam2 <- (tr - disc) / 2
-
-  ## Scale factors: singular values of J
-  scale_a <- sqrt(pmax(lam1, 0))
-  scale_b <- sqrt(pmax(lam2, 0))
-
-  ## Meridional scale (h) and parallel scale (k) from Snyder
+  scale_a <- sqrt(pmax((tr + disc) / 2, 0))
+  scale_b <- sqrt(pmax((tr - disc) / 2, 0))
   scale_h <- sqrt(a22)
   scale_k <- sqrt(a11)
-
-  ## Areal scale
   scale_area <- scale_a * scale_b
 
-  ## Maximum angular deformation (omega): Snyder eq 4-1b
   sin_half_omega <- ifelse(scale_a + scale_b > 0,
-                           (scale_a - scale_b) / (scale_a + scale_b),
-                           0)
+                           (scale_a - scale_b) / (scale_a + scale_b), 0)
   angle_deformation <- 2 * asin(pmin(sin_half_omega, 1)) * 180 / pi
-
-  ## Convergence: angle of the projected meridian from north
   convergence <- atan2(dX_dphi_deg, dY_dphi_deg) * 180 / pi
 
-  out <- tibble::tibble(
-    x = lon,
-    y = lat,
+  tibble::tibble(
+    x    = lon,
+    y    = lat,
     dx_dlam = dX_dlam,
     dy_dlam = dY_dlam,
     dx_dphi = dX_dphi,
     dy_dphi = dY_dphi,
-    scale_h = scale_h,
-    scale_k = scale_k,
-    scale_omega = angle_deformation,
-    scale_a = scale_a,
-    scale_b = scale_b,
-    scale_area = scale_area,
+    scale_h           = scale_h,
+    scale_k           = scale_k,
+    scale_omega       = angle_deformation,
+    scale_a           = scale_a,
+    scale_b           = scale_b,
+    scale_area        = scale_area,
     angle_deformation = angle_deformation,
-    convergence = convergence
+    convergence       = convergence
   )
-
-  ## Attach projection metadata and subclass
-  attr(out, "source") <- source
-  attr(out, "target") <- target
-  class(out) <- c("tissot_tbl", class(out))
-  out
 }
 
 #' Unproject coordinates to geographic (lon/lat) CRS
 #'
-#' A convenience wrapper around [gdalraster::transform_xy()] for converting
+#' A convenience wrapper around [PROJ::proj_trans()] for converting
 #' projected coordinates to geographic. Useful for generating regular grids
 #' in a projected CRS to feed to [tissot()], which requires lon/lat input.
 #'
@@ -172,7 +210,7 @@ tissot <- function(x, target, ...,
 #' @param ... ignored
 #' @param source source CRS string (required). Must be a projected CRS.
 #' @return A two-column matrix of longitude and latitude values.
-#' @seealso [tissot()], [gdalraster::transform_xy()]
+#' @seealso [tissot()], [PROJ::proj_trans()]
 #' @export
 #' @examples
 #' ## regular grid in UTM zone 55S, unprojected to lon/lat for tissot()
@@ -184,14 +222,14 @@ tissot_unproject <- function(x, target = "EPSG:4326", ..., source = NULL) {
   if (is.null(source)) {
     stop("'source' must be provided")
   }
-  if (gdalraster::srs_is_geographic(source)) {
+  if (.srs_is_geographic(source)) {
     stop("'source' must be a projected CRS, got: ", source)
   }
-  if (!gdalraster::srs_is_geographic(target)) {
+  if (!.srs_is_geographic(target)) {
     stop("'target' must be a geographic (lon/lat) CRS, got: ", target)
   }
   xy <- as_xy(x)
-  gdalraster::transform_xy(xy, srs_from = source, srs_to = target)
+  PROJ::proj_trans(xy, target_crs = target, source_crs = source)
 }
 
 
@@ -277,8 +315,8 @@ indicatrix <- function(x, target = NULL, ..., source = "EPSG:4326") {
   }
 
   ## Project the center points
-  centers <- gdalraster::transform_xy(
-    cbind(tis$x, tis$y), source, target
+  centers <- PROJ::proj_trans(
+    cbind(tis$x, tis$y), target_crs = target, source_crs = source
   )
 
   out <- lapply(seq_len(nrow(tis)), function(i) {
@@ -314,6 +352,14 @@ indicatrix <- function(x, target = NULL, ..., source = "EPSG:4326") {
 #' @return A two-column matrix of projected coordinates tracing the ellipse
 #' @seealso [indicatrix()], [plot.indicatrix()]
 #' @export
+#' @examples
+#' ii <- indicatrix(c(0, 45), "+proj=robin")
+#' ell <- ti_ellipse(ii[[1]], scale = 5e5)
+#' head(ell)
+#'
+#' ## draw on a map
+#' tissot_map(target = "+proj=robin", add = FALSE)
+#' lines(ell)
 ti_ellipse <- function(x, scale = 1e5, n = 72, ...) {
   stopifnot(inherits(x, "indicatrix"))
   theta <- seq(0, 2 * pi, length.out = n + 1L)
@@ -513,7 +559,7 @@ plot.indicatrix_list <- function(x, scale = 1e5, n = 72,
     ## Register the projection for tissot_map()
     target <- attr(x, "target")
     if (!is.null(target)) {
-      options(tissot.last.plot.proj = target)
+      .tissot_state$last_proj <- target
     }
   }
 

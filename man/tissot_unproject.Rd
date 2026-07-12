@@ -21,7 +21,7 @@ or a length-2 numeric vector for a single point}
 A two-column matrix of longitude and latitude values.
 }
 \description{
-A convenience wrapper around \code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}} for converting
+A convenience wrapper around \code{\link[PROJ:proj_trans]{PROJ::proj_trans()}} for converting
 projected coordinates to geographic. Useful for generating regular grids
 in a projected CRS to feed to \code{\link[=tissot]{tissot()}}, which requires lon/lat input.
 }
@@ -33,5 +33,5 @@ ll <- tissot_unproject(xy, source = "EPSG:32755")
 tissot(ll, "+proj=utm +zone=55 +south")
 }
 \seealso{
-\code{\link[=tissot]{tissot()}}, \code{\link[gdalraster:transform_xy]{gdalraster::transform_xy()}}
+\code{\link[=tissot]{tissot()}}, \code{\link[PROJ:proj_trans]{PROJ::proj_trans()}}
 }

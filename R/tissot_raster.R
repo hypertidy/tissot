@@ -39,6 +39,7 @@
 #'   The object has an [image()] method for quick plotting.
 #' @seealso [tissot()], [plot.tissot_raster()], [image.tissot_raster()]
 #' @export
+#' @importFrom stats setNames
 #' @examples
 #' tr <- tissot_raster("+proj=robin", nx = 60)
 #' image(tr)
@@ -83,7 +84,7 @@ tissot_raster <- function(target, extent = NULL, radius = 2e7,
   xy_proj <- as.matrix(grid)
 
   ## Back-project to lonlat
-  xy_ll <- gdalraster::transform_xy(xy_proj, target, source)
+  xy_ll <- PROJ::proj_trans(xy_proj, target_crs = source, source_crs = target)
 
   ## Flag valid back-projections (finite and within plausible lonlat range)
   ok <- is.finite(xy_ll[, 1L]) & is.finite(xy_ll[, 2L]) &
@@ -113,7 +114,7 @@ tissot_raster <- function(target, extent = NULL, radius = 2e7,
   }
 
   ## Register projection for tissot_map()
-  options(tissot.last.plot.proj = target)
+  .tissot_state$last_proj <- target
 
   structure(list(
     x = xc,
@@ -164,7 +165,7 @@ image.tissot_raster <- function(x, metric = NULL,
   if (is.null(main)) main <- metric
 
   ## Register projection for tissot_map()
-  options(tissot.last.plot.proj = x$target)
+  .tissot_state$last_proj <- x$target
 
   graphics::image(x$x, x$y, t(x$z[[metric]]),
                   col = col, asp = asp, main = main,
@@ -198,7 +199,7 @@ plot.tissot_raster <- function(x, ...) {
     c(lats, ring_lat_lo, ring_lat_hi, ring_lat_mid)
   )
 
-  proj <- gdalraster::transform_xy(all_ll, source, target)
+  proj <- PROJ::proj_trans(all_ll, target_crs = target, source_crs = source)
   ok <- is.finite(proj[, 1L]) & is.finite(proj[, 2L])
 
   if (sum(ok) < 2L) {
