@@ -45,7 +45,7 @@ distortion visible at map scale). See \code{\link[=plot.indicatrix]{plot.indicat
 the fill. One of \code{"scale_area"}, \code{"angle_deformation"}, \code{"scale_h"},
 \code{"scale_k"}, \code{"scale_a"}, \code{"scale_b"}. Default \code{NULL} (uniform fill).}
 
-\item{palette}{colour palette function (default \code{\link[grDevices:palettes]{grDevices::hcl.colors()}})}
+\item{palette}{colour palette function (default \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}})}
 
 \item{ncolors}{number of colours in the palette (default 64)}
 

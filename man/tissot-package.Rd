@@ -20,6 +20,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Michael Sumner \email{mdsumner@gmail.com} (\href{https://orcid.org/0000-0002-2471-7511}{ORCID})
   \item Bill Huber (original algorithm and calculations)
 }
 

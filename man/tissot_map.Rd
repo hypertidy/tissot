@@ -11,7 +11,7 @@ tissot_abline(x, y = NULL, ..., source = "EPSG:4326", target = NULL)
 }
 \arguments{
 \item{...}{graphical parameters passed to \code{\link[graphics:lines]{graphics::lines()}} (if adding)
-or \code{\link[graphics:plot.default]{graphics::plot()}} (if creating new)}
+or \code{\link[graphics:plot]{graphics::plot()}} (if creating new)}
 
 \item{target}{target CRS. If \code{NULL}, uses the last plot projection
 (from \code{plot.indicatrix_list()}) or draws in lon/lat.}

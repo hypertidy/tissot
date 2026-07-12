@@ -11,3 +11,5 @@
 ^gdalwmscache$
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
+^\.positai$
+^\.claude$
